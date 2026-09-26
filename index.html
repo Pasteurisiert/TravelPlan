@@ -47,7 +47,7 @@
 
     .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 10px; }
     h3, h4 { margin: 0 0 8px 0; }
-    input, select, textarea { width: 100%; padding: 10px; margin-top: 4px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; }
+    input, select, textarea { width: 100%; padding: 9px 10px; margin-top: 4px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; }
     button.btn { padding: 9px 12px; border-radius: 6px; border: none; font-size: 0.88rem; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
     .btn-primary { background: var(--primary); color: white; }
     .btn-secondary { background: #e9ecef; color: #333; }
@@ -66,7 +66,11 @@
     .google-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
     .google-actions a { display: block; text-align: center; background: #f1f3f4; border: 1px solid #dadce0; border-radius: 6px; padding: 7px; font-size: 0.78rem; color: #1a73e8; text-decoration: none; font-weight: 500; }
 
-    .editable-field { background: #fafafa; border: 1px dashed #ccc; padding: 6px; border-radius: 4px; margin-top: 4px; font-size: 0.85rem; }
+    .editable-field { background: #fafafa; border: 1px dashed #ccc; padding: 6px; border-radius: 4px; font-size: 0.85rem; }
+
+    /* Modal Styling */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 12px; }
+    .modal-content { background: white; width: 100%; max-width: 480px; border-radius: 10px; padding: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
 
     @media (max-width: 768px) {
       .split-container { flex-direction: column; }
@@ -95,14 +99,13 @@
       </div>
 
       <div class="split-container">
-        <!-- Sidebar -->
         <div class="day-sidebar" id="day-sidebar">
           <div>
             <label style="font-size:0.85rem; font-weight:bold;">Region / Gebiet wählen:</label>
             <select id="day-region-select" onchange="onRegionChange()"></select>
           </div>
 
-          <!-- Standort & Startpunkt -->
+          <!-- Standort / Startpunkt -->
           <div class="card">
             <div style="font-weight:bold; font-size:0.9rem; margin-bottom:6px;">📍 Startpunkt / Standort</div>
             
@@ -129,26 +132,30 @@
           </div>
           <div id="day-poi-list"></div>
 
-          <!-- Detailkarte -->
+          <!-- Detailkarte (mit direkter Bearbeitung für Ziel & Stadt) -->
           <div id="detail-card" class="card" style="display:none;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-              <div>
-                <h3 id="det-name" style="font-size:1.1rem; margin:0;">-</h3>
-                <div id="det-city" style="font-size:0.85rem; color:#666; font-weight:500;">-</div>
-              </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <span style="font-weight:bold; font-size:0.95rem; color:var(--primary);">Ort-Details & Bearbeiten</span>
               <div style="display:flex; gap:4px;">
                 <button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 8px;" id="det-update-btn">🔄 Auto-Update</button>
                 <button class="btn btn-primary" style="font-size:0.75rem; padding:4px 8px;" id="det-save-btn" onclick="saveDirectEdits()">💾 Sichern</button>
               </div>
             </div>
 
-            <div style="font-size:0.8rem; color:#666; margin-top:6px;">Beschreibung (direkt editierbar):</div>
-            <textarea id="det-desc-input" rows="3" class="editable-field" style="margin:0;"></textarea>
+            <!-- Ziel & Stadt direkt editierbar -->
+            <label style="font-size:0.8rem; color:#666; margin-top:2px;">Sehenswürdigkeit / Ziel:</label>
+            <input type="text" id="det-name-input" style="margin-bottom:6px;">
 
-            <div style="font-size:0.8rem; color:#666; margin-top:6px;">Details (Klicken & ändern):</div>
+            <label style="font-size:0.8rem; color:#666;">Stadt / Ort:</label>
+            <input type="text" id="det-city-input" style="margin-bottom:6px;">
+
+            <label style="font-size:0.8rem; color:#666;">Beschreibung:</label>
+            <textarea id="det-desc-input" rows="3" class="editable-field" style="margin-bottom:6px;"></textarea>
+
+            <div style="font-size:0.8rem; color:#666; margin-top:2px;">Klicken zum schnellen Anpassen:</div>
             <div id="det-badges"></div>
 
-            <!-- Schnellsuche / Google Links -->
+            <!-- Google Links -->
             <div class="google-actions">
               <a id="link-google" target="_blank">🔍 Google Suche</a>
               <a id="link-hours" target="_blank">🕒 Google Öffnungszeiten</a>
@@ -164,7 +171,6 @@
           </div>
         </div>
 
-        <!-- Karte -->
         <div class="map-wrapper" id="map-wrapper">
           <div id="map"></div>
         </div>
@@ -184,7 +190,7 @@
       </div>
 
       <div class="card">
-        <h4>Neuen Ort anlegen (Ziel & Stadt getrennt)</h4>
+        <h4>Neuen Ort anlegen (Ziel & Stadt)</h4>
         <label style="font-size:0.85rem;">Region / Gebiet:</label>
         <select id="admin-region-select" onchange="syncAdminCityDefault()"></select>
 
@@ -196,7 +202,7 @@
 
         <button class="btn btn-primary btn-block" id="btn-add-poi" style="margin-top:6px;" onclick="searchAndAddPOI()">Recherche & Hinzufügen</button>
         <div id="admin-search-status" style="font-size:0.8rem; color:#555; margin-top:4px;">
-          Sucht gezielt mit Kombination aus Ziel & Stadt in Wikivoyage, Wikipedia & OpenStreetMap.
+          Kombiniert Wikivoyage, Wikipedia, Wikidata & OpenStreetMap.
         </div>
       </div>
 
@@ -223,6 +229,7 @@
     </div>
   </main>
 
+  <!-- Mobile Bottom Nav -->
   <nav class="bottom-nav">
     <button class="active" id="nav-day" onclick="switchNav('day')">
       <span class="icon">📅</span>Tagesplan
@@ -234,6 +241,40 @@
       <span class="icon">☁️</span>Sync / Setup
     </button>
   </nav>
+
+  <!-- MODAL: Ort im Admin bearbeiten -->
+  <div id="admin-edit-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h4>Ort im Admin bearbeiten</h4>
+      <input type="hidden" id="modal-poi-id">
+      
+      <label style="font-size:0.85rem;">Sehenswürdigkeit / Ziel:</label>
+      <input type="text" id="modal-name">
+
+      <label style="font-size:0.85rem;">Stadt / Ort:</label>
+      <input type="text" id="modal-city">
+
+      <label style="font-size:0.85rem;">Beschreibung:</label>
+      <textarea id="modal-desc" rows="3"></textarea>
+
+      <label style="font-size:0.85rem;">Öffnungszeiten:</label>
+      <input type="text" id="modal-hours">
+
+      <label style="font-size:0.85rem;">Eintrittsgeld:</label>
+      <input type="text" id="modal-fee">
+
+      <label style="font-size:0.85rem;">ÖV-Anbindung:</label>
+      <input type="text" id="modal-transit">
+
+      <label style="font-size:0.85rem;">Offizielle Website:</label>
+      <input type="text" id="modal-web">
+
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="saveAdminModal()">Speichern</button>
+        <button class="btn btn-secondary" style="flex:1;" onclick="closeAdminModal()">Abbrechen</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // --- DATENMODELL ---
@@ -406,7 +447,7 @@
       } catch(e) { }
     }
 
-    // --- MULTI-SOURCE RECHERCHE (ZIEL + STADT) ---
+    // --- RECHERCHE ---
     async function deepSearchPOI(poiName, cityName, regionName) {
       const info = {
         lat: 0,
@@ -421,7 +462,7 @@
       const cityOrRegion = (cityName || regionName || "").split(',')[0].trim();
       const combinedSearch = cityName ? `${poiName} ${cityName}` : `${poiName} ${regionName}`;
 
-      // 1. Wikivoyage (Listing-Extraktion)
+      // 1. Wikivoyage
       try {
         const wvUrl = `https://de.wikivoyage.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(combinedSearch)}&format=json&origin=*`;
         const wvRes = await fetch(wvUrl);
@@ -500,7 +541,7 @@
         }
       } catch (e) { }
 
-      // 3. OpenStreetMap Nominatim
+      // 3. OpenStreetMap
       if (!info.lat || !info.lon || !info.openingHours) {
         const queries = [
           `${poiName}, ${cityOrRegion}`,
@@ -528,7 +569,7 @@
         }
       }
 
-      // 4. Nächste ÖV-Haltestelle im Umkreis von 450m
+      // 4. ÖV
       if (info.lat && info.lon && !info.transit) {
         try {
           const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:450,${info.lat},${info.lon})[highway=bus_stop];out 1;`;
@@ -628,11 +669,31 @@
       alert(`Daten zu "${targetPOI.name}" aktualisiert!`);
     }
 
+    // --- DIREKTES SCHNELL-SPEICHERN IM TAGESPLAN (Ziel, Stadt, Text) ---
     function saveDirectEdits() {
       if (!selectedPoi) return;
-      selectedPoi.description = document.getElementById('det-desc-input').value.trim();
+
+      const newName = document.getElementById('det-name-input').value.trim();
+      const newCity = document.getElementById('det-city-input').value.trim();
+      const newDesc = document.getElementById('det-desc-input').value.trim();
+
+      if (!newName) {
+        alert("Der Name der Sehenswürdigkeit darf nicht leer sein.");
+        return;
+      }
+
+      selectedPoi.name = newName;
+      selectedPoi.city = newCity;
+      selectedPoi.description = newDesc;
+
       persistData();
-      alert("Beschreibung gesichert!");
+      renderDayList();
+      renderAdminList();
+      updateStartPoiDropdown();
+      onRegionChange();
+      selectPoi(selectedPoi);
+
+      alert("Änderungen erfolgreich gesichert!");
     }
 
     function editBadgePrompt(fieldKey, label) {
@@ -645,6 +706,55 @@
         selectPoi(selectedPoi);
         renderAdminList();
         updateStartPoiDropdown();
+      }
+    }
+
+    // --- ADMIN MODAL: BEARBEITEN ---
+    function openAdminEditModal(poiId) {
+      for (let r of appData.regions) {
+        let p = r.places.find(item => item.id === poiId);
+        if (p) {
+          document.getElementById('modal-poi-id').value = p.id;
+          document.getElementById('modal-name').value = p.name || '';
+          document.getElementById('modal-city').value = p.city || '';
+          document.getElementById('modal-desc').value = p.description || '';
+          document.getElementById('modal-hours').value = p.openingHours || '';
+          document.getElementById('modal-fee').value = p.fee || '';
+          document.getElementById('modal-transit').value = p.transit || '';
+          document.getElementById('modal-web').value = p.website || '';
+          document.getElementById('admin-edit-modal').style.display = 'flex';
+          return;
+        }
+      }
+    }
+
+    function closeAdminModal() {
+      document.getElementById('admin-edit-modal').style.display = 'none';
+    }
+
+    function saveAdminModal() {
+      const poiId = document.getElementById('modal-poi-id').value;
+      for (let r of appData.regions) {
+        let p = r.places.find(item => item.id === poiId);
+        if (p) {
+          p.name = document.getElementById('modal-name').value.trim() || p.name;
+          p.city = document.getElementById('modal-city').value.trim();
+          p.description = document.getElementById('modal-desc').value.trim();
+          p.openingHours = document.getElementById('modal-hours').value.trim();
+          p.fee = document.getElementById('modal-fee').value.trim();
+          p.transit = document.getElementById('modal-transit').value.trim();
+          p.website = document.getElementById('modal-web').value.trim();
+
+          persistData();
+          renderAdminList();
+          renderDayList();
+          updateStartPoiDropdown();
+          onRegionChange();
+          if (selectedPoi && selectedPoi.id === p.id) selectPoi(p);
+          closeAdminModal();
+          alert("Ort erfolgreich aktualisiert!");
+          return;
+        }
       }
     }
 
@@ -741,8 +851,8 @@
       const targetQuery = `${poi.name}, ${poi.city || reg.name}`;
 
       document.getElementById('detail-card').style.display = "block";
-      document.getElementById('det-name').innerText = poi.name;
-      document.getElementById('det-city').innerText = `Stadt: ${poi.city || 'Nicht angegeben'}`;
+      document.getElementById('det-name-input').value = poi.name;
+      document.getElementById('det-city-input').value = poi.city || '';
       document.getElementById('det-desc-input').value = poi.description;
 
       document.getElementById('det-update-btn').onclick = () => autoUpdatePOI(poi.id);
@@ -766,7 +876,6 @@
       const badgesEl = document.getElementById('det-badges');
       badgesEl.innerHTML = `
         <span class="badge ${poi.lat ? 'ok' : 'warn'}">📍 ${poi.lat ? poi.lat.toFixed(4) + ', ' + poi.lon.toFixed(4) : 'Keine Koord'}</span>
-        <span class="badge" onclick="editBadgePrompt('city', 'Stadt / Ort')">🏙️ Stadt: ${poi.city || 'k.A.'} ✏️</span>
         <span class="badge" onclick="editBadgePrompt('openingHours', 'Öffnungszeiten')">🕒 ${poi.openingHours || 'k.A.'} ✏️</span>
         <span class="badge" onclick="editBadgePrompt('fee', 'Eintrittspreis')">💵 ${poi.fee || 'k.A.'} ✏️</span>
         <span class="badge" onclick="editBadgePrompt('transit', 'ÖV-Anbindung')">🚆 ${poi.transit || 'k.A.'} ✏️</span>
@@ -831,6 +940,7 @@
               <div style="font-size:0.72rem; color:${p.lat ? '#666' : 'red'};">${p.lat ? `[${p.lat.toFixed(3)},${p.lon.toFixed(3)}]` : '⚠️ Keine Koord'}</div>
             </div>
             <div style="display:flex; gap:4px;">
+              <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="openAdminEditModal('${p.id}')">✏️ Edit</button>
               <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="autoUpdatePOI('${p.id}')">🔄 Update</button>
               <button class="btn btn-danger" style="padding:4px 8px; font-size:0.75rem;" onclick="deletePOI('${region.id}', ${idx})">🗑️</button>
             </div>
