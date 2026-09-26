@@ -668,19 +668,6 @@
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Skudeneshavn (A)\" (< 350m)",
           "visited": false
-        },
-        {
-          "id": "poi_1790435557887",
-          "name": "Viking farm",
-          "city": "Avaldsness",
-          "lat": 47.5264076,
-          "lon": -97.3696348,
-          "description": "Lucken Farm, Viking Township, Traill County, North Dakota, United States",
-          "website": "",
-          "openingHours": "Siehe Google-Info",
-          "fee": "Siehe Google-Info",
-          "transit": "Mit ÖV erreichbar",
-          "visited": false
         }
       ]
     }
