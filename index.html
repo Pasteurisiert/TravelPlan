@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TravelPlan - GitHub Sync Edition</title>
+  <title>TravelPlan - GitHub & Gemini AI</title>
   
   <!-- Leaflet CSS & JS für OpenStreetMap -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -17,60 +17,56 @@
       --card-bg: #ffffff;
       --text: #333333;
       --border: #e0e0e0;
-      --success: #2e7d32;
+      --accent: #6200ea;
     }
 
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { margin: 0; padding: 0; background: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-    /* Navigation */
     header { background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.15); z-index: 1000; }
     .nav-buttons button { background: transparent; border: 1px solid white; color: white; padding: 8px 14px; margin-left: 8px; border-radius: 4px; cursor: pointer; font-weight: 500; }
     .nav-buttons button.active, .nav-buttons button:hover { background: white; color: var(--primary); }
 
-    /* Status Bar */
     #sync-status { font-size: 0.85rem; background: #e3f2fd; padding: 5px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
 
-    /* Main Container */
     main { flex: 1; display: flex; overflow: hidden; position: relative; }
     .view-panel { width: 100%; height: 100%; display: none; overflow-y: auto; padding: 20px; }
     .view-panel.active { display: flex; }
 
-    /* Tagesplanung Split-Screen */
     #day-plan-view { display: none; padding: 0; }
     #day-plan-view.active { display: flex; }
-    .sidebar { width: 450px; border-right: 1px solid var(--border); background: var(--card-bg); overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+    .sidebar { width: 460px; border-right: 1px solid var(--border); background: var(--card-bg); overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
     .map-container { flex: 1; height: 100%; position: relative; }
     #map { width: 100%; height: 100%; }
 
-    /* Cards & Forms */
     .card { background: white; border-radius: 8px; padding: 15px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 15px; }
-    h2, h3 { margin-top: 0; }
+    h2, h3, h4 { margin-top: 0; }
     input, select, textarea, button { width: 100%; padding: 8px 10px; margin-top: 5px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; }
     button.btn-primary { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
     button.btn-primary:hover { background: var(--primary-dark); }
+    button.btn-ai { background: var(--accent); color: white; border: none; font-weight: bold; cursor: pointer; }
+    button.btn-ai:hover { background: #4a00b0; }
     .btn-secondary { background: #eee; border: 1px solid #ccc; cursor: pointer; }
 
-    /* POI Listen */
     .poi-item { border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: background 0.2s; background: #fff; }
     .poi-item:hover { background: #f0f7ff; }
-    .poi-item.selected { border-color: var(--primary); background: #e3f2fd; }
     .poi-item.visited { opacity: 0.6; text-decoration: line-through; background: #f9f9f9; }
     .poi-header { display: flex; justify-content: space-between; align-items: center; }
 
-    /* Details Panel */
-    .info-badge { display: inline-block; background: #eee; padding: 3px 7px; border-radius: 4px; font-size: 0.8rem; margin-right: 5px; margin-bottom: 5px; }
+    .info-badge { display: inline-block; background: #f0f0f0; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; margin-right: 5px; margin-bottom: 5px; }
     .route-info { background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; padding: 10px; margin-top: 10px; font-size: 0.9rem; }
+    .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
   <header>
-    <div style="font-weight: bold; font-size: 1.2rem;">🌍 TravelPlan</div>
+    <div style="font-weight: bold; font-size: 1.2rem;">🌍 TravelPlan & AI</div>
     <div class="nav-buttons">
       <button id="btn-nav-day" class="active" onclick="switchView('day-plan')">Tagesplanung</button>
       <button id="btn-nav-admin" onclick="switchView('admin')">Admin / Orte</button>
-      <button id="btn-nav-settings" onclick="switchView('settings')">GitHub Setup</button>
+      <button id="btn-nav-settings" onclick="switchView('settings')">Setup (GitHub & Gemini)</button>
     </div>
   </header>
 
@@ -91,7 +87,6 @@
           </select>
         </div>
 
-        <!-- Standorterfassung -->
         <div class="card">
           <h4>Mein aktueller Standort</h4>
           <div style="display: flex; gap: 5px;">
@@ -102,7 +97,6 @@
           <div id="current-pos-display" style="font-size: 0.8rem; color: #666; margin-top: 5px;">Standort nicht gesetzt</div>
         </div>
 
-        <!-- Orte-Filter -->
         <div>
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <h4>Orte am Tag</h4>
@@ -115,12 +109,16 @@
 
         <!-- Detailansicht & Route -->
         <div id="poi-detail-container" style="display:none;" class="card">
-          <h3 id="det-title" style="margin-bottom: 5px;">-</h3>
-          <p id="det-desc" style="font-size: 0.9rem; color: #555;">-</p>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <h3 id="det-title" style="margin-bottom: 5px;">-</h3>
+            <button id="det-update-btn" class="btn-secondary" style="width:auto; font-size:0.8rem; margin:0; padding:4px 8px;">🔄 Neu recherchieren</button>
+          </div>
+          <p id="det-desc" style="font-size: 0.9rem; color: #444; line-height: 1.4;">-</p>
           <div>
-            <span class="info-badge" id="det-web">🌐 Keine Webseite</span>
-            <span class="info-badge" id="det-fee">💵 Eintritt: k.A.</span>
-            <span class="info-badge" id="det-hours">🕒 Öffnungszeiten: k.A.</span>
+            <div class="info-badge" id="det-web">🌐 Keine Webseite</div>
+            <div class="info-badge" id="det-fee">💵 Eintritt: k.A.</div>
+            <div class="info-badge" id="det-hours">🕒 Öffnungszeiten: k.A.</div>
+            <div class="info-badge" id="det-transit">🚆 ÖV: k.A.</div>
           </div>
 
           <div id="route-panel" class="route-info" style="display:none;">
@@ -155,9 +153,9 @@
         <label>Ortsname / Attraktion:</label>
         <div style="display:flex; gap:10px;">
           <input type="text" id="new-poi-name" placeholder="z.B. Bryggen, St. Michael's Mount...">
-          <button class="btn-primary" style="width: 200px;" onclick="searchAndAddPOI()">Auto-Suchen & Anlegen</button>
+          <button id="btn-add-poi" class="btn-primary" style="width: 220px;" onclick="searchAndAddPOI()">Auto-Suchen & Anlegen</button>
         </div>
-        <small style="color: #666;">Ruft automatisch Beschreibung, Webseite, Koordinaten & Links über Wikipedia/OSM ab.</small>
+        <small style="color: #666;">Durchsucht Wikipedia & OSM. Fehlen Angaben, springt automatisch Gemini ein.</small>
       </div>
 
       <div class="card">
@@ -168,22 +166,32 @@
 
     <!-- 3. SETTINGS VIEW -->
     <div id="settings-view" class="view-panel" style="flex-direction: column; max-width: 700px; margin: 0 auto;">
-      <h2>GitHub Synchronisation Setup</h2>
+      <h2>Setup & API Schlüssel</h2>
+      
       <div class="card">
-        <p>Um Daten plattformübergreifend zu sichern, hinterlegen Sie hier ein GitHub-Repository und ein Personal Access Token (PAT mit <code>repo</code>-Rechten).</p>
+        <h3>Google Gemini API</h3>
+        <p>Wird für automatische Recherchen, Zusammenfassungen, Öffnungszeiten, ÖV & Preise verwendet.</p>
+        <label>Gemini API-Key:</label>
+        <input type="password" id="gemini-key" placeholder="AIzaSy...">
+        <small><a href="https://aistudio.google.com/app/apikey" target="_blank">Hier kostenlosen API-Key in Google AI Studio anlegen</a></small>
+      </div>
+
+      <div class="card">
+        <h3>GitHub Synchronisation</h3>
+        <p>Persistente Speicherung der <code>travel_data.json</code> direkt in Ihrem Repository.</p>
         <label>GitHub Username / Owner:</label>
         <input type="text" id="gh-owner" placeholder="z.B. mein-name">
         <label>Repository Name:</label>
         <input type="text" id="gh-repo" placeholder="z.B. travel-plan-repo">
-        <label>GitHub Personal Access Token (Fine-grained oder Classic mit 'repo' scope):</label>
+        <label>GitHub Token (PAT mit <code>repo</code>-Rechten):</label>
         <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
-        <button class="btn-primary" onclick="saveGithubSettings()">Speichern & Testen</button>
+        <button class="btn-primary" onclick="saveAllSettings()">Einstellungen Speichern</button>
       </div>
     </div>
   </main>
 
   <script>
-    // --- DATENSTRUKTUR ---
+    // --- DATENMODELL ---
     let appData = {
       regions: [
         {
@@ -195,9 +203,11 @@
     };
     
     let ghConfig = { owner: "", repo: "", token: "", path: "travel_data.json", sha: null };
-    let currentPosition = null; // { lat, lng }
+    let geminiApiKey = "";
+    let currentPosition = null;
     let pickMode = false;
     let map, routeLayer, markersLayer;
+    let selectedPoi = null;
 
     // --- INITIALISIERUNG ---
     window.addEventListener("DOMContentLoaded", () => {
@@ -215,7 +225,6 @@
 
       markersLayer = L.layerGroup().addTo(map);
 
-      // Karten-Klick Modus zur Standorterfassung
       map.on('click', (e) => {
         if(pickMode) {
           setCustomPosition(e.latlng.lat, e.latlng.lng, "Ausgewählter Kartenpunkt");
@@ -224,7 +233,7 @@
       });
     }
 
-    // --- NAVIGATION & VIEWS ---
+    // --- NAVIGATION ---
     function switchView(viewName) {
       document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-buttons button').forEach(b => b.classList.remove('active'));
@@ -248,17 +257,20 @@
       currentPosition = { lat, lng };
       document.getElementById('current-pos-display').innerText = `${label} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
       
-      // Marker für Standort
       if(window.posMarker) map.removeLayer(window.posMarker);
       window.posMarker = L.circleMarker([lat, lng], { color: 'blue', radius: 8 }).addTo(map).bindPopup(label).openPopup();
       map.panTo([lat, lng]);
+
+      if(selectedPoi && selectedPoi.lat && selectedPoi.lon) {
+        calculateRoute(selectedPoi.lat, selectedPoi.lon);
+      }
     }
 
     function getCurrentGPSLocation() {
       if (!navigator.geolocation) return alert("Geolocation nicht unterstützt.");
       navigator.geolocation.getCurrentPosition(
         (pos) => setCustomPosition(pos.coords.latitude, pos.coords.longitude, "Aktueller GPS Standort"),
-        () => alert("Standort konnte nicht abgerufen werden.")
+        () => alert("Standort konnte nicht ermittelt werden.")
       );
     }
 
@@ -271,48 +283,119 @@
 
     async function geocodeLocationInput(query) {
       if(!query) return;
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      if(data && data.length > 0) {
-        setCustomPosition(parseFloat(data[0].lat), parseFloat(data[0].lon), query);
-      } else {
-        alert("Adresse nicht gefunden.");
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        if(data && data.length > 0) {
+          setCustomPosition(parseFloat(data[0].lat), parseFloat(data[0].lon), query);
+        } else {
+          alert("Adresse nicht gefunden.");
+        }
+      } catch(e) {
+        alert("Geocoding fehlgeschlagen.");
       }
     }
 
-    // --- AUTO-INFORMATIONEN ERMITTELN (WIKIPEDIA / NOMINATIM) ---
+    // --- GEMINI KI RECHERCHE ENGINE ---
+    async function researchWithGemini(poiName, regionName) {
+      if(!geminiApiKey) {
+        alert("Hinweis: Kein Gemini API-Key hinterlegt. Bitte unter Setup eintragen für KI-Recherchen.");
+        return null;
+      }
+
+      const prompt = `Recherchiere touristische Informationen für folgenden Ort:
+Ort: "${poiName}" in der Region/Stadt "${regionName}".
+
+Gib die Daten zwingend als JSON mit folgenden Feldern aus:
+- description: Ausführliche Kurzbeschreibung auf Deutsch (ca. 2-4 Sätze)
+- website: Offizielle Website URL oder verlässliche Infoseite
+- openingHours: Typische Öffnungszeiten (z.B. "Mo-So 10:00 - 18:00" oder "Rund um die Uhr zugänglich")
+- fee: Eintrittspreise (z.B. "Kostenlos" oder "Erwachsene ca. 15€")
+- publicTransit: Anbindung an den öffentlichen Verkehr (z.B. "Buslinie 4 bis Haltestelle Torget, 2 Min Fußweg")`;
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
+
+      const payload = {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          response_mime_type: "application/json"
+        }
+      };
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if(!response.ok) {
+          throw new Error(`Gemini API Fehler: ${response.statusText}`);
+        }
+
+        const resData = await response.json();
+        const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+        if(rawText) {
+          return JSON.parse(rawText);
+        }
+      } catch(err) {
+        console.error("Gemini Recherchefehler:", err);
+      }
+      return null;
+    }
+
+    // --- ORTE ERSTELLEN & AUTOMATISCH RECHERCHIEREN ---
     async function searchAndAddPOI() {
       const regId = document.getElementById('admin-region-select').value;
       const name = document.getElementById('new-poi-name').value.trim();
-      if(!name || !regId) return alert("Region und Name erforderlich");
+      if(!name || !regId) return alert("Region und Name erforderlich!");
 
       const regionObj = appData.regions.find(r => r.id === regId);
       const query = `${name} ${regionObj.name}`;
+      const btn = document.getElementById('btn-add-poi');
+      btn.innerHTML = `<span class="spinner"></span> Recherche...`;
+      btn.disabled = true;
 
       try {
-        // 1. Koordinaten & Details via OpenStreetMap Nominatim
-        const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&extratags=1&q=${encodeURIComponent(query)}`);
-        const nomData = await nomRes.json();
-        
-        let lat = 0, lon = 0, osmOpeningHours = "k.A.", osmFee = "k.A.", website = "";
-        if(nomData.length > 0) {
-          const item = nomData[0];
-          lat = parseFloat(item.lat);
-          lon = parseFloat(item.lon);
-          if(item.extratags) {
-            osmOpeningHours = item.extratags.opening_hours || "k.A.";
-            osmFee = item.extratags.fee || "k.A.";
-            website = item.extratags.website || "";
+        // 1. Nominatim OpenStreetMap Abfrage
+        let lat = 0, lon = 0, osmOpeningHours = "", osmFee = "", website = "";
+        try {
+          const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&extratags=1&q=${encodeURIComponent(query)}`);
+          const nomData = await nomRes.json();
+          if(nomData && nomData.length > 0) {
+            const item = nomData[0];
+            lat = parseFloat(item.lat);
+            lon = parseFloat(item.lon);
+            if(item.extratags) {
+              osmOpeningHours = item.extratags.opening_hours || "";
+              osmFee = item.extratags.fee || "";
+              website = item.extratags.website || "";
+            }
           }
-        }
+        } catch(e) { console.warn("OSM Abfrage übersprungen", e); }
 
-        // 2. Beschreibung & Link via Wikipedia API
-        const wikiRes = await fetch(`https://de.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`);
-        let description = "Keine Kurzbeschreibung gefunden.";
-        if(wikiRes.ok) {
-          const wikiData = await wikiRes.json();
-          if(wikiData.extract) description = wikiData.extract;
-          if(!website && wikiData.content_urls) website = wikiData.content_urls.desktop.page;
+        // 2. Wikipedia Abfrage
+        let description = "";
+        try {
+          const wikiRes = await fetch(`https://de.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`);
+          if(wikiRes.ok) {
+            const wikiData = await wikiRes.json();
+            if(wikiData.extract) description = wikiData.extract;
+            if(!website && wikiData.content_urls) website = wikiData.content_urls.desktop.page;
+          }
+        } catch(e) { console.warn("Wiki Abfrage übersprungen", e); }
+
+        // 3. Wenn Beschreibung fehlt -> Gemini AI Fallback
+        let transitInfo = "Mit lokalen Bussen/Bahnen erreichbar";
+        if(!description || description.length < 20 || !osmOpeningHours) {
+          const aiData = await researchWithGemini(name, regionObj.name);
+          if(aiData) {
+            description = aiData.description || description;
+            website = website || aiData.website;
+            osmOpeningHours = osmOpeningHours || aiData.openingHours;
+            osmFee = osmFee || aiData.fee;
+            transitInfo = aiData.publicTransit || transitInfo;
+          }
         }
 
         const newPOI = {
@@ -320,10 +403,11 @@
           name: name,
           lat: lat,
           lon: lon,
-          description: description,
-          website: website || "https://google.com/search?q=" + encodeURIComponent(query),
-          openingHours: osmOpeningHours,
-          fee: osmFee,
+          description: description || "Keine Beschreibung verfügbar.",
+          website: website || `https://www.google.com/search?q=${encodeURIComponent(query)}`,
+          openingHours: osmOpeningHours || "k.A.",
+          fee: osmFee || "k.A.",
+          transit: transitInfo,
           visited: false
         };
 
@@ -331,23 +415,60 @@
         document.getElementById('new-poi-name').value = "";
         renderAdminPlaces();
         persistData();
-        alert("Ort erfolgreich angelegt!");
+        alert(`Ort "${name}" erfolgreich angelegt!`);
       } catch(e) {
-        alert("Fehler beim Abrufen: " + e.toString());
+        alert("Fehler beim Anlegen: " + e.toString());
+      } finally {
+        btn.innerHTML = "Auto-Suchen & Anlegen";
+        btn.disabled = false;
       }
     }
 
-    // --- ROUTENBERECHNUNG (OSRM + ÖV-Link) ---
-    async function calculateRoute(destLat, destLon) {
-      if(!currentPosition) {
-        alert("Bitte zuerst aktuellen Standort angeben (GPS, Karte oder Eingabe)!");
-        return;
+    // --- RE-UPDATE MIT GEMINI ---
+    async function updatePOIWithGemini(poiId) {
+      let targetPOI = null;
+      let targetRegion = null;
+      for(let r of appData.regions) {
+        let p = r.places.find(item => item.id === poiId);
+        if(p) {
+          targetPOI = p;
+          targetRegion = r;
+          break;
+        }
       }
+
+      if(!targetPOI || !targetRegion) return;
+
+      const ok = confirm(`Möchten Sie die Informationen zu "${targetPOI.name}" per Gemini KI neu recherchieren und überschreiben?`);
+      if(!ok) return;
+
+      const aiData = await researchWithGemini(targetPOI.name, targetRegion.name);
+      if(aiData) {
+        if(aiData.description) targetPOI.description = aiData.description;
+        if(aiData.website) targetPOI.website = aiData.website;
+        if(aiData.openingHours) targetPOI.openingHours = aiData.openingHours;
+        if(aiData.fee) targetPOI.fee = aiData.fee;
+        if(aiData.publicTransit) targetPOI.transit = aiData.publicTransit;
+
+        persistData();
+        if(selectedPoi && selectedPoi.id === poiId) {
+          selectPOI(targetPOI);
+        }
+        renderAdminPlaces();
+        renderDayPlanList();
+        alert(`Informationen zu "${targetPOI.name}" aktualisiert!`);
+      } else {
+        alert("Recherche konnte nicht durchgeführt werden. Bitte prüfen Sie den Gemini API-Key.");
+      }
+    }
+
+    // --- ROUTENBERECHNUNG ---
+    async function calculateRoute(destLat, destLon) {
+      if(!currentPosition) return;
       const p = document.getElementById('route-panel');
       p.style.display = "block";
       document.getElementById('route-time-dist').innerText = "Berechne Route...";
 
-      // OSRM Fußweg-Routing (Open Source Routing)
       const url = `https://router.project-osrm.org/route/v1/foot/${currentPosition.lng},${currentPosition.lat};${destLon},${destLat}?overview=full&geometries=geojson`;
       
       try {
@@ -359,22 +480,20 @@
           const durMin = Math.round(route.duration / 60);
 
           document.getElementById('route-time-dist').innerHTML = `
-            <strong>🚶 Fußweg:</strong> ca. ${distKm} km (${durMin} Min)<br>
+            <strong>🚶 Kürzester Fußweg:</strong> ca. ${distKm} km (${durMin} Min)<br>
           `;
 
-          // Auf Karte zeichnen
           if(routeLayer) map.removeLayer(routeLayer);
           routeLayer = L.geoJSON(route.geometry, { style: { color: 'green', weight: 4 } }).addTo(map);
           map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
 
-          // ÖV Verknüpfung via Google Transit / ÖV Link
           const transitUrl = `https://www.google.com/maps/dir/?api=1&origin=${currentPosition.lat},${currentPosition.lng}&destination=${destLat},${destLon}&travelmode=transit`;
           document.getElementById('transit-link').innerHTML = `
-            🚆 <strong>ÖV-Verbindung:</strong> <a href="${transitUrl}" target="_blank">Fahrplan & ÖV-Routen in externem Planer öffnen</a>
+            🚆 <strong>ÖV-Fahrplan:</strong> <a href="${transitUrl}" target="_blank">ÖV-Verbindung / Kombination öffnen</a>
           `;
         }
       } catch(err) {
-        document.getElementById('route-time-dist').innerText = "Routenabfrage nicht verfügbar.";
+        document.getElementById('route-time-dist').innerText = "Routenabfrage derzeit nicht erreichbar.";
       }
     }
 
@@ -408,7 +527,7 @@
       if(!region) return;
 
       region.places.forEach(poi => {
-        if(!showVisited && poi.visited) return; // Ausblenden falls besucht
+        if(!showVisited && poi.visited) return;
 
         const el = document.createElement('div');
         el.className = `poi-item ${poi.visited ? 'visited' : ''}`;
@@ -424,18 +543,29 @@
     }
 
     function selectPOI(poi) {
+      selectedPoi = poi;
       document.getElementById('poi-detail-container').style.display = "block";
       document.getElementById('det-title').innerText = poi.name;
       document.getElementById('det-desc').innerText = poi.description;
-      document.getElementById('det-hours').innerText = `🕒 ${poi.openingHours}`;
-      document.getElementById('det-fee').innerText = `💵 ${poi.fee}`;
+      document.getElementById('det-hours').innerText = `🕒 ${poi.openingHours || 'k.A.'}`;
+      document.getElementById('det-fee').innerText = `💵 ${poi.fee || 'k.A.'}`;
+      document.getElementById('det-transit').innerText = `🚆 ${poi.transit || 'k.A.'}`;
       
       const webEl = document.getElementById('det-web');
       webEl.innerHTML = poi.website ? `<a href="${poi.website}" target="_blank">🌐 Offizielle Webseite</a>` : "🌐 Keine Webseite";
 
+      const updateBtn = document.getElementById('det-update-btn');
+      updateBtn.onclick = () => updatePOIWithGemini(poi.id);
+
       if(poi.lat && poi.lon) {
         map.setView([poi.lat, poi.lon], 15);
-        calculateRoute(poi.lat, poi.lon);
+        if(currentPosition) {
+          calculateRoute(poi.lat, poi.lon);
+        } else {
+          document.getElementById('route-panel').style.display = "block";
+          document.getElementById('route-time-dist').innerText = "Standort festlegen, um Wegzeit & Route anzuzeigen.";
+          document.getElementById('transit-link').innerHTML = "";
+        }
       }
     }
 
@@ -480,12 +610,15 @@
         item.className = "poi-item";
         item.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
+            <div style="flex:1;">
               <input type="checkbox" ${p.visited ? 'checked' : ''} onchange="toggleAdminVisited('${region.id}', ${idx})" style="width:auto; margin-right:8px;">
               <strong style="${p.visited ? 'text-decoration: line-through;' : ''}">${p.name}</strong>
-              <small>(${p.lat ? p.lat.toFixed(3) : 0}, ${p.lon ? p.lon.toFixed(3) : 0})</small>
+              <small style="color:#666; margin-left: 5px;">(${p.lat ? p.lat.toFixed(3) : 0}, ${p.lon ? p.lon.toFixed(3) : 0})</small>
             </div>
-            <button class="btn-secondary" style="width:auto; margin:0;" onclick="deletePOI('${region.id}', ${idx})">🗑️ Löschen</button>
+            <div style="display:flex; gap: 5px;">
+              <button class="btn-ai" style="width:auto; margin:0; padding:4px 8px; font-size:0.8rem;" onclick="updatePOIWithGemini('${p.id}')">🔄 Update (KI)</button>
+              <button class="btn-secondary" style="width:auto; margin:0; padding:4px 8px;" onclick="deletePOI('${region.id}', ${idx})">🗑️</button>
+            </div>
           </div>
         `;
         listEl.appendChild(item);
@@ -521,37 +654,45 @@
       persistData();
     }
 
-    // --- GITHUB SYNC (REST API) ---
+    // --- STORAGE & GITHUB SYNC ---
     function loadSettings() {
-      const saved = localStorage.getItem('gh_config');
-      if(saved) {
-        ghConfig = JSON.parse(saved);
+      const savedGh = localStorage.getItem('gh_config');
+      if(savedGh) {
+        ghConfig = JSON.parse(savedGh);
         document.getElementById('gh-owner').value = ghConfig.owner || '';
         document.getElementById('gh-repo').value = ghConfig.repo || '';
         document.getElementById('gh-token').value = ghConfig.token || '';
       }
+      geminiApiKey = localStorage.getItem('gemini_api_key') || '';
+      document.getElementById('gemini-key').value = geminiApiKey;
+
       const localData = localStorage.getItem('travel_data');
       if(localData) {
         appData = JSON.parse(localData);
       }
     }
 
-    function saveGithubSettings() {
+    function saveAllSettings() {
       ghConfig.owner = document.getElementById('gh-owner').value.trim();
       ghConfig.repo = document.getElementById('gh-repo').value.trim();
       ghConfig.token = document.getElementById('gh-token').value.trim();
+      geminiApiKey = document.getElementById('gemini-key').value.trim();
+
       localStorage.setItem('gh_config', JSON.stringify(ghConfig));
+      localStorage.setItem('gemini_api_key', geminiApiKey);
+
+      alert("Einstellungen gespeichert!");
       syncWithGitHub();
     }
 
     function persistData() {
       localStorage.setItem('travel_data', JSON.stringify(appData));
-      syncWithGitHub(true); // Automatisch zu GitHub pushen
+      syncWithGitHub(true);
     }
 
     async function syncWithGitHub(pushOnly = false) {
       if(!ghConfig.token || !ghConfig.owner || !ghConfig.repo) {
-        document.getElementById('sync-text').innerText = "GitHub: Lokaler Offline-Modus (Nicht eingerichtet)";
+        document.getElementById('sync-text').innerText = "GitHub: Lokaler Offline-Modus (Nicht verknüpft)";
         return;
       }
 
@@ -564,14 +705,12 @@
       try {
         document.getElementById('sync-text').innerText = "GitHub: Synchronisiere...";
 
-        // 1. Datei holen um SHA & neueste Version zu kennen
         const getRes = await fetch(url, { headers });
         if(getRes.ok) {
           const fileData = await getRes.json();
           ghConfig.sha = fileData.sha;
 
           if(!pushOnly) {
-            // Aus GitHub laden
             const content = decodeURIComponent(escape(atob(fileData.content)));
             appData = JSON.parse(content);
             localStorage.setItem('travel_data', JSON.stringify(appData));
@@ -582,10 +721,9 @@
           }
         }
 
-        // 2. Schreiben / Updaten auf GitHub
         const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(appData, null, 2))));
         const body = {
-          message: "Update travel planning data",
+          message: "Update travel planning data via App",
           content: contentBase64,
           sha: ghConfig.sha || undefined
         };
@@ -599,9 +737,9 @@
         if(putRes.ok) {
           const putData = await putRes.json();
           ghConfig.sha = putData.content.sha;
-          document.getElementById('sync-text').innerText = "GitHub: Erfolgreich synchronisiert ✅";
+          document.getElementById('sync-text').innerText = "GitHub: Gespeichert & synchronisiert ✅";
         } else {
-          document.getElementById('sync-text').innerText = "GitHub Fehler: Schreibzugriff fehlgeschlagen.";
+          document.getElementById('sync-text').innerText = "GitHub Fehler beim Speichern.";
         }
       } catch (err) {
         document.getElementById('sync-text').innerText = "GitHub Verbindung fehlgeschlagen.";
