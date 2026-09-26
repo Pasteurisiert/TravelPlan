@@ -726,6 +726,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790435984566",
+          "name": "Norsk Natursenter Hardanger",
+          "city": "Eidfjord",
+          "lat": 60.4232015,
+          "lon": 7.1348178,
+          "description": "Norsk Natursenter Hardanger, Sæbøtunet, Hagaskarv, Øvre Eidfjord, Eidfjord, Vestland, 5784, Norway",
+          "website": "https://norsknatursenter.no/",
+          "openingHours": "Siehe Google-Info",
+          "fee": "yes",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
