@@ -60,13 +60,14 @@
         {
           "id": "poi_1790423341958",
           "name": "Copenhagen Botanical Garden",
-          "lat": 0,
-          "lon": 0,
-          "description": "Keine Kurzbeschreibung gefunden.",
-          "website": "https://google.com/search?q=Copenhagen%20Botanical%20Garden%20Kopenhagen",
-          "openingHours": "k.A.",
-          "fee": "k.A.",
-          "visited": false
+          "lat": 55.6869091,
+          "lon": 12.5739827,
+          "description": "Bertel Thorvaldsen [ˌbɛɐ̯dl̩ ˈtɔɐ̯vælsn̩] (* 19. November 1770 in Kopenhagen; † 24. März 1844 ebenda) war ein dänischer Bildhauer. Er gilt als bedeutendster Vertreter des dänischen Klassizismus....",
+          "website": "https://snm.dk/en/botanical-garden",
+          "openingHours": "Apr-Sep: 08:30-18:00, Oct-Mar: 08:30-16:00",
+          "fee": "no",
+          "visited": false,
+          "transit": "Haltestelle \"Nørreport\" (< 450m)"
         },
         {
           "id": "poi_1790423362446",
