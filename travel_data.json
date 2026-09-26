@@ -605,19 +605,6 @@
           "visited": false
         },
         {
-          "id": "poi_1790434935634",
-          "name": "Viking Village",
-          "city": "Bukkøy",
-          "lat": -33.8304859,
-          "lon": 18.7188943,
-          "description": "Viking Village, Cape Town Ward 103, Kraaifontein, Kapstadt, Western Cape, 7570, South Africa",
-          "website": "",
-          "openingHours": "Siehe Google-Info",
-          "fee": "Siehe Google-Info",
-          "transit": "Mit ÖV erreichbar",
-          "visited": false
-        },
-        {
           "id": "poi_1790434994587",
           "name": "Dokken Museum",
           "city": "Haugesund",
