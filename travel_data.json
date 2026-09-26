@@ -110,11 +110,12 @@
           "name": "Danish Design Museum",
           "lat": 55.6863742,
           "lon": 12.5944077,
-          "description": "Keine Kurzbeschreibung gefunden.",
+          "description": "Bjarke Ingels (* 2. Oktober 1974 in Kopenhagen) ist ein dänischer Architekt. Seit 2006 führt er das Architekturbüro Bjarke Ingels Group (BIG) mit Sitz in Kopenhagen. 2009 war er Mitbegründer der Design-Agentur KiBiSi. Ingels’ Entwürfe zeichnen sich durch sehr klare, oft plakative und pragmatische Ideen, verbunden mit einer spielerischen Herangehens...",
           "website": "https://designmuseum.dk",
           "openingHours": "Tu-We, Fr-Su 10:00-18:00; Th 10:00-20:00",
           "fee": "k.A.",
-          "visited": false
+          "visited": false,
+          "transit": "Mit ÖV erreichbar"
         },
         {
           "id": "poi_1790423456189",
