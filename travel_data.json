@@ -123,13 +123,14 @@
         {
           "id": "poi_1790423498131",
           "name": "Helsingør Kronborg Schloss",
-          "lat": 0,
-          "lon": 0,
-          "description": "Keine Kurzbeschreibung gefunden.",
-          "website": "https://google.com/search?q=Helsing%C3%B8r%20Kronborg%20Schloss%20Kopenhagen",
-          "openingHours": "k.A.",
-          "fee": "k.A.",
-          "visited": false
+          "lat": 56.039,
+          "lon": 12.6218,
+          "description": "Schloss Kronborg in Helsingør ist eine der bedeutendsten Renaissancefestungen Nordeuropas und zählt zum UNESCO-Weltkulturerbe. Internationale Bekanntheit erlangte das majestätische Schloss am Öresund vor allem als Schauplatz von Shakespeares berühmter Tragödie „Hamlet“. Besucher können prunkvolle Säle, die unterirdischen Kasematten und die Statue des schlafenden Nationalhelden Holger Danske erkunden.",
+          "website": "https://kronborg.dk/",
+          "openingHours": "10:00 - 17:00 Uhr (saisonal variierend, im Winter teils bis 16:00 Uhr)",
+          "fee": "ca. 145 DKK (ca. 19,50 €), Kinder unter 18 Jahren frei",
+          "visited": false,
+          "transit": "Regionalzug (Kystbanen) ab Kopenhagen Hbf bis Helsingør Station (ca. 45 Min.), danach ca. 15 Gehminuten"
         },
         {
           "id": "poi_1790423522140",
