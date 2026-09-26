@@ -42,6 +42,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790430816439",
+          "name": "Festung Bergenhus",
+          "city": "Bergen, Norwegen",
+          "lat": 60.4001102,
+          "lon": 5.3178547,
+          "description": "Die Festung Bergenhus in Bergen ist eine der ältesten und am besten erhaltenen Festungen Norwegens. Die ältesten Teile der Festung, die im Stadtteil Bergenhus liegt, stammen aus dem 12. Jahrhundert, die neuesten Teile aus der Zeit des Zweiten Weltkrieges....",
+          "website": "https://www.forsvarsbygg.no/no/festningene/finn-din-festning/bergenhus-festning/",
+          "openingHours": "Mo-Su 06:30-23:00",
+          "fee": "Siehe Google-Info",
+          "transit": "Haltestelle \"Bradbenken\" (< 350m)",
+          "visited": false
         }
       ]
     },
