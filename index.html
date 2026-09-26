@@ -2,526 +2,477 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TravelPlan - GitHub & Gemini AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TravelPlan Mobile</title>
   
+  <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     :root {
       --primary: #1976d2;
-      --primary-dark: #115293;
-      --bg: #f4f6f8;
+      --primary-dark: #0d47a1;
+      --bg: #f8f9fa;
       --card-bg: #ffffff;
-      --text: #333333;
-      --border: #e0e0e0;
-      --accent: #6200ea;
+      --text: #212529;
+      --border: #dee2e6;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
     }
 
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { margin: 0; padding: 0; background: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-    header { background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.15); z-index: 1000; }
-    .nav-buttons button { background: transparent; border: 1px solid white; color: white; padding: 8px 14px; margin-left: 8px; border-radius: 4px; cursor: pointer; font-weight: 500; }
-    .nav-buttons button.active, .nav-buttons button:hover { background: white; color: var(--primary); }
+    /* Header */
+    header { background: var(--primary); color: white; padding: 12px 16px; font-weight: bold; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    #sync-pill { font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 12px; font-weight: normal; }
 
-    #sync-status { font-size: 0.85rem; background: #e3f2fd; padding: 5px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    /* Content Area */
+    main { flex: 1; position: relative; overflow: hidden; display: flex; }
+    .page-view { position: absolute; top:0; left:0; width:100%; height:100%; display: none; flex-direction: column; overflow-y: auto; background: var(--bg); padding: 12px; }
+    .page-view.active { display: flex; }
 
-    main { flex: 1; display: flex; overflow: hidden; position: relative; }
-    .view-panel { width: 100%; height: 100%; display: none; overflow-y: auto; padding: 20px; }
-    .view-panel.active { display: flex; }
-
-    #day-plan-view { display: none; padding: 0; }
-    #day-plan-view.active { display: flex; }
-    .sidebar { width: 460px; border-right: 1px solid var(--border); background: var(--card-bg); overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-    .map-container { flex: 1; height: 100%; position: relative; }
+    /* Desktop Split Screen vs Mobile Fullscreen */
+    #day-view { padding: 0; }
+    .split-container { display: flex; width: 100%; height: 100%; position: relative; }
+    .day-sidebar { width: 420px; height: 100%; overflow-y: auto; padding: 12px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+    .map-wrapper { flex: 1; height: 100%; position: relative; }
     #map { width: 100%; height: 100%; }
 
-    .card { background: white; border-radius: 8px; padding: 15px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 15px; }
-    h2, h3, h4 { margin-top: 0; }
-    input, select, textarea, button { width: 100%; padding: 8px 10px; margin-top: 5px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; }
-    button.btn-primary { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
-    button.btn-primary:hover { background: var(--primary-dark); }
-    button.btn-ai { background: var(--accent); color: white; border: none; font-weight: bold; cursor: pointer; }
-    button.btn-ai:hover { background: #4a00b0; }
-    .btn-secondary { background: #eee; border: 1px solid #ccc; cursor: pointer; }
+    /* Mobile Sub-Switch (Liste vs Karte) */
+    .mobile-switch { display: none; background: white; border-bottom: 1px solid var(--border); padding: 6px; }
+    .segmented-control { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid var(--primary); }
+    .segmented-control button { flex: 1; border: none; background: white; padding: 8px; font-size: 0.9rem; font-weight: bold; color: var(--primary); cursor: pointer; }
+    .segmented-control button.active { background: var(--primary); color: white; }
 
-    .poi-item { border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: background 0.2s; background: #fff; }
-    .poi-item:hover { background: #f0f7ff; }
-    .poi-item.visited { opacity: 0.6; text-decoration: line-through; background: #f9f9f9; }
-    .poi-header { display: flex; justify-content: space-between; align-items: center; }
+    /* Feste Bottom Navigation für Mobile */
+    nav.bottom-nav { background: white; border-top: 1px solid var(--border); display: flex; height: 56px; z-index: 1000; }
+    nav.bottom-nav button { flex: 1; border: none; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; color: #666; cursor: pointer; }
+    nav.bottom-nav button.active { color: var(--primary); font-weight: bold; }
+    nav.bottom-nav button span.icon { font-size: 1.2rem; margin-bottom: 2px; }
 
-    .info-badge { display: inline-block; background: #f0f0f0; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; margin-right: 5px; margin-bottom: 5px; }
-    .route-info { background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; padding: 10px; margin-top: 10px; font-size: 0.9rem; }
-    .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    /* UI Cards & Buttons */
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 10px; }
+    h2, h3, h4 { margin: 0 0 8px 0; }
+    input, select, textarea { width: 100%; padding: 10px; margin-top: 4px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; }
+    button.btn { padding: 10px 14px; border-radius: 6px; border: none; font-size: 0.9rem; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: #e9ecef; color: #333; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-block { width: 100%; }
+
+    /* Orte in Liste */
+    .poi-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.2s; }
+    .poi-card.active { border: 2px solid var(--primary); background: #f0f7ff; }
+    .poi-card.visited { opacity: 0.55; text-decoration: line-through; background: #e9ecef; }
+    .poi-card-header { display: flex; justify-content: space-between; align-items: center; }
+
+    /* Detailansicht Badges */
+    .badge { display: inline-block; background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; margin: 2px 4px 4px 0; }
+    .badge.ok { background: #d4edda; color: #155724; }
+    .badge.warn { background: #fff3cd; color: #856404; }
+
+    /* Google Action Links */
+    .google-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+    .google-actions a { display: block; text-align: center; background: #f1f3f4; border: 1px solid #dadce0; border-radius: 6px; padding: 8px; font-size: 0.8rem; color: #1a73e8; text-decoration: none; font-weight: 500; }
+
+    /* Mobile Anpassung */
+    @media (max-width: 768px) {
+      .split-container { flex-direction: column; }
+      .mobile-switch { display: block; }
+      .day-sidebar { width: 100%; border-right: none; }
+      .day-sidebar.hide-mobile { display: none; }
+      .map-wrapper.hide-mobile { display: none; }
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <div style="font-weight: bold; font-size: 1.2rem;">🌍 TravelPlan & AI</div>
-    <div class="nav-buttons">
-      <button id="btn-nav-day" class="active" onclick="switchView('day-plan')">Tagesplanung</button>
-      <button id="btn-nav-admin" onclick="switchView('admin')">Admin / Orte</button>
-      <button id="btn-nav-settings" onclick="switchView('settings')">Setup (GitHub & Gemini)</button>
-    </div>
+    <div>🌍 TravelPlan Mobile</div>
+    <div id="sync-pill" onclick="syncWithGitHub()">GitHub: Offline</div>
   </header>
 
-  <div id="sync-status">
-    <span id="sync-text">GitHub: Nicht verbunden</span>
-    <button class="btn-secondary" style="width: auto; margin: 0; padding: 3px 10px;" onclick="syncWithGitHub()">Jetzt synchronisieren</button>
-  </div>
-
   <main>
-    <!-- 1. TAGESPLANUNG VIEW -->
-    <div id="day-plan-view" class="view-panel active">
-      <div class="sidebar">
-        <div>
-          <h3>Planungsauswahl</h3>
-          <label>Region / Stadt wählen:</label>
-          <select id="day-region-select" onchange="onRegionChange()">
-            <option value="">-- Bitte wählen --</option>
-          </select>
-        </div>
-
-        <div class="card">
-          <h4>Mein aktueller Standort</h4>
-          <div style="display: flex; gap: 5px;">
-            <button class="btn-secondary" onclick="getCurrentGPSLocation()">📍 GPS Ermitteln</button>
-            <button class="btn-secondary" id="btn-map-pick" onclick="toggleMapPick()">🗺️ Klick auf Karte</button>
-          </div>
-          <input type="text" id="manual-loc-search" placeholder="Adresse/Ort eingeben..." onchange="geocodeLocationInput(this.value)">
-          <div id="current-pos-display" style="font-size: 0.8rem; color: #666; margin-top: 5px;">Standort nicht gesetzt</div>
-        </div>
-
-        <div>
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h4>Orte am Tag</h4>
-            <label style="font-size:0.85rem; cursor:pointer;">
-              <input type="checkbox" id="show-visited-checkbox" onchange="renderDayPlanList()" style="width:auto; margin:0;"> Besuchte anzeigen
-            </label>
-          </div>
-          <div id="day-poi-list">Wähle zuerst eine Region/Stadt aus.</div>
-        </div>
-
-        <!-- Detailansicht & Route -->
-        <div id="poi-detail-container" style="display:none;" class="card">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <h3 id="det-title" style="margin-bottom: 5px;">-</h3>
-            <button id="det-update-btn" class="btn-secondary" style="width:auto; font-size:0.8rem; margin:0; padding:4px 8px;">🔄 Neu recherchieren</button>
-          </div>
-          <p id="det-desc" style="font-size: 0.9rem; color: #444; line-height: 1.4;">-</p>
-          <div>
-            <div class="info-badge" id="det-coords">📍 Koord: -</div>
-            <div class="info-badge" id="det-web">🌐 Keine Webseite</div>
-            <div class="info-badge" id="det-fee">💵 Eintritt: k.A.</div>
-            <div class="info-badge" id="det-hours">🕒 Öffnungszeiten: k.A.</div>
-            <div class="info-badge" id="det-transit">🚆 ÖV: k.A.</div>
-          </div>
-
-          <div id="route-panel" class="route-info" style="display:none;">
-            <strong>Wegführung vom Standort:</strong>
-            <div id="route-time-dist">Distanz / Dauer: Berechnung...</div>
-            <div id="transit-link" style="margin-top:5px;"></div>
-          </div>
+    <!-- 1. TAGESPLANUNG -->
+    <div id="view-day" class="page-view active">
+      <div class="mobile-switch">
+        <div class="segmented-control">
+          <button id="btn-sub-list" class="active" onclick="setMobileSubTab('list')">📋 Liste & Details</button>
+          <button id="btn-sub-map" onclick="setMobileSubTab('map')">🗺️ Karte & Route</button>
         </div>
       </div>
 
-      <div class="map-container">
-        <div id="map"></div>
+      <div class="split-container">
+        <!-- Seitenleiste / Liste -->
+        <div class="day-sidebar" id="day-sidebar">
+          <div>
+            <label style="font-size:0.85rem; font-weight:bold;">Region wählen:</label>
+            <select id="day-region-select" onchange="onRegionChange()"></select>
+          </div>
+
+          <!-- Mein Standort -->
+          <div class="card">
+            <div style="font-weight:bold; font-size:0.9rem; margin-bottom:6px;">📍 Mein Standort</div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-secondary" style="flex:1;" onclick="getGPSLocation()">📡 GPS</button>
+              <button class="btn btn-secondary" style="flex:1;" id="btn-pick" onclick="toggleMapPick()">🗺️ Klick</button>
+            </div>
+            <input type="text" placeholder="Adresse eingeben..." style="margin-top:6px;" onchange="geocodeAddress(this.value)">
+            <div id="loc-status" style="font-size:0.75rem; color:#666;">Standort nicht gesetzt</div>
+          </div>
+
+          <!-- POI List Filter -->
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-weight:bold;">Orte</div>
+            <label style="font-size:0.85rem; cursor:pointer;">
+              <input type="checkbox" id="check-visited" onchange="renderDayList()" style="width:auto; margin:0;"> Besuchte zeigen
+            </label>
+          </div>
+          <div id="day-poi-list"></div>
+
+          <!-- POI Detailansicht -->
+          <div id="detail-card" class="card" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <h3 id="det-name" style="font-size:1.1rem;">-</h3>
+              <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;" onclick="openEditModal(selectedPoi)">✏️ Editieren</button>
+            </div>
+            <p id="det-desc" style="font-size:0.85rem; color:#444; line-height:1.4; margin: 4px 0 8px 0;">-</p>
+            
+            <div id="det-badges"></div>
+
+            <!-- Schnellsuche / Google Links -->
+            <div class="google-actions">
+              <a id="link-google" target="_blank">🔍 Google Suche</a>
+              <a id="link-hours" target="_blank">🕒 Google Öffnungszeiten</a>
+              <a id="link-transit" target="_blank">🚆 Google ÖV-Plan</a>
+              <a id="link-web" target="_blank">🌐 Offizielle Website</a>
+            </div>
+
+            <!-- Wegführung -->
+            <div id="route-box" style="margin-top:10px; background:#e8f5e9; border:1px solid #c8e6c9; border-radius:6px; padding:8px; font-size:0.85rem; display:none;">
+              <strong>Weg vom Standort:</strong>
+              <div id="route-calc-text">Berechnung...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Karte -->
+        <div class="map-wrapper" id="map-wrapper">
+          <div id="map"></div>
+        </div>
       </div>
     </div>
 
     <!-- 2. ADMIN VIEW -->
-    <div id="admin-view" class="view-panel" style="flex-direction: column; max-width: 900px; margin: 0 auto;">
-      <h2>Adminbereich: Städte, Gebiete & Orte</h2>
+    <div id="view-admin" class="page-view">
+      <h3>Admin & Orte Verwalten</h3>
       
+      <!-- Region anlegen -->
       <div class="card">
-        <h3>Neue Region / Stadt anlegen</h3>
-        <div style="display:flex; gap: 10px;">
-          <input type="text" id="new-region-name" placeholder="z.B. Bergen, Cornwall...">
-          <button class="btn-primary" style="width: 200px;" onclick="addRegion()">Hinzufügen</button>
+        <h4>Neue Region anlegen</h4>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="admin-new-region" placeholder="z.B. Bergen, Cornwall">
+          <button class="btn btn-primary" onclick="addRegion()">Anlegen</button>
         </div>
       </div>
 
+      <!-- Ort anlegen -->
       <div class="card">
-        <h3>Neuen Ort eintragen</h3>
-        <label>Region:</label>
+        <h4>Neuen Ort hinzufügen</h4>
+        <label style="font-size:0.85rem;">Region:</label>
         <select id="admin-region-select"></select>
-        <label>Ortsname / Attraktion:</label>
-        <div style="display:flex; gap:10px;">
-          <input type="text" id="new-poi-name" placeholder="z.B. Bryggen, St. Michael's Mount...">
-          <button id="btn-add-poi" class="btn-primary" style="width: 220px;" onclick="searchAndAddPOI()">Auto-Suchen & Anlegen</button>
+
+        <label style="font-size:0.85rem;">Ortsname / Attraktion:</label>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="admin-new-poi" placeholder="z.B. Bryggen, Schloss Neuschwanstein">
+          <button class="btn btn-primary" id="btn-add-poi" onclick="searchAndAddPOI()">Recherche & Hinzufügen</button>
         </div>
-        <div id="poi-create-status" style="font-size:0.85rem; color:#555;">Recherchiert Daten & Geokoordinaten automatisch.</div>
+        <div id="admin-search-status" style="font-size:0.8rem; color:#555; margin-top:2px;">Sucht automatisch Koordinaten & Infos über Wikipedia.</div>
       </div>
 
+      <!-- Orte Liste im Admin -->
       <div class="card">
-        <h3>Bestehende Orte verwalten</h3>
-        <div id="admin-poi-list">Keine Region ausgewählt.</div>
+        <h4>Orte in dieser Region</h4>
+        <div id="admin-poi-list"></div>
       </div>
     </div>
 
-    <!-- 3. SETTINGS VIEW -->
-    <div id="settings-view" class="view-panel" style="flex-direction: column; max-width: 700px; margin: 0 auto;">
-      <h2>Setup & API Schlüssel</h2>
-      
+    <!-- 3. SYNC & SETUP -->
+    <div id="view-settings" class="page-view">
+      <h3>GitHub Synchronisation</h3>
       <div class="card">
-        <h3>Google Gemini API</h3>
-        <p>Wird für automatische Recherchen, Zusammenfassungen, Öffnungszeiten, ÖV, Preise und <b>Geokoordinaten</b> verwendet.</p>
-        <label>Gemini API-Key:</label>
-        <input type="password" id="gemini-key" placeholder="AIzaSy...">
-        <div style="display:flex; gap:10px; align-items:center;">
-          <button type="button" class="btn-secondary" style="width:auto; margin:0;" onclick="testGeminiKey()">🔑 API-Key jetzt testen</button>
-          <span id="gemini-test-status" style="font-size:0.85rem;"></span>
-        </div>
-        <small style="display:block; margin-top:8px;"><a href="https://aistudio.google.com/app/apikey" target="_blank">Hier kostenlosen API-Key in Google AI Studio anlegen</a></small>
-      </div>
-
-      <div class="card">
-        <h3>GitHub Synchronisation</h3>
-        <p>Persistente Speicherung der <code>travel_data.json</code> direkt in Ihrem Repository.</p>
-        <label>GitHub Username / Owner:</label>
-        <input type="text" id="gh-owner" placeholder="z.B. mein-name">
-        <label>Repository Name:</label>
-        <input type="text" id="gh-repo" placeholder="z.B. travel-plan-repo">
-        <label>GitHub Token (PAT mit <code>repo</code>-Rechten):</label>
-        <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
-        <button class="btn-primary" onclick="saveAllSettings()">Einstellungen Speichern</button>
+        <p style="font-size:0.85rem;">Hier können Sie Ihre Daten über Ihr GitHub Repository auf allen Geräten synchron halten.</p>
+        <label style="font-size:0.85rem;">GitHub Username:</label>
+        <input type="text" id="gh-owner" placeholder="z.B. mein-username">
+        <label style="font-size:0.85rem;">Repository:</label>
+        <input type="text" id="gh-repo" placeholder="z.B. travel-plan">
+        <label style="font-size:0.85rem;">Personal Access Token (PAT):</label>
+        <input type="password" id="gh-token" placeholder="ghp_...">
+        <button class="btn btn-primary btn-block" onclick="saveSettings()">Einstellungen Speichern</button>
+        <button class="btn btn-secondary btn-block" style="margin-top:6px;" onclick="syncWithGitHub()">Manuell synchronisieren</button>
       </div>
     </div>
   </main>
 
+  <!-- Mobile Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="active" id="nav-day" onclick="switchNav('day')">
+      <span class="icon">📅</span>Tagesplan
+    </button>
+    <button id="nav-admin" onclick="switchNav('admin')">
+      <span class="icon">⚙️</span>Admin
+    </button>
+    <button id="nav-settings" onclick="switchNav('settings')">
+      <span class="icon">☁️</span>Sync / Setup
+    </button>
+  </nav>
+
+  <!-- Modal zum Editieren von Orten -->
+  <div id="edit-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; padding:12px;">
+    <div class="card" style="width:100%; max-width:500px; max-height:90vh; overflow-y:auto; margin:0;">
+      <h4>Ort bearbeiten</h4>
+      <label style="font-size:0.8rem;">Name:</label>
+      <input type="text" id="edit-name">
+      <label style="font-size:0.8rem;">Beschreibung:</label>
+      <textarea id="edit-desc" rows="3"></textarea>
+      <label style="font-size:0.8rem;">Öffnungszeiten:</label>
+      <input type="text" id="edit-hours">
+      <label style="font-size:0.8rem;">Eintrittsgeld:</label>
+      <input type="text" id="edit-fee">
+      <label style="font-size:0.8rem;">ÖV-Verbindung / Haltestelle:</label>
+      <input type="text" id="edit-transit">
+      <label style="font-size:0.8rem;">Offizielle Website:</label>
+      <input type="text" id="edit-web">
+      <div style="display:flex; gap:6px;">
+        <div style="flex:1;">
+          <label style="font-size:0.8rem;">Breitengrad (Lat):</label>
+          <input type="number" step="any" id="edit-lat">
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:0.8rem;">Längengrad (Lon):</label>
+          <input type="number" step="any" id="edit-lon">
+        </div>
+      </div>
+      <div style="display:flex; gap:6px; margin-top:10px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="saveEditedPOI()">Speichern</button>
+        <button class="btn btn-secondary" style="flex:1;" onclick="closeEditModal()">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // --- DATENMODELL ---
+    // --- DATENSTRUKTUR ---
     let appData = {
       regions: [
-        {
-          id: "bergen-no",
-          name: "Bergen, Norwegen",
-          places: []
-        }
+        { id: "bergen", name: "Bergen, Norwegen", places: [] }
       ]
     };
-    
     let ghConfig = { owner: "", repo: "", token: "", path: "travel_data.json", sha: null };
-    let geminiApiKey = "";
     let currentPosition = null;
-    let pickMode = false;
-    let map, routeLayer, markersLayer;
     let selectedPoi = null;
+    let map, markersLayer, routeLayer;
+    let pickMode = false;
+    let editingPoiId = null;
 
     // --- INITIALISIERUNG ---
     window.addEventListener("DOMContentLoaded", () => {
       initMap();
       loadSettings();
-      if(ghConfig.token) syncWithGitHub();
       updateRegionDropdowns();
+      if(ghConfig.token) syncWithGitHub();
     });
 
     function initMap() {
-      map = L.map('map').setView([60.3913, 5.3221], 12);
+      map = L.map('map', { zoomControl: false }).setView([60.3913, 5.3221], 12);
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap Contributors'
+        attribution: '&copy; OpenStreetMap'
       }).addTo(map);
 
       markersLayer = L.layerGroup().addTo(map);
 
       map.on('click', (e) => {
         if(pickMode) {
-          setCustomPosition(e.latlng.lat, e.latlng.lng, "Ausgewählter Kartenpunkt");
+          setCustomPosition(e.latlng.lat, e.latlng.lng, "Karten-Punkt");
           toggleMapPick();
         }
       });
     }
 
     // --- NAVIGATION ---
-    function switchView(viewName) {
-      document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.nav-buttons button').forEach(b => b.classList.remove('active'));
+    function switchNav(tab) {
+      document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
 
-      if(viewName === 'day-plan') {
-        document.getElementById('day-plan-view').classList.add('active');
-        document.getElementById('btn-nav-day').classList.add('active');
+      if(tab === 'day') {
+        document.getElementById('view-day').classList.add('active');
+        document.getElementById('nav-day').classList.add('active');
         setTimeout(() => map.invalidateSize(), 200);
-      } else if(viewName === 'admin') {
-        document.getElementById('admin-view').classList.add('active');
-        document.getElementById('btn-nav-admin').classList.add('active');
-        renderAdminPlaces();
-      } else if(viewName === 'settings') {
-        document.getElementById('settings-view').classList.add('active');
-        document.getElementById('btn-nav-settings').classList.add('active');
+      } else if(tab === 'admin') {
+        document.getElementById('view-admin').classList.add('active');
+        document.getElementById('nav-admin').classList.add('active');
+        renderAdminList();
+      } else if(tab === 'settings') {
+        document.getElementById('view-settings').classList.add('active');
+        document.getElementById('nav-settings').classList.add('active');
       }
     }
 
-    // --- STANDORT-LOGIK ---
+    function setMobileSubTab(sub) {
+      document.getElementById('btn-sub-list').classList.toggle('active', sub === 'list');
+      document.getElementById('btn-sub-map').classList.toggle('active', sub === 'map');
+
+      const side = document.getElementById('day-sidebar');
+      const mapWrap = document.getElementById('map-wrapper');
+
+      if(sub === 'list') {
+        side.classList.remove('hide-mobile');
+        mapWrap.classList.add('hide-mobile');
+      } else {
+        side.classList.add('hide-mobile');
+        mapWrap.classList.remove('hide-mobile');
+        setTimeout(() => map.invalidateSize(), 200);
+      }
+    }
+
+    // --- STANDORT ---
     function setCustomPosition(lat, lng, label) {
       currentPosition = { lat, lng };
-      document.getElementById('current-pos-display').innerText = `${label} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
-      
+      document.getElementById('loc-status').innerText = `${label} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+
       if(window.posMarker) map.removeLayer(window.posMarker);
-      window.posMarker = L.circleMarker([lat, lng], { color: 'blue', radius: 8 }).addTo(map).bindPopup(label).openPopup();
-      map.panTo([lat, lng]);
+      window.posMarker = L.circleMarker([lat, lng], { color: 'blue', fillColor: '#2196f3', fillOpacity: 0.8, radius: 8 }).addTo(map);
 
       if(selectedPoi && selectedPoi.lat && selectedPoi.lon) {
-        calculateRoute(selectedPoi.lat, selectedPoi.lon);
+        calcRoute(selectedPoi.lat, selectedPoi.lon);
       }
     }
 
-    function getCurrentGPSLocation() {
-      if (!navigator.geolocation) return alert("Geolocation nicht unterstützt.");
+    function getGPSLocation() {
+      if(!navigator.geolocation) return alert("GPS nicht verfügbar");
+      document.getElementById('loc-status').innerText = "Suche GPS Signal...";
       navigator.geolocation.getCurrentPosition(
         (pos) => setCustomPosition(pos.coords.latitude, pos.coords.longitude, "Aktueller GPS Standort"),
-        () => alert("Standort konnte nicht ermittelt werden.")
+        (err) => alert("GPS Signal konnte nicht empfangen werden: " + err.message),
+        { enableHighAccuracy: true, timeout: 10000 }
       );
     }
 
     function toggleMapPick() {
       pickMode = !pickMode;
-      const btn = document.getElementById('btn-map-pick');
-      btn.style.background = pickMode ? '#ffc107' : '#eee';
-      btn.innerText = pickMode ? "Klicke jetzt auf Karte..." : "🗺️ Klick auf Karte";
+      const btn = document.getElementById('btn-pick');
+      btn.style.background = pickMode ? '#ffc107' : '#e9ecef';
+      if(pickMode) {
+        alert("Tippen Sie jetzt auf die gewünschte Stelle der Karte.");
+        if(window.innerWidth <= 768) setMobileSubTab('map');
+      }
     }
 
-    async function geocodeLocationInput(query) {
+    async function geocodeAddress(query) {
       if(!query) return;
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
         const data = await res.json();
         if(data && data.length > 0) {
           setCustomPosition(parseFloat(data[0].lat), parseFloat(data[0].lon), query);
         } else {
           alert("Adresse nicht gefunden.");
         }
-      } catch(e) {
-        alert("Geocoding fehlgeschlagen.");
-      }
+      } catch(e) { alert("Geocoding fehlgeschlagen."); }
     }
 
-    // --- TEST-BUTTON FÜR GEMINI KEY ---
-    async function testGeminiKey() {
-      const statusEl = document.getElementById('gemini-test-status');
-      const key = (document.getElementById('gemini-key').value || "").trim();
-
-      if (!key) {
-        statusEl.innerHTML = "<span style='color:red;'>Bitte zuerst einen API-Key eintragen!</span>";
-        return;
-      }
-
-      statusEl.innerHTML = "Prüfe Schlüssel...";
-      const model = 'gemini-3.8-flash';
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": key
-          },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: "Antworte kurz mit: OK" }] }]
-          })
-        });
-
-        const data = await res.json();
-        if (res.ok) {
-          statusEl.innerHTML = `<span style='color:green; font-weight:bold;'>✅ Key ist gültig & bereit (${model})!</span>`;
-          geminiApiKey = key;
-          localStorage.setItem('gemini_api_key', key);
-        } else {
-          statusEl.innerHTML = `<span style='color:red; font-weight:bold;'>❌ Fehler (${res.status}): ${data.error?.message || res.statusText}</span>`;
-        }
-      } catch (e) {
-        statusEl.innerHTML = `<span style='color:red; font-weight:bold;'>Netzwerkfehler: ${e.message}</span>`;
-      }
-    }
-
-    // --- GEMINI RECHERCHE MIT RETRY-LOGIK GEGEN RATE-LIMITS & INKLUSIVE KOORDINATEN ---
-    async function researchWithGemini(poiName, regionName, retries = 2) {
-      const key = (geminiApiKey || "").trim();
-      if(!key) {
-        alert("Hinweis: Kein Gemini API-Key hinterlegt. Bitte unter Setup eintragen!");
-        return null;
-      }
-
-      const prompt = `Recherchiere diesen touristischen Ort:
-Name: "${poiName}" in "${regionName}".
-
-Gib das Ergebnis zwingend als reines JSON mit folgenden Schlüsseln zurück:
-- description: Kurzbeschreibung auf Deutsch (2-3 Sätze)
-- website: Offizielle Website URL oder Informationsseite
-- openingHours: Öffnungszeiten (z.B. "10:00 - 18:00" oder "Frei zugänglich")
-- fee: Eintritt (z.B. "Kostenlos" oder "ca. 10€")
-- publicTransit: Kurze Angabe zur ÖV-Anbindung
-- latitude: Breitengrad als Dezimalzahl (z.B. 60.3975)
-- longitude: Längengrad als Dezimalzahl (z.B. 5.3242)`;
-
-      const model = 'gemini-3.8-flash';
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-
-      for (let attempt = 0; attempt <= retries; attempt++) {
-        try {
-          const response = await fetch(url, {
-            method: "POST",
-            headers: { 
-              "Content-Type": "application/json",
-              "x-goog-api-key": key
-            },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { response_mime_type: "application/json" }
-            })
-          });
-
-          if (response.ok) {
-            const resData = await response.json();
-            const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
-            if(rawText) return JSON.parse(rawText);
-          } else if (response.status === 429 && attempt < retries) {
-            // Zu viel Traffic: 2.5 Sekunden warten und automatisch wiederholen
-            await new Promise(r => setTimeout(r, 2500));
-            continue;
-          } else {
-            const errDetails = await response.json();
-            alert(`Recherche-Meldung (${response.status}): ${errDetails.error?.message || response.statusText}`);
-            return null;
-          }
-        } catch(err) {
-          if (attempt === retries) alert(`Verbindungsfehler: ${err.message}`);
-        }
-      }
-      return null;
-    }
-
-    // --- ORTE ERSTELLEN & KOORDINATEN FESTLEGEN ---
+    // --- RECHERCHE OHNE KI (WIKIPEDIA SEARCH + GEOSEARCH) ---
     async function searchAndAddPOI() {
       const regId = document.getElementById('admin-region-select').value;
-      const name = document.getElementById('new-poi-name').value.trim();
-      const statusEl = document.getElementById('poi-create-status');
+      const name = document.getElementById('admin-new-poi').value.trim();
+      const statusEl = document.getElementById('admin-search-status');
       if(!name || !regId) return alert("Region und Name erforderlich!");
 
-      const regionObj = appData.regions.find(r => r.id === regId);
-      const query = `${name} ${regionObj.name}`;
+      const region = appData.regions.find(r => r.id === regId);
       const btn = document.getElementById('btn-add-poi');
-      btn.innerHTML = `<span class="spinner"></span> Recherche...`;
       btn.disabled = true;
-      statusEl.innerText = "1/2: Suche Geokoordinaten & Basisdaten...";
+      btn.innerText = "Recherche...";
+      statusEl.innerText = "Suche in Wikipedia & Webquellen...";
 
-      let lat = 0, lon = 0, osmOpeningHours = "", osmFee = "", website = "", description = "";
+      let lat = 0, lon = 0, desc = "", website = "";
 
       try {
-        // 1. Wikipedia Abfrage (schnell und ohne strikte Rate-Limits)
-        try {
-          const wikiRes = await fetch(`https://de.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`);
-          if(wikiRes.ok) {
-            const wikiData = await wikiRes.json();
-            if(wikiData.extract) description = wikiData.extract;
-            if(wikiData.content_urls) website = wikiData.content_urls.desktop.page;
-            if(wikiData.coordinates) {
-              lat = wikiData.coordinates.lat;
-              lon = wikiData.coordinates.lon;
-            }
-          }
-        } catch(e) { }
-
-        // 2. OpenStreetMap nur anfragen wenn Wikipedia keine Koordinaten hatte
-        if(!lat || !lon) {
-          try {
-            const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
-            if(nomRes.ok) {
-              const nomData = await nomRes.json();
-              if(nomData && nomData.length > 0) {
-                lat = parseFloat(nomData[0].lat);
-                lon = parseFloat(nomData[0].lon);
-              }
-            }
-          } catch(e) { }
+        // 1. Wikipedia Volltext- & Titelsuche
+        const wikiSearch = await fetch(`https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name + ' ' + region.name)}&format=json&origin=*`);
+        const searchData = await wikiSearch.json();
+        
+        let pageTitle = name;
+        if(searchData.query && searchData.query.search && searchData.query.search.length > 0) {
+          pageTitle = searchData.query.search[0].title;
         }
 
-        // 3. Wenn Koordinaten oder Beschreibung fehlen -> Gemini KI übernimmt
-        let transitInfo = "Mit ÖV / Nahverkehr erreichbar";
-        if(!description || !lat || !lon) {
-          statusEl.innerText = "2/2: Gemini recherchiert Koordinaten & Details...";
-          const aiData = await researchWithGemini(name, regionObj.name);
-          if(aiData) {
-            description = aiData.description || description;
-            website = website || aiData.website;
-            osmOpeningHours = aiData.openingHours || osmOpeningHours;
-            osmFee = aiData.fee || osmFee;
-            transitInfo = aiData.publicTransit || transitInfo;
-            if(!lat && aiData.latitude) lat = parseFloat(aiData.latitude);
-            if(!lon && aiData.longitude) lon = parseFloat(aiData.longitude);
+        // 2. Artikel-Details, Koordinaten & Auszug holen
+        const pageRes = await fetch(`https://de.wikipedia.org/w/api.php?action=query&prop=extracts|coordinates|info&inprop=url&exintro=1&explaintext=1&titles=${encodeURIComponent(pageTitle)}&format=json&origin=*`);
+        const pageData = await pageRes.json();
+        const pages = pageData.query ? pageData.query.pages : {};
+        const firstKey = Object.keys(pages)[0];
+
+        if(firstKey && firstKey !== "-1") {
+          const item = pages[firstKey];
+          desc = item.extract ? item.extract.slice(0, 300) + "..." : "";
+          website = item.fullurl || "";
+          if(item.coordinates && item.coordinates.length > 0) {
+            lat = item.coordinates[0].lat;
+            lon = item.coordinates[0].lon;
+          }
+        }
+
+        // 3. Fallback: Koordinaten über Nominatim, falls Wikipedia keine Geodaten hatte
+        if(!lat || !lon) {
+          const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(name + ' ' + region.name)}`);
+          const nomData = await nomRes.json();
+          if(nomData && nomData.length > 0) {
+            lat = parseFloat(nomData[0].lat);
+            lon = parseFloat(nomData[0].lon);
           }
         }
 
         const newPOI = {
           id: "poi_" + Date.now(),
           name: name,
-          lat: lat || 0,
-          lon: lon || 0,
-          description: description || "Keine Beschreibung verfügbar.",
-          website: website || `https://www.google.com/search?q=${encodeURIComponent(query)}`,
-          openingHours: osmOpeningHours || "k.A.",
-          fee: osmFee || "k.A.",
-          transit: transitInfo,
+          lat: lat,
+          lon: lon,
+          description: desc || "Keine Zusammenfassung gefunden. Nutzen Sie den Google-Suche Button für Details.",
+          website: website || "",
+          openingHours: "Siehe Google-Info",
+          fee: "Siehe Google-Info",
+          transit: "Mit lokalen Bussen/Bahnen erreichbar",
           visited: false
         };
 
-        regionObj.places.push(newPOI);
-        document.getElementById('new-poi-name').value = "";
-        renderAdminPlaces();
+        region.places.push(newPOI);
+        document.getElementById('admin-new-poi').value = "";
+        renderAdminList();
         persistData();
-        statusEl.innerText = lat ? `✅ Ort angelegt mit Koordinaten: [${lat.toFixed(4)}, ${lon.toFixed(4)}]` : `⚠️ Ort angelegt, aber keine Koordinaten gefunden.`;
+        statusEl.innerText = lat ? `✅ Erfolgreich gefunden: [${lat.toFixed(4)}, ${lon.toFixed(4)}]` : `⚠️ Hinzugefügt (Keine Koordinaten gefunden, bitte manuell editieren).`;
         alert(`Ort "${name}" erfolgreich hinzugefügt!`);
       } catch(e) {
-        alert("Fehler beim Anlegen: " + e.toString());
+        alert("Fehler beim Abrufen: " + e.message);
       } finally {
-        btn.innerHTML = "Auto-Suchen & Anlegen";
         btn.disabled = false;
+        btn.innerText = "Recherche & Hinzufügen";
       }
     }
 
-    // --- RE-UPDATE MIT GEMINI ---
-    async function updatePOIWithGemini(poiId) {
-      let targetPOI = null, targetRegion = null;
-      for(let r of appData.regions) {
-        let p = r.places.find(item => item.id === poiId);
-        if(p) { targetPOI = p; targetRegion = r; break; }
-      }
-      if(!targetPOI || !targetRegion) return;
-
-      const ok = confirm(`Informationen und Koordinaten zu "${targetPOI.name}" per Gemini KI neu recherchieren?`);
-      if(!ok) return;
-
-      const aiData = await researchWithGemini(targetPOI.name, targetRegion.name);
-      if(aiData) {
-        if(aiData.description) targetPOI.description = aiData.description;
-        if(aiData.website) targetPOI.website = aiData.website;
-        if(aiData.openingHours) targetPOI.openingHours = aiData.openingHours;
-        if(aiData.fee) targetPOI.fee = aiData.fee;
-        if(aiData.publicTransit) targetPOI.transit = aiData.publicTransit;
-        if(aiData.latitude) targetPOI.lat = parseFloat(aiData.latitude);
-        if(aiData.longitude) targetPOI.lon = parseFloat(aiData.longitude);
-
-        persistData();
-        if(selectedPoi && selectedPoi.id === poiId) selectPOI(targetPOI);
-        renderAdminPlaces();
-        renderDayPlanList();
-        onRegionChange();
-        alert(`Ort "${targetPOI.name}" erfolgreich aktualisiert! (Koord: ${targetPOI.lat}, ${targetPOI.lon})`);
-      }
-    }
-
-    // --- ROUTENBERECHNUNG ---
-    async function calculateRoute(destLat, destLon) {
+    // --- ROUTE BERECHNEN ---
+    async function calcRoute(destLat, destLon) {
       if(!currentPosition) return;
-      const p = document.getElementById('route-panel');
-      p.style.display = "block";
-      document.getElementById('route-time-dist').innerText = "Berechne Route...";
+      const rBox = document.getElementById('route-box');
+      rBox.style.display = "block";
+      document.getElementById('route-calc-text').innerText = "Berechne Fußweg...";
 
       const url = `https://router.project-osrm.org/route/v1/foot/${currentPosition.lng},${currentPosition.lat};${destLon},${destLat}?overview=full&geometries=geojson`;
-      
+
       try {
         const res = await fetch(url);
         const data = await res.json();
@@ -530,25 +481,20 @@ Gib das Ergebnis zwingend als reines JSON mit folgenden Schlüsseln zurück:
           const distKm = (route.distance / 1000).toFixed(2);
           const durMin = Math.round(route.duration / 60);
 
-          document.getElementById('route-time-dist').innerHTML = `
-            <strong>🚶 Kürzester Fußweg:</strong> ca. ${distKm} km (${durMin} Min)<br>
+          document.getElementById('route-calc-text').innerHTML = `
+            🚶 <strong>Kürzester Fußweg:</strong> ${distKm} km (~${durMin} Min.)
           `;
 
           if(routeLayer) map.removeLayer(routeLayer);
-          routeLayer = L.geoJSON(route.geometry, { style: { color: 'green', weight: 4 } }).addTo(map);
-          map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
-
-          const transitUrl = `https://www.google.com/maps/dir/?api=1&origin=${currentPosition.lat},${currentPosition.lng}&destination=${destLat},${destLon}&travelmode=transit`;
-          document.getElementById('transit-link').innerHTML = `
-            🚆 <strong>ÖV-Fahrplan:</strong> <a href="${transitUrl}" target="_blank">ÖV-Verbindung / Kombination öffnen</a>
-          `;
+          routeLayer = L.geoJSON(route.geometry, { style: { color: '#28a745', weight: 4 } }).addTo(map);
+          map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
         }
-      } catch(err) {
-        document.getElementById('route-time-dist').innerText = "Wegführung konnte nicht geladen werden.";
+      } catch(e) {
+        document.getElementById('route-calc-text').innerText = "Fußwegberechnung derzeit nicht erreichbar.";
       }
     }
 
-    // --- TAGESPLANUNG ---
+    // --- TAGESPLAN LISTE & DETAILS ---
     function onRegionChange() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -559,73 +505,91 @@ Gib das Ergebnis zwingend als reines JSON mit folgenden Schlüsseln zurück:
         region.places.forEach(p => {
           if(p.lat && p.lon && p.lat !== 0) {
             const m = L.marker([p.lat, p.lon]).addTo(markersLayer).bindPopup(`<b>${p.name}</b>`);
-            m.on('click', () => selectPOI(p));
+            m.on('click', () => selectPoi(p));
             bounds.push([p.lat, p.lon]);
           }
         });
-        if(bounds.length > 0) {
-          map.fitBounds(bounds, { padding: [30, 30] });
-        }
+        if(bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
       }
-      renderDayPlanList();
+      renderDayList();
     }
 
-    function renderDayPlanList() {
+    function renderDayList() {
       const regId = document.getElementById('day-region-select').value;
-      const showVisited = document.getElementById('show-visited-checkbox').checked;
-      const container = document.getElementById('day-poi-list');
-      container.innerHTML = "";
+      const showVisited = document.getElementById('check-visited').checked;
+      const listEl = document.getElementById('day-poi-list');
+      listEl.innerHTML = "";
 
       const region = appData.regions.find(r => r.id === regId);
-      if(!region) return;
+      if(!region || !region.places.length) {
+        listEl.innerHTML = "<small style='color:#666;'>Keine Orte eingetragen.</small>";
+        return;
+      }
 
-      region.places.forEach(poi => {
-        if(!showVisited && poi.visited) return;
+      region.places.forEach(p => {
+        if(!showVisited && p.visited) return;
 
         const el = document.createElement('div');
-        el.className = `poi-item ${poi.visited ? 'visited' : ''}`;
+        el.className = `poi-card ${p.visited ? 'visited' : ''} ${selectedPoi && selectedPoi.id === p.id ? 'active' : ''}`;
         el.innerHTML = `
-          <div class="poi-header">
-            <strong>${poi.name}</strong>
-            <input type="checkbox" ${poi.visited ? 'checked' : ''} title="Als besucht markieren" style="width:auto; margin:0;" onclick="event.stopPropagation(); toggleVisited('${poi.id}')">
+          <div class="poi-card-header">
+            <strong>${p.name}</strong>
+            <input type="checkbox" ${p.visited ? 'checked' : ''} style="width:auto; margin:0;" onclick="event.stopPropagation(); toggleVisited('${p.id}')">
           </div>
-          <small style="color: ${poi.lat ? '#666' : 'red'};">${poi.lat ? '📍 Koord vorhanden' : '⚠️ Keine Koordinaten'}</small>
+          <div style="font-size:0.75rem; color:${p.lat ? '#666' : 'red'}; margin-top:2px;">
+            ${p.lat ? '📍 Koord vorhanden' : '⚠️ Keine Koordinaten'}
+          </div>
         `;
-        el.onclick = () => selectPOI(poi);
-        container.appendChild(el);
+        el.onclick = () => selectPoi(p);
+        listEl.appendChild(el);
       });
     }
 
-    function selectPOI(poi) {
+    function selectPoi(poi) {
       selectedPoi = poi;
-      document.getElementById('poi-detail-container').style.display = "block";
-      document.getElementById('det-title').innerText = poi.name;
+      renderDayList();
+
+      const reg = appData.regions.find(r => r.id === document.getElementById('day-region-select').value);
+      const query = `${poi.name} ${reg ? reg.name : ''}`;
+
+      document.getElementById('detail-card').style.display = "block";
+      document.getElementById('det-name').innerText = poi.name;
       document.getElementById('det-desc').innerText = poi.description;
-      document.getElementById('det-hours').innerText = `🕒 ${poi.openingHours || 'k.A.'}`;
-      document.getElementById('det-fee').innerText = `💵 ${poi.fee || 'k.A.'}`;
-      document.getElementById('det-transit').innerText = `🚆 ${poi.transit || 'k.A.'}`;
+
+      // Google Links dynamisch generieren
+      document.getElementById('link-google').href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+      document.getElementById('link-hours').href = `https://www.google.com/search?q=${encodeURIComponent(query + ' öffnungszeiten eintritt')}`;
       
-      const coordEl = document.getElementById('det-coords');
-      coordEl.innerText = poi.lat ? `📍 [${poi.lat.toFixed(4)}, ${poi.lon.toFixed(4)}]` : `⚠️ Keine Koordinaten`;
-      coordEl.style.color = poi.lat ? '#333' : 'red';
+      const originParam = currentPosition ? `${currentPosition.lat},${currentPosition.lng}` : '';
+      document.getElementById('link-transit').href = `https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${encodeURIComponent(query)}&travelmode=transit`;
 
-      const webEl = document.getElementById('det-web');
-      webEl.innerHTML = poi.website ? `<a href="${poi.website}" target="_blank">🌐 Offizielle Webseite</a>` : "🌐 Keine Webseite";
+      const webA = document.getElementById('link-web');
+      if(poi.website) {
+        webA.href = poi.website;
+        webA.style.display = "block";
+      } else {
+        webA.style.display = "none";
+      }
 
-      const updateBtn = document.getElementById('det-update-btn');
-      updateBtn.onclick = () => updatePOIWithGemini(poi.id);
+      // Badges
+      const badgesEl = document.getElementById('det-badges');
+      badgesEl.innerHTML = `
+        <span class="badge ${poi.lat ? 'ok' : 'warn'}">${poi.lat ? '📍 ' + poi.lat.toFixed(4) + ', ' + poi.lon.toFixed(4) : '⚠️ Keine Koordinaten'}</span>
+        <span class="badge">🕒 ${poi.openingHours || 'k.A.'}</span>
+        <span class="badge">💵 ${poi.fee || 'k.A.'}</span>
+        <span class="badge">🚆 ${poi.transit || 'k.A.'}</span>
+      `;
 
       if(poi.lat && poi.lon && poi.lat !== 0) {
         map.setView([poi.lat, poi.lon], 15);
         if(currentPosition) {
-          calculateRoute(poi.lat, poi.lon);
+          calcRoute(poi.lat, poi.lon);
         } else {
-          document.getElementById('route-panel').style.display = "block";
-          document.getElementById('route-time-dist').innerText = "Eigenen Standort angeben, um Wegzeit zu berechnen.";
-          document.getElementById('transit-link').innerHTML = "";
+          document.getElementById('route-box').style.display = "block";
+          document.getElementById('route-calc-text').innerText = "Standort setzen, um Wegzeit zu berechnen.";
         }
       } else {
-        document.getElementById('route-panel').style.display = "none";
+        document.getElementById('route-box').style.display = "none";
       }
     }
 
@@ -634,49 +598,92 @@ Gib das Ergebnis zwingend als reines JSON mit folgenden Schlüsseln zurück:
         let p = r.places.find(item => item.id === poiId);
         if(p) { p.visited = !p.visited; break; }
       }
-      renderDayPlanList();
+      renderDayList();
       persistData();
+    }
+
+    // --- MODAL / EDITIEREN ---
+    function openEditModal(poi) {
+      if(!poi) return;
+      editingPoiId = poi.id;
+      document.getElementById('edit-name').value = poi.name || "";
+      document.getElementById('edit-desc').value = poi.description || "";
+      document.getElementById('edit-hours').value = poi.openingHours || "";
+      document.getElementById('edit-fee').value = poi.fee || "";
+      document.getElementById('edit-transit').value = poi.transit || "";
+      document.getElementById('edit-web').value = poi.website || "";
+      document.getElementById('edit-lat').value = poi.lat || "";
+      document.getElementById('edit-lon').value = poi.lon || "";
+
+      document.getElementById('edit-modal').style.display = "flex";
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').style.display = "none";
+      editingPoiId = null;
+    }
+
+    function saveEditedPOI() {
+      if(!editingPoiId) return;
+      for(let r of appData.regions) {
+        let p = r.places.find(item => item.id === editingPoiId);
+        if(p) {
+          p.name = document.getElementById('edit-name').value.trim();
+          p.description = document.getElementById('edit-desc').value.trim();
+          p.openingHours = document.getElementById('edit-hours').value.trim();
+          p.fee = document.getElementById('edit-fee').value.trim();
+          p.transit = document.getElementById('edit-transit').value.trim();
+          p.website = document.getElementById('edit-web').value.trim();
+          p.lat = parseFloat(document.getElementById('edit-lat').value) || 0;
+          p.lon = parseFloat(document.getElementById('edit-lon').value) || 0;
+          
+          if(selectedPoi && selectedPoi.id === p.id) selectPoi(p);
+          break;
+        }
+      }
+      closeEditModal();
+      persistData();
+      renderAdminList();
+      onRegionChange();
     }
 
     // --- ADMIN BEREICH ---
     function updateRegionDropdowns() {
       const daySel = document.getElementById('day-region-select');
       const admSel = document.getElementById('admin-region-select');
-      
+
       const opts = appData.regions.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
-      daySel.innerHTML = '<option value="">-- Bitte wählen --</option>' + opts;
+      daySel.innerHTML = opts;
       admSel.innerHTML = opts;
 
-      admSel.onchange = renderAdminPlaces;
-      renderAdminPlaces();
+      admSel.onchange = renderAdminList;
+      onRegionChange();
     }
 
-    function renderAdminPlaces() {
+    function renderAdminList() {
       const regId = document.getElementById('admin-region-select').value;
       const listEl = document.getElementById('admin-poi-list');
       listEl.innerHTML = "";
 
       const region = appData.regions.find(r => r.id === regId);
       if(!region || !region.places.length) {
-        listEl.innerHTML = "<p>Keine Orte eingetragen.</p>";
+        listEl.innerHTML = "<small style='color:#666;'>Keine Orte in dieser Region.</small>";
         return;
       }
 
       region.places.forEach((p, idx) => {
         const item = document.createElement('div');
-        item.className = "poi-item";
+        item.className = "card";
+        item.style.padding = "8px";
         item.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="flex:1;">
-              <input type="checkbox" ${p.visited ? 'checked' : ''} onchange="toggleAdminVisited('${region.id}', ${idx})" style="width:auto; margin-right:8px;">
+            <div>
               <strong style="${p.visited ? 'text-decoration: line-through;' : ''}">${p.name}</strong>
-              <small style="color:${p.lat ? '#666' : 'red'}; margin-left: 5px;">
-                ${p.lat ? `(${p.lat.toFixed(3)},${p.lon.toFixed(3)})` : '⚠️ Keine Koord'}
-              </small>
+              <div style="font-size:0.75rem; color:${p.lat ? '#666' : 'red'};">${p.lat ? `Koord: [${p.lat.toFixed(3)},${p.lon.toFixed(3)}]` : '⚠️ Keine Koordinaten'}</div>
             </div>
-            <div style="display:flex; gap: 5px;">
-              <button class="btn-ai" style="width:auto; margin:0; padding:4px 8px; font-size:0.8rem;" onclick="updatePOIWithGemini('${p.id}')">🔄 Update (KI)</button>
-              <button class="btn-secondary" style="width:auto; margin:0; padding:4px 8px;" onclick="deletePOI('${region.id}', ${idx})">🗑️</button>
+            <div style="display:flex; gap:4px;">
+              <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;" onclick="openEditModalById('${p.id}')">✏️</button>
+              <button class="btn btn-danger" style="padding:4px 8px; font-size:0.8rem;" onclick="deletePOI('${region.id}', ${idx})">🗑️</button>
             </div>
           </div>
         `;
@@ -684,13 +691,10 @@ Gib das Ergebnis zwingend als reines JSON mit folgenden Schlüsseln zurück:
       });
     }
 
-    function toggleAdminVisited(regId, idx) {
-      const reg = appData.regions.find(r => r.id === regId);
-      if(reg) {
-        reg.places[idx].visited = !reg.places[idx].visited;
-        renderAdminPlaces();
-        renderDayPlanList();
-        persistData();
+    function openEditModalById(id) {
+      for(let r of appData.regions) {
+        let p = r.places.find(item => item.id === id);
+        if(p) return openEditModal(p);
       }
     }
 
@@ -698,23 +702,23 @@ Gib das Ergebnis zwingend als reines JSON mit folgenden Schlüsseln zurück:
       const reg = appData.regions.find(r => r.id === regId);
       if(reg && confirm("Ort wirklich löschen?")) {
         reg.places.splice(idx, 1);
-        renderAdminPlaces();
-        persistData();
+        renderAdminList();
         onRegionChange();
+        persistData();
       }
     }
 
     function addRegion() {
-      const name = document.getElementById('new-region-name').value.trim();
+      const name = document.getElementById('admin-new-region').value.trim();
       if(!name) return;
       const id = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
       appData.regions.push({ id, name, places: [] });
-      document.getElementById('new-region-name').value = "";
+      document.getElementById('admin-new-region').value = "";
       updateRegionDropdowns();
       persistData();
     }
 
-    // --- SPEICHERUNG & SYNC ---
+    // --- STORAGE & GITHUB SYNC ---
     function loadSettings() {
       const savedGh = localStorage.getItem('gh_config');
       if(savedGh) {
@@ -723,24 +727,17 @@ Gib das Ergebnis zwingend als reines JSON mit folgenden Schlüsseln zurück:
         document.getElementById('gh-repo').value = ghConfig.repo || '';
         document.getElementById('gh-token').value = ghConfig.token || '';
       }
-      geminiApiKey = localStorage.getItem('gemini_api_key') || '';
-      document.getElementById('gemini-key').value = geminiApiKey;
-
       const localData = localStorage.getItem('travel_data');
       if(localData) {
         appData = JSON.parse(localData);
       }
     }
 
-    function saveAllSettings() {
-      ghConfig.owner = (document.getElementById('gh-owner').value || '').trim();
-      ghConfig.repo = (document.getElementById('gh-repo').value || '').trim();
-      ghConfig.token = (document.getElementById('gh-token').value || '').trim();
-      geminiApiKey = (document.getElementById('gemini-key').value || '').trim();
-
+    function saveSettings() {
+      ghConfig.owner = document.getElementById('gh-owner').value.trim();
+      ghConfig.repo = document.getElementById('gh-repo').value.trim();
+      ghConfig.token = document.getElementById('gh-token').value.trim();
       localStorage.setItem('gh_config', JSON.stringify(ghConfig));
-      localStorage.setItem('gemini_api_key', geminiApiKey);
-
       alert("Einstellungen gespeichert!");
       syncWithGitHub();
     }
@@ -751,8 +748,9 @@ Gib das Ergebnis zwingend als reines JSON mit folgenden Schlüsseln zurück:
     }
 
     async function syncWithGitHub(pushOnly = false) {
+      const pill = document.getElementById('sync-pill');
       if(!ghConfig.token || !ghConfig.owner || !ghConfig.repo) {
-        document.getElementById('sync-text').innerText = "GitHub: Lokaler Offline-Modus (Nicht verknüpft)";
+        pill.innerText = "GitHub: Offline";
         return;
       }
 
@@ -763,43 +761,41 @@ Gib das Ergebnis zwingend als reines JSON mit folgenden Schlüsseln zurück:
       };
 
       try {
-        document.getElementById('sync-text').innerText = "GitHub: Synchronisiere...";
-
+        pill.innerText = "Sync...";
         const getRes = await fetch(url, { headers });
         if(getRes.ok) {
           const fileData = await getRes.json();
           ghConfig.sha = fileData.sha;
-
           if(!pushOnly) {
             const content = decodeURIComponent(escape(atob(fileData.content)));
             appData = JSON.parse(content);
             localStorage.setItem('travel_data', JSON.stringify(appData));
             updateRegionDropdowns();
-            renderDayPlanList();
-            onRegionChange();
-            document.getElementById('sync-text').innerText = "GitHub: Aktuell geladen ✅";
+            pill.innerText = "GitHub: Synced ✅";
             return;
           }
         }
 
         const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(appData, null, 2))));
-        const body = {
-          message: "Update travel planning data via App",
-          content: contentBase64,
-          sha: ghConfig.sha || undefined
-        };
-
-        const putRes = await fetch(url, { method: "PUT", headers, body: JSON.stringify(body) });
+        const putRes = await fetch(url, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify({
+            message: "Update TravelPlan Data",
+            content: contentBase64,
+            sha: ghConfig.sha || undefined
+          })
+        });
 
         if(putRes.ok) {
-          const putData = await putRes.json();
-          ghConfig.sha = putData.content.sha;
-          document.getElementById('sync-text').innerText = "GitHub: Gespeichert & synchronisiert ✅";
+          const resJson = await putRes.json();
+          ghConfig.sha = resJson.content.sha;
+          pill.innerText = "GitHub: Synced ✅";
         } else {
-          document.getElementById('sync-text').innerText = "GitHub Fehler beim Speichern.";
+          pill.innerText = "GitHub: Fehler";
         }
-      } catch (err) {
-        document.getElementById('sync-text').innerText = "GitHub Verbindung fehlgeschlagen.";
+      } catch(e) {
+        pill.innerText = "GitHub: Offline";
       }
     }
   </script>
