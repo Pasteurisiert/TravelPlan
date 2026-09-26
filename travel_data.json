@@ -96,13 +96,14 @@
         {
           "id": "poi_1790423394158",
           "name": "Nationalmuseet",
-          "lat": 55.6747103,
-          "lon": 12.5743545,
-          "description": "Das Dänische Nationalmuseum in Kopenhagen präsentiert die Kulturgeschichte Dänemarks im internationalen Kontext, beginnend mit der Ur- und Frühgeschichte über die Wikingerzeit, das Mittelalter und die Renaissance bis in die Neuzeit. Einige Museumsstandorte befinden sich im Land verteilt.",
-          "website": "https://www.nationalmuseet.dk/",
+          "lat": 55.67444444,
+          "lon": 12.575,
+          "description": "Das Dänische Nationalmuseum (dänisch Nationalmuseet) in Kopenhagen präsentiert die Kulturgeschichte Dänemarks im internationalen Kontext, beginnend mit der Ur- und Frühgeschichte über die Wikingerzeit, das Mittelalter und die Renaissance bis in die Neuzeit. Einige Museumsstandorte befinden sich im Land verteilt....",
+          "website": "https://nationalmuseet.dk/en",
           "openingHours": "Apr-Oct Mo-Su,PH 10:00-17:00; Nov-Mar Mo closed, Tu-Su,PH 10:00-17:00; Dec 24,25,31 off",
           "fee": "yes",
-          "visited": false
+          "visited": false,
+          "transit": "Haltestelle \"Glyptoteket\" (< 450m)"
         },
         {
           "id": "poi_1790423411070",
