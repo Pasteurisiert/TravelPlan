@@ -224,19 +224,6 @@
           "transit": "Mit ÖV erreichbar"
         },
         {
-          "id": "poi_1790428973362",
-          "name": "Maritimes Museum",
-          "lat": 53.5423963,
-          "lon": 10.0001739,
-          "description": "Das Maritime Museum Dänemark, dänisch M/S Museet for Søfart (wörtlich Museum für Seefahrt), präsentiert die zivile dänische Seefahrt vom Mittelalter bis in die Gegenwart. Fotoarchiv und Bibliothek verwahren den größten maritimen Fundus Dänemarks. Die preisgekrönte Architektur des neuen Ausstellungsgebäudes hat 2013 international große Aufmerksamkei...",
-          "website": "https://de.wikipedia.org/wiki/Maritimes_Museum_D%C3%A4nemark",
-          "openingHours": "Siehe Google-Info",
-          "fee": "Siehe Google-Info",
-          "transit": "Haltestelle \"Osakaallee (Überseequartier)\" (< 350m)",
-          "visited": false,
-          "city": "Helsingør"
-        },
-        {
           "id": "poi_1790429848448",
           "name": "Studiestræde 57",
           "city": "Kopenhagen",
