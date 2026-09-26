@@ -564,7 +564,21 @@
     {
       "id": "haugesund",
       "name": "Haugesund",
-      "places": []
+      "places": [
+        {
+          "id": "poi_1790434876560",
+          "name": "Haraldshaugen",
+          "city": "Haugesund",
+          "lat": 59.428286,
+          "lon": 5.262062,
+          "description": "Haraldshaugen (B), Kvalsvikvegen, Gard, Kvala, Haugesund, Rogaland, 5515, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
+        }
+      ]
     }
   ]
 }
