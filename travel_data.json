@@ -120,18 +120,6 @@
           "transit": "Mit ÖV erreichbar"
         },
         {
-          "id": "poi_1790423456189",
-          "name": "Humlebæk Louisiana",
-          "lat": 55.96944444,
-          "lon": 12.54305556,
-          "description": "Das Louisiana Museum of Modern Art, auch bekannt als das Louisiana, ist ein Kunstmuseum nördlich von Kopenhagen in Dänemark. Mit über 700.000 Besuchern jährlich ist das Louisiana das meistbesuchte Museum für moderne und zeitgenössische Kunst in Skandinavien und wird für seine herausragenden Ausstellungen und Sammlungen gefeiert, einschließlich eine...",
-          "website": "http://www.louisiana.dk",
-          "openingHours": "Mo off; Tu-Fr 11:00-22:00; Sa-Su 11:00-18:00",
-          "fee": "yes",
-          "visited": false,
-          "transit": "Haltestelle \"Krogerupvej\" (< 450m)"
-        },
-        {
           "id": "poi_1790423498131",
           "name": "Helsingør Kronborg Schloss",
           "lat": 56.03902778,
