@@ -371,6 +371,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790431632443",
+          "name": "Loen Skylift",
+          "city": "Olden, Norwegen",
+          "lat": 61.8801507,
+          "lon": 6.8366239,
+          "description": "Loen Skylift, Fjordvegen, Loen, Stryn, Vestland, 6789, Norway",
+          "website": "https://hovenloen.no/english/#intro-en",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
