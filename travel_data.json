@@ -63,6 +63,17 @@
           "openingHours": "k.A.",
           "fee": "k.A.",
           "visited": false
+        },
+        {
+          "id": "poi_1790423362446",
+          "name": "Staten Museum for Kunst",
+          "lat": 0,
+          "lon": 0,
+          "description": "Keine Kurzbeschreibung gefunden.",
+          "website": "https://google.com/search?q=Staten%20Museum%20for%20Kunst%20Kopenhagen",
+          "openingHours": "k.A.",
+          "fee": "k.A.",
+          "visited": false
         }
       ]
     }
