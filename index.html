@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TravelPlan Mobile</title>
+  <title>TravelPlan Mobile - Auto-Enrich</title>
   
   <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -18,68 +18,56 @@
       --text: #212529;
       --border: #dee2e6;
       --success: #28a745;
-      --warning: #ffc107;
-      --danger: #dc3545;
     }
 
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { margin: 0; padding: 0; background: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-    /* Header */
-    header { background: var(--primary); color: white; padding: 12px 16px; font-weight: bold; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    #sync-pill { font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 12px; font-weight: normal; }
+    header { background: var(--primary); color: white; padding: 12px 16px; font-weight: bold; font-size: 1.05rem; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    #sync-pill { font-size: 0.75rem; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 12px; font-weight: normal; cursor: pointer; }
 
-    /* Content Area */
     main { flex: 1; position: relative; overflow: hidden; display: flex; }
     .page-view { position: absolute; top:0; left:0; width:100%; height:100%; display: none; flex-direction: column; overflow-y: auto; background: var(--bg); padding: 12px; }
     .page-view.active { display: flex; }
 
-    /* Desktop Split Screen vs Mobile Fullscreen */
-    #day-view { padding: 0; }
+    /* Tagesansicht & Mobile Split */
+    #view-day { padding: 0; }
     .split-container { display: flex; width: 100%; height: 100%; position: relative; }
-    .day-sidebar { width: 420px; height: 100%; overflow-y: auto; padding: 12px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+    .day-sidebar { width: 430px; height: 100%; overflow-y: auto; padding: 12px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
     .map-wrapper { flex: 1; height: 100%; position: relative; }
     #map { width: 100%; height: 100%; }
 
-    /* Mobile Sub-Switch (Liste vs Karte) */
     .mobile-switch { display: none; background: white; border-bottom: 1px solid var(--border); padding: 6px; }
     .segmented-control { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid var(--primary); }
     .segmented-control button { flex: 1; border: none; background: white; padding: 8px; font-size: 0.9rem; font-weight: bold; color: var(--primary); cursor: pointer; }
     .segmented-control button.active { background: var(--primary); color: white; }
 
-    /* Feste Bottom Navigation für Mobile */
     nav.bottom-nav { background: white; border-top: 1px solid var(--border); display: flex; height: 56px; z-index: 1000; }
     nav.bottom-nav button { flex: 1; border: none; background: none; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; color: #666; cursor: pointer; }
     nav.bottom-nav button.active { color: var(--primary); font-weight: bold; }
     nav.bottom-nav button span.icon { font-size: 1.2rem; margin-bottom: 2px; }
 
-    /* UI Cards & Buttons */
     .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 10px; }
-    h2, h3, h4 { margin: 0 0 8px 0; }
+    h3, h4 { margin: 0 0 8px 0; }
     input, select, textarea { width: 100%; padding: 10px; margin-top: 4px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.95rem; }
-    button.btn { padding: 10px 14px; border-radius: 6px; border: none; font-size: 0.9rem; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+    button.btn { padding: 9px 12px; border-radius: 6px; border: none; font-size: 0.88rem; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
     .btn-primary { background: var(--primary); color: white; }
     .btn-secondary { background: #e9ecef; color: #333; }
-    .btn-success { background: var(--success); color: white; }
-    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger { background: #dc3545; color: white; }
     .btn-block { width: 100%; }
 
-    /* Orte in Liste */
-    .poi-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.2s; }
+    .poi-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; cursor: pointer; }
     .poi-card.active { border: 2px solid var(--primary); background: #f0f7ff; }
     .poi-card.visited { opacity: 0.55; text-decoration: line-through; background: #e9ecef; }
     .poi-card-header { display: flex; justify-content: space-between; align-items: center; }
 
-    /* Detailansicht Badges */
     .badge { display: inline-block; background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; margin: 2px 4px 4px 0; }
     .badge.ok { background: #d4edda; color: #155724; }
     .badge.warn { background: #fff3cd; color: #856404; }
 
-    /* Google Action Links */
-    .google-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
-    .google-actions a { display: block; text-align: center; background: #f1f3f4; border: 1px solid #dadce0; border-radius: 6px; padding: 8px; font-size: 0.8rem; color: #1a73e8; text-decoration: none; font-weight: 500; }
+    .google-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+    .google-actions a { display: block; text-align: center; background: #f1f3f4; border: 1px solid #dadce0; border-radius: 6px; padding: 7px; font-size: 0.78rem; color: #1a73e8; text-decoration: none; font-weight: 500; }
 
-    /* Mobile Anpassung */
     @media (max-width: 768px) {
       .split-container { flex-direction: column; }
       .mobile-switch { display: block; }
@@ -101,13 +89,13 @@
     <div id="view-day" class="page-view active">
       <div class="mobile-switch">
         <div class="segmented-control">
-          <button id="btn-sub-list" class="active" onclick="setMobileSubTab('list')">📋 Liste & Details</button>
-          <button id="btn-sub-map" onclick="setMobileSubTab('map')">🗺️ Karte & Route</button>
+          <button id="btn-sub-list" class="active" onclick="setMobileSubTab('list')">📋 Liste & Info</button>
+          <button id="btn-sub-map" onclick="setMobileSubTab('map')">🗺️ Karte & Weg</button>
         </div>
       </div>
 
       <div class="split-container">
-        <!-- Seitenleiste / Liste -->
+        <!-- Sidebar / Liste -->
         <div class="day-sidebar" id="day-sidebar">
           <div>
             <label style="font-size:0.85rem; font-weight:bold;">Region wählen:</label>
@@ -127,7 +115,7 @@
 
           <!-- POI List Filter -->
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="font-weight:bold;">Orte</div>
+            <div style="font-weight:bold;">Orte am Tag</div>
             <label style="font-size:0.85rem; cursor:pointer;">
               <input type="checkbox" id="check-visited" onchange="renderDayList()" style="width:auto; margin:0;"> Besuchte zeigen
             </label>
@@ -138,7 +126,7 @@
           <div id="detail-card" class="card" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <h3 id="det-name" style="font-size:1.1rem;">-</h3>
-              <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;" onclick="openEditModal(selectedPoi)">✏️ Editieren</button>
+              <button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 8px;" id="det-update-btn">🔄 Auto-Update</button>
             </div>
             <p id="det-desc" style="font-size:0.85rem; color:#444; line-height:1.4; margin: 4px 0 8px 0;">-</p>
             
@@ -152,7 +140,7 @@
               <a id="link-web" target="_blank">🌐 Offizielle Website</a>
             </div>
 
-            <!-- Wegführung -->
+            <!-- Wegführung OSRM -->
             <div id="route-box" style="margin-top:10px; background:#e8f5e9; border:1px solid #c8e6c9; border-radius:6px; padding:8px; font-size:0.85rem; display:none;">
               <strong>Weg vom Standort:</strong>
               <div id="route-calc-text">Berechnung...</div>
@@ -188,37 +176,37 @@
 
         <label style="font-size:0.85rem;">Ortsname / Attraktion:</label>
         <div style="display:flex; gap:6px;">
-          <input type="text" id="admin-new-poi" placeholder="z.B. Bryggen, Schloss Neuschwanstein">
-          <button class="btn btn-primary" id="btn-add-poi" onclick="searchAndAddPOI()">Recherche & Hinzufügen</button>
+          <input type="text" id="admin-new-poi" placeholder="z.B. Bryggen, Floibanen">
+          <button class="btn btn-primary" id="btn-add-poi" onclick="searchAndAddPOI()">Automatisch Recherchieren</button>
         </div>
-        <div id="admin-search-status" style="font-size:0.8rem; color:#555; margin-top:2px;">Sucht automatisch Koordinaten & Infos über Wikipedia.</div>
+        <div id="admin-search-status" style="font-size:0.8rem; color:#555; margin-top:3px;">Ermittelt automatisch Infos, Haltestellen, Öffnungszeiten & Karte.</div>
       </div>
 
-      <!-- Orte Liste im Admin -->
+      <!-- Liste im Admin -->
       <div class="card">
         <h4>Orte in dieser Region</h4>
         <div id="admin-poi-list"></div>
       </div>
     </div>
 
-    <!-- 3. SYNC & SETUP -->
+    <!-- 3. SETUP & SYNC -->
     <div id="view-settings" class="page-view">
       <h3>GitHub Synchronisation</h3>
       <div class="card">
-        <p style="font-size:0.85rem;">Hier können Sie Ihre Daten über Ihr GitHub Repository auf allen Geräten synchron halten.</p>
+        <p style="font-size:0.85rem;">Hinterlegen Sie Ihr GitHub-Repository, um die Reisedaten auf PC und Smartphone synchron zu halten.</p>
         <label style="font-size:0.85rem;">GitHub Username:</label>
-        <input type="text" id="gh-owner" placeholder="z.B. mein-username">
+        <input type="text" id="gh-owner" placeholder="z.B. benutzername">
         <label style="font-size:0.85rem;">Repository:</label>
         <input type="text" id="gh-repo" placeholder="z.B. travel-plan">
         <label style="font-size:0.85rem;">Personal Access Token (PAT):</label>
         <input type="password" id="gh-token" placeholder="ghp_...">
         <button class="btn btn-primary btn-block" onclick="saveSettings()">Einstellungen Speichern</button>
-        <button class="btn btn-secondary btn-block" style="margin-top:6px;" onclick="syncWithGitHub()">Manuell synchronisieren</button>
+        <button class="btn btn-secondary btn-block" style="margin-top:6px;" onclick="syncWithGitHub()">Jetzt synchronisieren</button>
       </div>
     </div>
   </main>
 
-  <!-- Mobile Bottom Navigation -->
+  <!-- Mobile Bottom Nav -->
   <nav class="bottom-nav">
     <button class="active" id="nav-day" onclick="switchNav('day')">
       <span class="icon">📅</span>Tagesplan
@@ -231,41 +219,8 @@
     </button>
   </nav>
 
-  <!-- Modal zum Editieren von Orten -->
-  <div id="edit-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; padding:12px;">
-    <div class="card" style="width:100%; max-width:500px; max-height:90vh; overflow-y:auto; margin:0;">
-      <h4>Ort bearbeiten</h4>
-      <label style="font-size:0.8rem;">Name:</label>
-      <input type="text" id="edit-name">
-      <label style="font-size:0.8rem;">Beschreibung:</label>
-      <textarea id="edit-desc" rows="3"></textarea>
-      <label style="font-size:0.8rem;">Öffnungszeiten:</label>
-      <input type="text" id="edit-hours">
-      <label style="font-size:0.8rem;">Eintrittsgeld:</label>
-      <input type="text" id="edit-fee">
-      <label style="font-size:0.8rem;">ÖV-Verbindung / Haltestelle:</label>
-      <input type="text" id="edit-transit">
-      <label style="font-size:0.8rem;">Offizielle Website:</label>
-      <input type="text" id="edit-web">
-      <div style="display:flex; gap:6px;">
-        <div style="flex:1;">
-          <label style="font-size:0.8rem;">Breitengrad (Lat):</label>
-          <input type="number" step="any" id="edit-lat">
-        </div>
-        <div style="flex:1;">
-          <label style="font-size:0.8rem;">Längengrad (Lon):</label>
-          <input type="number" step="any" id="edit-lon">
-        </div>
-      </div>
-      <div style="display:flex; gap:6px; margin-top:10px;">
-        <button class="btn btn-primary" style="flex:1;" onclick="saveEditedPOI()">Speichern</button>
-        <button class="btn btn-secondary" style="flex:1;" onclick="closeEditModal()">Abbrechen</button>
-      </div>
-    </div>
-  </div>
-
   <script>
-    // --- DATENSTRUKTUR ---
+    // --- DATEN ---
     let appData = {
       regions: [
         { id: "bergen", name: "Bergen, Norwegen", places: [] }
@@ -276,7 +231,6 @@
     let selectedPoi = null;
     let map, markersLayer, routeLayer;
     let pickMode = false;
-    let editingPoiId = null;
 
     // --- INITIALISIERUNG ---
     window.addEventListener("DOMContentLoaded", () => {
@@ -358,7 +312,7 @@
       document.getElementById('loc-status').innerText = "Suche GPS Signal...";
       navigator.geolocation.getCurrentPosition(
         (pos) => setCustomPosition(pos.coords.latitude, pos.coords.longitude, "Aktueller GPS Standort"),
-        (err) => alert("GPS Signal konnte nicht empfangen werden: " + err.message),
+        (err) => alert("GPS Signal nicht empfangen: " + err.message),
         { enableHighAccuracy: true, timeout: 10000 }
       );
     }
@@ -383,10 +337,85 @@
         } else {
           alert("Adresse nicht gefunden.");
         }
-      } catch(e) { alert("Geocoding fehlgeschlagen."); }
+      } catch(e) { }
     }
 
-    // --- RECHERCHE OHNE KI (WIKIPEDIA SEARCH + GEOSEARCH) ---
+    // --- AUTOMATISCHE INTERNET-RECHERCHE (OHNE API-KEY & OHNE RATE-LIMITS) ---
+    async function fetchInternetData(name, regionName) {
+      const result = {
+        lat: 0,
+        lon: 0,
+        description: "",
+        website: "",
+        openingHours: "Nicht erfasst (siehe Google)",
+        fee: "Nicht erfasst (siehe Google)",
+        transit: "ÖV in der Nähe vorhanden"
+      };
+
+      // 1. Wikipedia Text & Geokoordinaten
+      try {
+        const wikiSearch = await fetch(`https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name + ' ' + regionName)}&format=json&origin=*`);
+        const searchData = await wikiSearch.json();
+        let title = name;
+        if(searchData.query?.search?.length > 0) {
+          title = searchData.query.search[0].title;
+        }
+
+        const pageRes = await fetch(`https://de.wikipedia.org/w/api.php?action=query&prop=extracts|coordinates|info&inprop=url&exintro=1&explaintext=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
+        const pageData = await pageRes.json();
+        const pages = pageData.query?.pages || {};
+        const firstKey = Object.keys(pages)[0];
+
+        if(firstKey && firstKey !== "-1") {
+          const item = pages[firstKey];
+          if(item.extract) result.description = item.extract.slice(0, 320) + "...";
+          if(item.fullurl) result.website = item.fullurl;
+          if(item.coordinates?.length > 0) {
+            result.lat = item.coordinates[0].lat;
+            result.lon = item.coordinates[0].lon;
+          }
+        }
+      } catch(e) { }
+
+      // 2. OpenStreetMap Details (Öffnungszeiten, Website, Koordinaten-Fallback)
+      try {
+        const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&extratags=1&limit=1&q=${encodeURIComponent(name + ' ' + regionName)}`);
+        const nomData = await nomRes.json();
+        if(nomData && nomData.length > 0) {
+          const item = nomData[0];
+          if(!result.lat || !result.lon) {
+            result.lat = parseFloat(item.lat);
+            result.lon = parseFloat(item.lon);
+          }
+          if(item.extratags) {
+            if(item.extratags.opening_hours) result.openingHours = item.extratags.opening_hours;
+            if(item.extratags.fee) result.fee = item.extratags.fee;
+            if(!result.website && item.extratags.website) result.website = item.extratags.website;
+          }
+        }
+      } catch(e) { }
+
+      // 3. Automatische ÖV-Haltestellen im Umkreis von 400m über OpenStreetMap Overpass
+      if(result.lat && result.lon) {
+        try {
+          const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:400,${result.lat},${result.lon})[highway=bus_stop];out 2;`;
+          const opRes = await fetch(overpassUrl);
+          const opData = await opRes.json();
+          if(opData.elements && opData.elements.length > 0) {
+            const stopName = opData.elements[0].tags?.name || "ÖV-Haltestelle";
+            result.transit = `Haltestelle "${stopName}" (< 400m)`;
+          }
+        } catch(e) { }
+      }
+
+      if(!result.description) {
+        result.description = "Keine Kurzbeschreibung gefunden. Nutzen Sie die Google-Links für Details.";
+      }
+
+      return result;
+    }
+
+    // --- NEUEN ORT ANLEGEN MIT AUTO-RECHERCHE ---
     async function searchAndAddPOI() {
       const regId = document.getElementById('admin-region-select').value;
       const name = document.getElementById('admin-new-poi').value.trim();
@@ -397,56 +426,21 @@
       const btn = document.getElementById('btn-add-poi');
       btn.disabled = true;
       btn.innerText = "Recherche...";
-      statusEl.innerText = "Suche in Wikipedia & Webquellen...";
-
-      let lat = 0, lon = 0, desc = "", website = "";
+      statusEl.innerText = "Recherchiere automatisch Daten im Web...";
 
       try {
-        // 1. Wikipedia Volltext- & Titelsuche
-        const wikiSearch = await fetch(`https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name + ' ' + region.name)}&format=json&origin=*`);
-        const searchData = await wikiSearch.json();
-        
-        let pageTitle = name;
-        if(searchData.query && searchData.query.search && searchData.query.search.length > 0) {
-          pageTitle = searchData.query.search[0].title;
-        }
-
-        // 2. Artikel-Details, Koordinaten & Auszug holen
-        const pageRes = await fetch(`https://de.wikipedia.org/w/api.php?action=query&prop=extracts|coordinates|info&inprop=url&exintro=1&explaintext=1&titles=${encodeURIComponent(pageTitle)}&format=json&origin=*`);
-        const pageData = await pageRes.json();
-        const pages = pageData.query ? pageData.query.pages : {};
-        const firstKey = Object.keys(pages)[0];
-
-        if(firstKey && firstKey !== "-1") {
-          const item = pages[firstKey];
-          desc = item.extract ? item.extract.slice(0, 300) + "..." : "";
-          website = item.fullurl || "";
-          if(item.coordinates && item.coordinates.length > 0) {
-            lat = item.coordinates[0].lat;
-            lon = item.coordinates[0].lon;
-          }
-        }
-
-        // 3. Fallback: Koordinaten über Nominatim, falls Wikipedia keine Geodaten hatte
-        if(!lat || !lon) {
-          const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(name + ' ' + region.name)}`);
-          const nomData = await nomRes.json();
-          if(nomData && nomData.length > 0) {
-            lat = parseFloat(nomData[0].lat);
-            lon = parseFloat(nomData[0].lon);
-          }
-        }
+        const info = await fetchInternetData(name, region.name);
 
         const newPOI = {
           id: "poi_" + Date.now(),
           name: name,
-          lat: lat,
-          lon: lon,
-          description: desc || "Keine Zusammenfassung gefunden. Nutzen Sie den Google-Suche Button für Details.",
-          website: website || "",
-          openingHours: "Siehe Google-Info",
-          fee: "Siehe Google-Info",
-          transit: "Mit lokalen Bussen/Bahnen erreichbar",
+          lat: info.lat,
+          lon: info.lon,
+          description: info.description,
+          website: info.website,
+          openingHours: info.openingHours,
+          fee: info.fee,
+          transit: info.transit,
           visited: false
         };
 
@@ -454,17 +448,48 @@
         document.getElementById('admin-new-poi').value = "";
         renderAdminList();
         persistData();
-        statusEl.innerText = lat ? `✅ Erfolgreich gefunden: [${lat.toFixed(4)}, ${lon.toFixed(4)}]` : `⚠️ Hinzugefügt (Keine Koordinaten gefunden, bitte manuell editieren).`;
-        alert(`Ort "${name}" erfolgreich hinzugefügt!`);
+        statusEl.innerText = info.lat ? `✅ Hinzugefügt mit Koordinaten: [${info.lat.toFixed(4)}, ${info.lon.toFixed(4)}]` : `⚠️ Hinzugefügt (Keine Geodaten gefunden).`;
+        alert(`Ort "${name}" erfolgreich automatisch angelegt!`);
       } catch(e) {
-        alert("Fehler beim Abrufen: " + e.message);
+        alert("Fehler beim Hinzufügen: " + e.message);
       } finally {
         btn.disabled = false;
-        btn.innerText = "Recherche & Hinzufügen";
+        btn.innerText = "Automatisch Recherchieren";
       }
     }
 
-    // --- ROUTE BERECHNEN ---
+    // --- AUTOMATISCHES RE-UPDATE EINES ORTES ---
+    async function autoUpdatePOI(poiId) {
+      let targetPOI = null, targetRegion = null;
+      for(let r of appData.regions) {
+        let p = r.places.find(item => item.id === poiId);
+        if(p) { targetPOI = p; targetRegion = r; break; }
+      }
+      if(!targetPOI || !targetRegion) return;
+
+      const btn = document.getElementById('det-update-btn');
+      if(btn) btn.innerText = "Aktualisiere...";
+
+      const updated = await fetchInternetData(targetPOI.name, targetRegion.name);
+      
+      targetPOI.description = updated.description;
+      if(updated.website) targetPOI.website = updated.website;
+      if(updated.openingHours) targetPOI.openingHours = updated.openingHours;
+      if(updated.fee) targetPOI.fee = updated.fee;
+      if(updated.transit) targetPOI.transit = updated.transit;
+      if(updated.lat) targetPOI.lat = updated.lat;
+      if(updated.lon) targetPOI.lon = updated.lon;
+
+      persistData();
+      selectPoi(targetPOI);
+      renderAdminList();
+      onRegionChange();
+
+      if(btn) btn.innerText = "🔄 Auto-Update";
+      alert(`Daten zu "${targetPOI.name}" wurden automatisch aktualisiert!`);
+    }
+
+    // --- ROUTENBERECHNUNG ---
     async function calcRoute(destLat, destLon) {
       if(!currentPosition) return;
       const rBox = document.getElementById('route-box');
@@ -490,11 +515,11 @@
           map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
         }
       } catch(e) {
-        document.getElementById('route-calc-text').innerText = "Fußwegberechnung derzeit nicht erreichbar.";
+        document.getElementById('route-calc-text').innerText = "Fußwegberechnung nicht erreichbar.";
       }
     }
 
-    // --- TAGESPLAN LISTE & DETAILS ---
+    // --- TAGESPLANUNG RENDERN ---
     function onRegionChange() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -522,7 +547,7 @@
 
       const region = appData.regions.find(r => r.id === regId);
       if(!region || !region.places.length) {
-        listEl.innerHTML = "<small style='color:#666;'>Keine Orte eingetragen.</small>";
+        listEl.innerHTML = "<small style='color:#666;'>Keine Orte in dieser Region.</small>";
         return;
       }
 
@@ -537,7 +562,7 @@
             <input type="checkbox" ${p.visited ? 'checked' : ''} style="width:auto; margin:0;" onclick="event.stopPropagation(); toggleVisited('${p.id}')">
           </div>
           <div style="font-size:0.75rem; color:${p.lat ? '#666' : 'red'}; margin-top:2px;">
-            ${p.lat ? '📍 Koord vorhanden' : '⚠️ Keine Koordinaten'}
+            ${p.lat ? '📍 Auf Karte vorhanden' : '⚠️ Keine Koordinaten'}
           </div>
         `;
         el.onclick = () => selectPoi(p);
@@ -555,6 +580,8 @@
       document.getElementById('detail-card').style.display = "block";
       document.getElementById('det-name').innerText = poi.name;
       document.getElementById('det-desc').innerText = poi.description;
+
+      document.getElementById('det-update-btn').onclick = () => autoUpdatePOI(poi.id);
 
       // Google Links dynamisch generieren
       document.getElementById('link-google').href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
@@ -602,52 +629,7 @@
       persistData();
     }
 
-    // --- MODAL / EDITIEREN ---
-    function openEditModal(poi) {
-      if(!poi) return;
-      editingPoiId = poi.id;
-      document.getElementById('edit-name').value = poi.name || "";
-      document.getElementById('edit-desc').value = poi.description || "";
-      document.getElementById('edit-hours').value = poi.openingHours || "";
-      document.getElementById('edit-fee').value = poi.fee || "";
-      document.getElementById('edit-transit').value = poi.transit || "";
-      document.getElementById('edit-web').value = poi.website || "";
-      document.getElementById('edit-lat').value = poi.lat || "";
-      document.getElementById('edit-lon').value = poi.lon || "";
-
-      document.getElementById('edit-modal').style.display = "flex";
-    }
-
-    function closeEditModal() {
-      document.getElementById('edit-modal').style.display = "none";
-      editingPoiId = null;
-    }
-
-    function saveEditedPOI() {
-      if(!editingPoiId) return;
-      for(let r of appData.regions) {
-        let p = r.places.find(item => item.id === editingPoiId);
-        if(p) {
-          p.name = document.getElementById('edit-name').value.trim();
-          p.description = document.getElementById('edit-desc').value.trim();
-          p.openingHours = document.getElementById('edit-hours').value.trim();
-          p.fee = document.getElementById('edit-fee').value.trim();
-          p.transit = document.getElementById('edit-transit').value.trim();
-          p.website = document.getElementById('edit-web').value.trim();
-          p.lat = parseFloat(document.getElementById('edit-lat').value) || 0;
-          p.lon = parseFloat(document.getElementById('edit-lon').value) || 0;
-          
-          if(selectedPoi && selectedPoi.id === p.id) selectPoi(p);
-          break;
-        }
-      }
-      closeEditModal();
-      persistData();
-      renderAdminList();
-      onRegionChange();
-    }
-
-    // --- ADMIN BEREICH ---
+    // --- ADMIN RENDERN ---
     function updateRegionDropdowns() {
       const daySel = document.getElementById('day-region-select');
       const admSel = document.getElementById('admin-region-select');
@@ -679,23 +661,16 @@
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
               <strong style="${p.visited ? 'text-decoration: line-through;' : ''}">${p.name}</strong>
-              <div style="font-size:0.75rem; color:${p.lat ? '#666' : 'red'};">${p.lat ? `Koord: [${p.lat.toFixed(3)},${p.lon.toFixed(3)}]` : '⚠️ Keine Koordinaten'}</div>
+              <div style="font-size:0.75rem; color:${p.lat ? '#666' : 'red'};">${p.lat ? `[${p.lat.toFixed(3)},${p.lon.toFixed(3)}]` : '⚠️ Keine Koord'}</div>
             </div>
             <div style="display:flex; gap:4px;">
-              <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;" onclick="openEditModalById('${p.id}')">✏️</button>
-              <button class="btn btn-danger" style="padding:4px 8px; font-size:0.8rem;" onclick="deletePOI('${region.id}', ${idx})">🗑️</button>
+              <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="autoUpdatePOI('${p.id}')">🔄 Update</button>
+              <button class="btn btn-danger" style="padding:4px 8px; font-size:0.75rem;" onclick="deletePOI('${region.id}', ${idx})">🗑️</button>
             </div>
           </div>
         `;
         listEl.appendChild(item);
       });
-    }
-
-    function openEditModalById(id) {
-      for(let r of appData.regions) {
-        let p = r.places.find(item => item.id === id);
-        if(p) return openEditModal(p);
-      }
     }
 
     function deletePOI(regId, idx) {
@@ -718,7 +693,7 @@
       persistData();
     }
 
-    // --- STORAGE & GITHUB SYNC ---
+    // --- GITHUB SYNC & SPEICHERUNG ---
     function loadSettings() {
       const savedGh = localStorage.getItem('gh_config');
       if(savedGh) {
