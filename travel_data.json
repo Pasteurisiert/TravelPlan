@@ -146,12 +146,12 @@
           "name": "Hillerød Frederiksborg",
           "lat": 55.88,
           "lon": 12.31,
-          "description": "Die Region Hovedstaden ([ˈhoːð̩ˌsd̥æðˀn̩], deutsch: Region Die Hauptstadt) ist eine der fünf Regionen Dänemarks, welche die höchste Verwaltungseinteilung Dänemarks darstellen. Sie umfasst den Nordosten Seelands mit der Hauptstadt Kopenhagen und weiteren Gemeinden sowie die Insel Bornholm. Verwaltungssitz ist Hillerød. ...",
-          "website": "https://de.wikipedia.org/wiki/Region_Hovedstaden",
+          "description": "Die Region Hovedstaden ([ˈhoːð̩ˌsd̥æðˀn̩], deutsch: Region Die Hauptstadt) ist eine der fünf Regionen Dänemarks, welche die höchste Verwaltungseinteilung Dänemarks darstellen. Sie umfasst den Nordosten Seelands mit der Hauptstadt Kopenhagen und weiteren Gemeinden sowie die Insel Bornholm. Verwaltungssitz ist Hillerød. In der Region lebt fast ein Dr...",
+          "website": "https://www.regionh.dk/",
           "openingHours": "Nicht erfasst (siehe Google)",
           "fee": "Nicht erfasst (siehe Google)",
           "visited": false,
-          "transit": "ÖV in der Nähe vorhanden"
+          "transit": "Mit ÖV erreichbar"
         },
         {
           "id": "poi_1790423575952",
