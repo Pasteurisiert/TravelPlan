@@ -81,6 +81,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790430868118",
+          "name": "Standseilbahn Fløibanen",
+          "city": "Bergen, Norwegen",
+          "lat": 0,
+          "lon": 0,
+          "description": "Die Fløibane ist eine Standseilbahn in Bergen (Norwegen), die auf den 320 Meter hohen Fløyen führt. Auf einer Streckenlänge von 848 Metern überwindet sie seit über 107 Jahren eine Höhendifferenz von 302 Metern. Die einzige Standseilbahn Norwegens befördert jährlich mehr als eine Million Reisende, 2017 waren es 1 834 000 Fahrgäste. Die Fahrtzeit bet...",
+          "website": "https://de.wikipedia.org/wiki/Fl%C3%B8ibanen",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     },
