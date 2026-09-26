@@ -771,6 +771,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790436255335",
+          "name": "Raphael Hotel Wälderhaus",
+          "city": "Hamburg",
+          "lat": 53.496068,
+          "lon": 10.0032316,
+          "description": "RAPHAEL HOTEL WÄLDERHAUS, Kurt-Emmerich-Platz, Kirchdorf, Wilhelmsburg, Hamburg-Mitte, Hamburg, 21109, Germany",
+          "website": "https://www.raphaelhotelwaelderhaus.de/",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Haltestelle \"Inselpark\" (< 350m)",
+          "visited": false
         }
       ]
     }
