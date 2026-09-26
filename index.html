@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TravelPlan Mobile - Auto-Enrich</title>
+  <title>TravelPlan Mobile Pro</title>
   
-  <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -20,7 +19,7 @@
       --success: #28a745;
     }
 
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { margin: 0; padding: 0; background: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
     header { background: var(--primary); color: white; padding: 12px 16px; font-weight: bold; font-size: 1.05rem; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -30,10 +29,9 @@
     .page-view { position: absolute; top:0; left:0; width:100%; height:100%; display: none; flex-direction: column; overflow-y: auto; background: var(--bg); padding: 12px; }
     .page-view.active { display: flex; }
 
-    /* Tagesansicht & Mobile Split */
     #view-day { padding: 0; }
     .split-container { display: flex; width: 100%; height: 100%; position: relative; }
-    .day-sidebar { width: 430px; height: 100%; overflow-y: auto; padding: 12px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+    .day-sidebar { width: 440px; height: 100%; overflow-y: auto; padding: 12px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
     .map-wrapper { flex: 1; height: 100%; position: relative; }
     #map { width: 100%; height: 100%; }
 
@@ -61,12 +59,14 @@
     .poi-card.visited { opacity: 0.55; text-decoration: line-through; background: #e9ecef; }
     .poi-card-header { display: flex; justify-content: space-between; align-items: center; }
 
-    .badge { display: inline-block; background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; margin: 2px 4px 4px 0; }
+    .badge { display: inline-block; background: #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; margin: 2px 4px 4px 0; cursor: pointer; }
     .badge.ok { background: #d4edda; color: #155724; }
     .badge.warn { background: #fff3cd; color: #856404; }
 
     .google-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
     .google-actions a { display: block; text-align: center; background: #f1f3f4; border: 1px solid #dadce0; border-radius: 6px; padding: 7px; font-size: 0.78rem; color: #1a73e8; text-decoration: none; font-weight: 500; }
+
+    .editable-field { background: #fafafa; border: 1px dashed #ccc; padding: 6px; border-radius: 4px; margin-top: 4px; font-size: 0.85rem; }
 
     @media (max-width: 768px) {
       .split-container { flex-direction: column; }
@@ -80,7 +80,7 @@
 <body>
 
   <header>
-    <div>🌍 TravelPlan Mobile</div>
+    <div>🌍 TravelPlan Mobile Pro</div>
     <div id="sync-pill" onclick="syncWithGitHub()">GitHub: Offline</div>
   </header>
 
@@ -95,14 +95,14 @@
       </div>
 
       <div class="split-container">
-        <!-- Sidebar / Liste -->
+        <!-- Sidebar -->
         <div class="day-sidebar" id="day-sidebar">
           <div>
             <label style="font-size:0.85rem; font-weight:bold;">Region wählen:</label>
             <select id="day-region-select" onchange="onRegionChange()"></select>
           </div>
 
-          <!-- Mein Standort -->
+          <!-- Standort -->
           <div class="card">
             <div style="font-weight:bold; font-size:0.9rem; margin-bottom:6px;">📍 Mein Standort</div>
             <div style="display:flex; gap:6px;">
@@ -113,7 +113,7 @@
             <div id="loc-status" style="font-size:0.75rem; color:#666;">Standort nicht gesetzt</div>
           </div>
 
-          <!-- POI List Filter -->
+          <!-- Filter -->
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div style="font-weight:bold;">Orte am Tag</div>
             <label style="font-size:0.85rem; cursor:pointer;">
@@ -122,14 +122,21 @@
           </div>
           <div id="day-poi-list"></div>
 
-          <!-- POI Detailansicht -->
+          <!-- Detailkarte -->
           <div id="detail-card" class="card" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-              <h3 id="det-name" style="font-size:1.1rem;">-</h3>
-              <button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 8px;" id="det-update-btn">🔄 Auto-Update</button>
+              <h3 id="det-name" style="font-size:1.1rem; margin:0;">-</h3>
+              <div style="display:flex; gap:4px;">
+                <button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 8px;" id="det-update-btn">🔄 Auto-Update</button>
+                <button class="btn btn-primary" style="font-size:0.75rem; padding:4px 8px;" id="det-save-btn" onclick="saveDirectEdits()">💾 Sichern</button>
+              </div>
             </div>
-            <p id="det-desc" style="font-size:0.85rem; color:#444; line-height:1.4; margin: 4px 0 8px 0;">-</p>
-            
+
+            <!-- Direkt editierbare Kurzbeschreibung -->
+            <div style="font-size:0.8rem; color:#666; margin-top:6px;">Beschreibung (direkt editierbar):</div>
+            <textarea id="det-desc-input" rows="3" class="editable-field" style="margin:0;"></textarea>
+
+            <div style="font-size:0.8rem; color:#666; margin-top:6px;">Details (Klicken & ändern):</div>
             <div id="det-badges"></div>
 
             <!-- Schnellsuche / Google Links -->
@@ -140,7 +147,7 @@
               <a id="link-web" target="_blank">🌐 Offizielle Website</a>
             </div>
 
-            <!-- Wegführung OSRM -->
+            <!-- Route -->
             <div id="route-box" style="margin-top:10px; background:#e8f5e9; border:1px solid #c8e6c9; border-radius:6px; padding:8px; font-size:0.85rem; display:none;">
               <strong>Weg vom Standort:</strong>
               <div id="route-calc-text">Berechnung...</div>
@@ -159,7 +166,6 @@
     <div id="view-admin" class="page-view">
       <h3>Admin & Orte Verwalten</h3>
       
-      <!-- Region anlegen -->
       <div class="card">
         <h4>Neue Region anlegen</h4>
         <div style="display:flex; gap:6px;">
@@ -168,21 +174,21 @@
         </div>
       </div>
 
-      <!-- Ort anlegen -->
       <div class="card">
-        <h4>Neuen Ort hinzufügen</h4>
+        <h4>Neuen Ort anlegen (Multi-Source-Suche)</h4>
         <label style="font-size:0.85rem;">Region:</label>
         <select id="admin-region-select"></select>
 
         <label style="font-size:0.85rem;">Ortsname / Attraktion:</label>
         <div style="display:flex; gap:6px;">
           <input type="text" id="admin-new-poi" placeholder="z.B. Bryggen, Floibanen">
-          <button class="btn btn-primary" id="btn-add-poi" onclick="searchAndAddPOI()">Automatisch Recherchieren</button>
+          <button class="btn btn-primary" id="btn-add-poi" onclick="searchAndAddPOI()">Recherche & Hinzufügen</button>
         </div>
-        <div id="admin-search-status" style="font-size:0.8rem; color:#555; margin-top:3px;">Ermittelt automatisch Infos, Haltestellen, Öffnungszeiten & Karte.</div>
+        <div id="admin-search-status" style="font-size:0.8rem; color:#555; margin-top:3px;">
+          Kombiniert Wikivoyage, Wikipedia, Wikidata & OpenStreetMap.
+        </div>
       </div>
 
-      <!-- Liste im Admin -->
       <div class="card">
         <h4>Orte in dieser Region</h4>
         <div id="admin-poi-list"></div>
@@ -193,10 +199,10 @@
     <div id="view-settings" class="page-view">
       <h3>GitHub Synchronisation</h3>
       <div class="card">
-        <p style="font-size:0.85rem;">Hinterlegen Sie Ihr GitHub-Repository, um die Reisedaten auf PC und Smartphone synchron zu halten.</p>
+        <p style="font-size:0.85rem;">Geben Sie Ihre GitHub-Daten ein, um die Reiseplanung geräteübergreifend abzuspeichern.</p>
         <label style="font-size:0.85rem;">GitHub Username:</label>
         <input type="text" id="gh-owner" placeholder="z.B. benutzername">
-        <label style="font-size:0.85rem;">Repository:</label>
+        <label style="font-size:0.85rem;">Repository Name:</label>
         <input type="text" id="gh-repo" placeholder="z.B. travel-plan">
         <label style="font-size:0.85rem;">Personal Access Token (PAT):</label>
         <input type="password" id="gh-token" placeholder="ghp_...">
@@ -206,7 +212,6 @@
     </div>
   </main>
 
-  <!-- Mobile Bottom Nav -->
   <nav class="bottom-nav">
     <button class="active" id="nav-day" onclick="switchNav('day')">
       <span class="icon">📅</span>Tagesplan
@@ -220,7 +225,7 @@
   </nav>
 
   <script>
-    // --- DATEN ---
+    // --- DATENMODELL ---
     let appData = {
       regions: [
         { id: "bergen", name: "Bergen, Norwegen", places: [] }
@@ -232,7 +237,6 @@
     let map, markersLayer, routeLayer;
     let pickMode = false;
 
-    // --- INITIALISIERUNG ---
     window.addEventListener("DOMContentLoaded", () => {
       initMap();
       loadSettings();
@@ -311,7 +315,7 @@
       if(!navigator.geolocation) return alert("GPS nicht verfügbar");
       document.getElementById('loc-status').innerText = "Suche GPS Signal...";
       navigator.geolocation.getCurrentPosition(
-        (pos) => setCustomPosition(pos.coords.latitude, pos.coords.longitude, "Aktueller GPS Standort"),
+        (pos) => setCustomPosition(pos.coords.latitude, pos.coords.longitude, "GPS Position"),
         (err) => alert("GPS Signal nicht empfangen: " + err.message),
         { enableHighAccuracy: true, timeout: 10000 }
       );
@@ -322,7 +326,7 @@
       const btn = document.getElementById('btn-pick');
       btn.style.background = pickMode ? '#ffc107' : '#e9ecef';
       if(pickMode) {
-        alert("Tippen Sie jetzt auf die gewünschte Stelle der Karte.");
+        alert("Tippen Sie auf die Karte.");
         if(window.innerWidth <= 768) setMobileSubTab('map');
       }
     }
@@ -334,102 +338,172 @@
         const data = await res.json();
         if(data && data.length > 0) {
           setCustomPosition(parseFloat(data[0].lat), parseFloat(data[0].lon), query);
-        } else {
-          alert("Adresse nicht gefunden.");
         }
       } catch(e) { }
     }
 
-    // --- AUTOMATISCHE INTERNET-RECHERCHE (OHNE API-KEY & OHNE RATE-LIMITS) ---
-    async function fetchInternetData(name, regionName) {
-      const result = {
+    // --- TIEFGEHENDE MULTI-SOURCE RECHERCHE ---
+    async function deepSearchPOI(poiName, regionName) {
+      const info = {
         lat: 0,
         lon: 0,
         description: "",
         website: "",
-        openingHours: "Nicht erfasst (siehe Google)",
-        fee: "Nicht erfasst (siehe Google)",
-        transit: "ÖV in der Nähe vorhanden"
+        openingHours: "",
+        fee: "",
+        transit: ""
       };
 
-      // 1. Wikipedia Text & Geokoordinaten
+      const cleanRegion = regionName.split(',')[0].trim();
+
+      // 1. SCHRITT: WIKIVOYAGE (Spezialisiert auf Öffnungszeiten, Preise und ÖV)
       try {
-        const wikiSearch = await fetch(`https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name + ' ' + regionName)}&format=json&origin=*`);
-        const searchData = await wikiSearch.json();
-        let title = name;
-        if(searchData.query?.search?.length > 0) {
-          title = searchData.query.search[0].title;
-        }
+        const wvUrl = `https://de.wikivoyage.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(poiName + ' ' + cleanRegion)}&format=json&origin=*`;
+        const wvRes = await fetch(wvUrl);
+        const wvData = await wvRes.json();
+        
+        if (wvData.query?.search?.length > 0) {
+          const pageTitle = wvData.query.search[0].title;
+          // Roh-Wikitext des Reiseführers abfragen
+          const parseUrl = `https://de.wikivoyage.org/w/api.php?action=parse&page=${encodeURIComponent(pageTitle)}&prop=wikitext&format=json&origin=*`;
+          const parseRes = await fetch(parseUrl);
+          const parseData = await parseRes.json();
+          const wikitext = parseData.parse?.wikitext?.['*'] || '';
 
-        const pageRes = await fetch(`https://de.wikipedia.org/w/api.php?action=query&prop=extracts|coordinates|info&inprop=url&exintro=1&explaintext=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
-        const pageData = await pageRes.json();
-        const pages = pageData.query?.pages || {};
-        const firstKey = Object.keys(pages)[0];
+          // Nach Listing-Tags wie {{vCard | name=... | hours=... | price=...}} suchen
+          const lines = wikitext.split('\n');
+          for (let line of lines) {
+            if (line.toLowerCase().includes(poiName.toLowerCase())) {
+              const hoursMatch = line.match(/\|\s*hours\s*=\s*([^\|\}]+)/i);
+              if (hoursMatch) info.openingHours = hoursMatch[1].trim();
 
-        if(firstKey && firstKey !== "-1") {
-          const item = pages[firstKey];
-          if(item.extract) result.description = item.extract.slice(0, 320) + "...";
-          if(item.fullurl) result.website = item.fullurl;
-          if(item.coordinates?.length > 0) {
-            result.lat = item.coordinates[0].lat;
-            result.lon = item.coordinates[0].lon;
+              const priceMatch = line.match(/\|\s*price\s*=\s*([^\|\}]+)/i);
+              if (priceMatch) info.fee = priceMatch[1].trim();
+
+              const urlMatch = line.match(/\|\s*url\s*=\s*([^\|\}]+)/i);
+              if (urlMatch) info.website = urlMatch[1].trim();
+
+              const dirMatch = line.match(/\|\s*directions\s*=\s*([^\|\}]+)/i);
+              if (dirMatch) info.transit = dirMatch[1].trim();
+
+              const latMatch = line.match(/\|\s*lat\s*=\s*([0-9\.\-]+)/i);
+              const lonMatch = line.match(/\|\s*long?\s*=\s*([0-9\.\-]+)/i);
+              if (latMatch && lonMatch) {
+                info.lat = parseFloat(latMatch[1]);
+                info.lon = parseFloat(lonMatch[1]);
+              }
+              break;
+            }
           }
         }
-      } catch(e) { }
+      } catch (e) { }
 
-      // 2. OpenStreetMap Details (Öffnungszeiten, Website, Koordinaten-Fallback)
+      // 2. SCHRITT: WIKIPEDIA / WIKIDATA (Für Beschreibung, Geodaten & offizielle Homepage)
       try {
-        const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&extratags=1&limit=1&q=${encodeURIComponent(name + ' ' + regionName)}`);
-        const nomData = await nomRes.json();
-        if(nomData && nomData.length > 0) {
-          const item = nomData[0];
-          if(!result.lat || !result.lon) {
-            result.lat = parseFloat(item.lat);
-            result.lon = parseFloat(item.lon);
-          }
-          if(item.extratags) {
-            if(item.extratags.opening_hours) result.openingHours = item.extratags.opening_hours;
-            if(item.extratags.fee) result.fee = item.extratags.fee;
-            if(!result.website && item.extratags.website) result.website = item.extratags.website;
+        const wpSearchUrl = `https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(poiName + ' ' + cleanRegion)}&format=json&origin=*`;
+        const wpRes = await fetch(wpSearchUrl);
+        const wpData = await wpRes.json();
+
+        if (wpData.query?.search?.length > 0) {
+          const wpTitle = wpData.query.search[0].title;
+          const detailUrl = `https://de.wikipedia.org/w/api.php?action=query&prop=extracts|coordinates|pageprops&inprop=url&exintro=1&explaintext=1&titles=${encodeURIComponent(wpTitle)}&format=json&origin=*`;
+          const dRes = await fetch(detailUrl);
+          const dData = await dRes.json();
+          const pages = dData.query?.pages || {};
+          const firstKey = Object.keys(pages)[0];
+
+          if (firstKey && firstKey !== "-1") {
+            const p = pages[firstKey];
+            if (!info.description && p.extract) {
+              info.description = p.extract.slice(0, 350) + "...";
+            }
+            if (!info.lat && p.coordinates?.length > 0) {
+              info.lat = p.coordinates[0].lat;
+              info.lon = p.coordinates[0].lon;
+            }
+
+            // Aus Wikidata die offizielle Homepage Property (P856) ziehen
+            const wikibaseItem = p.pageprops?.wikibase_item;
+            if (wikibaseItem && !info.website) {
+              try {
+                const wdRes = await fetch(`https://www.wikidata.org/wiki/Special:EntityData/${wikibaseItem}.json`);
+                const wdData = await wdRes.json();
+                const claims = wdData.entities?.[wikibaseItem]?.claims;
+                if (claims?.P856?.length > 0) {
+                  info.website = claims.P856[0].mainsnak?.datavalue?.value;
+                }
+              } catch(e) {}
+            }
           }
         }
-      } catch(e) { }
+      } catch (e) { }
 
-      // 3. Automatische ÖV-Haltestellen im Umkreis von 400m über OpenStreetMap Overpass
-      if(result.lat && result.lon) {
+      // 3. SCHRITT: OPENSTREETMAP (Fallback für Öffnungszeiten, Gebühren & Geodaten)
+      if (!info.lat || !info.lon || !info.openingHours) {
+        // Erst gezielt nur mit POI Name + Stadt suchen
+        const queries = [
+          `${poiName} ${cleanRegion}`,
+          poiName
+        ];
+
+        for (let q of queries) {
+          try {
+            const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&extratags=1&limit=1&q=${encodeURIComponent(q)}`);
+            const nomData = await nomRes.json();
+            if (nomData && nomData.length > 0) {
+              const item = nomData[0];
+              if (!info.lat) {
+                info.lat = parseFloat(item.lat);
+                info.lon = parseFloat(item.lon);
+              }
+              if (item.extratags) {
+                if (!info.openingHours && item.extratags.opening_hours) info.openingHours = item.extratags.opening_hours;
+                if (!info.fee && item.extratags.fee) info.fee = item.extratags.fee;
+                if (!info.website && item.extratags.website) info.website = item.extratags.website;
+              }
+              break;
+            }
+          } catch(e) {}
+        }
+      }
+
+      // 4. SCHRITT: ÖV-HALTESTELLE IM UMKREIS (Overpass)
+      if (info.lat && info.lon && !info.transit) {
         try {
-          const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:400,${result.lat},${result.lon})[highway=bus_stop];out 2;`;
+          const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:450,${info.lat},${info.lon})[highway=bus_stop];out 1;`;
           const opRes = await fetch(overpassUrl);
           const opData = await opRes.json();
-          if(opData.elements && opData.elements.length > 0) {
-            const stopName = opData.elements[0].tags?.name || "ÖV-Haltestelle";
-            result.transit = `Haltestelle "${stopName}" (< 400m)`;
+          if (opData.elements?.length > 0) {
+            const stopName = opData.elements[0].tags?.name || "ÖV-Station";
+            info.transit = `Haltestelle "${stopName}" (< 450m)`;
           }
-        } catch(e) { }
+        } catch(e) {}
       }
 
-      if(!result.description) {
-        result.description = "Keine Kurzbeschreibung gefunden. Nutzen Sie die Google-Links für Details.";
-      }
+      // Defaults falls noch leer
+      if (!info.description) info.description = "Keine Kurzbeschreibung gefunden. Nutzen Sie die Google-Links.";
+      if (!info.openingHours) info.openingHours = "Siehe Google-Info";
+      if (!info.fee) info.fee = "Siehe Google-Info";
+      if (!info.transit) info.transit = "Mit ÖV erreichbar";
 
-      return result;
+      return info;
     }
 
-    // --- NEUEN ORT ANLEGEN MIT AUTO-RECHERCHE ---
+    // --- NEUEN ORT ANLEGEN ---
     async function searchAndAddPOI() {
       const regId = document.getElementById('admin-region-select').value;
       const name = document.getElementById('admin-new-poi').value.trim();
       const statusEl = document.getElementById('admin-search-status');
-      if(!name || !regId) return alert("Region und Name erforderlich!");
+      if (!name || !regId) return alert("Region und Name erforderlich!");
 
       const region = appData.regions.find(r => r.id === regId);
       const btn = document.getElementById('btn-add-poi');
       btn.disabled = true;
-      btn.innerText = "Recherche...";
-      statusEl.innerText = "Recherchiere automatisch Daten im Web...";
+      btn.innerText = "Recherchiere...";
+      statusEl.innerText = "Durchsuche Wikivoyage, Wikipedia & OpenStreetMap...";
 
       try {
-        const info = await fetchInternetData(name, region.name);
+        const info = await deepSearchPOI(name, region.name);
 
         const newPOI = {
           id: "poi_" + Date.now(),
@@ -448,45 +522,64 @@
         document.getElementById('admin-new-poi').value = "";
         renderAdminList();
         persistData();
-        statusEl.innerText = info.lat ? `✅ Hinzugefügt mit Koordinaten: [${info.lat.toFixed(4)}, ${info.lon.toFixed(4)}]` : `⚠️ Hinzugefügt (Keine Geodaten gefunden).`;
-        alert(`Ort "${name}" erfolgreich automatisch angelegt!`);
+        statusEl.innerText = info.lat ? `✅ Gefunden & eingetragen: [${info.lat.toFixed(4)}, ${info.lon.toFixed(4)}]` : `⚠️ Angelegt (Keine Geodaten gefunden).`;
+        alert(`Ort "${name}" erfolgreich hinzugefügt!`);
       } catch(e) {
-        alert("Fehler beim Hinzufügen: " + e.message);
+        alert("Fehler beim Abrufen: " + e.message);
       } finally {
         btn.disabled = false;
-        btn.innerText = "Automatisch Recherchieren";
+        btn.innerText = "Recherche & Hinzufügen";
       }
     }
 
-    // --- AUTOMATISCHES RE-UPDATE EINES ORTES ---
+    // --- AUTO-UPDATE EINES BESTEHENDEN ORTES ---
     async function autoUpdatePOI(poiId) {
       let targetPOI = null, targetRegion = null;
-      for(let r of appData.regions) {
+      for (let r of appData.regions) {
         let p = r.places.find(item => item.id === poiId);
-        if(p) { targetPOI = p; targetRegion = r; break; }
+        if (p) { targetPOI = p; targetRegion = r; break; }
       }
-      if(!targetPOI || !targetRegion) return;
+      if (!targetPOI || !targetRegion) return;
 
       const btn = document.getElementById('det-update-btn');
-      if(btn) btn.innerText = "Aktualisiere...";
+      if (btn) btn.innerText = "Lade...";
 
-      const updated = await fetchInternetData(targetPOI.name, targetRegion.name);
-      
+      const updated = await deepSearchPOI(targetPOI.name, targetRegion.name);
+
       targetPOI.description = updated.description;
-      if(updated.website) targetPOI.website = updated.website;
-      if(updated.openingHours) targetPOI.openingHours = updated.openingHours;
-      if(updated.fee) targetPOI.fee = updated.fee;
-      if(updated.transit) targetPOI.transit = updated.transit;
-      if(updated.lat) targetPOI.lat = updated.lat;
-      if(updated.lon) targetPOI.lon = updated.lon;
+      if (updated.website) targetPOI.website = updated.website;
+      if (updated.openingHours && updated.openingHours !== "Siehe Google-Info") targetPOI.openingHours = updated.openingHours;
+      if (updated.fee && updated.fee !== "Siehe Google-Info") targetPOI.fee = updated.fee;
+      if (updated.transit) targetPOI.transit = updated.transit;
+      if (updated.lat) targetPOI.lat = updated.lat;
+      if (updated.lon) targetPOI.lon = updated.lon;
 
       persistData();
       selectPoi(targetPOI);
       renderAdminList();
       onRegionChange();
 
-      if(btn) btn.innerText = "🔄 Auto-Update";
-      alert(`Daten zu "${targetPOI.name}" wurden automatisch aktualisiert!`);
+      if (btn) btn.innerText = "🔄 Auto-Update";
+      alert(`Daten zu "${targetPOI.name}" aktualisiert!`);
+    }
+
+    // --- DIREKTES SCHNELL-SPEICHERN IN DER DETAILANSICHT ---
+    function saveDirectEdits() {
+      if (!selectedPoi) return;
+      selectedPoi.description = document.getElementById('det-desc-input').value.trim();
+      persistData();
+      alert("Beschreibung gesichert!");
+    }
+
+    function editBadgePrompt(fieldKey, label) {
+      if (!selectedPoi) return;
+      const currentVal = selectedPoi[fieldKey] || '';
+      const newVal = prompt(`${label} anpassen:`, currentVal);
+      if (newVal !== null) {
+        selectedPoi[fieldKey] = newVal.trim();
+        persistData();
+        selectPoi(selectedPoi);
+      }
     }
 
     // --- ROUTENBERECHNUNG ---
@@ -547,7 +640,7 @@
 
       const region = appData.regions.find(r => r.id === regId);
       if(!region || !region.places.length) {
-        listEl.innerHTML = "<small style='color:#666;'>Keine Orte in dieser Region.</small>";
+        listEl.innerHTML = "<small style='color:#666;'>Keine Orte eingetragen.</small>";
         return;
       }
 
@@ -579,7 +672,7 @@
 
       document.getElementById('detail-card').style.display = "block";
       document.getElementById('det-name').innerText = poi.name;
-      document.getElementById('det-desc').innerText = poi.description;
+      document.getElementById('det-desc-input').value = poi.description;
 
       document.getElementById('det-update-btn').onclick = () => autoUpdatePOI(poi.id);
 
@@ -598,13 +691,13 @@
         webA.style.display = "none";
       }
 
-      // Badges
+      // Interaktive Klick-Badges zur Schnellbearbeitung
       const badgesEl = document.getElementById('det-badges');
       badgesEl.innerHTML = `
-        <span class="badge ${poi.lat ? 'ok' : 'warn'}">${poi.lat ? '📍 ' + poi.lat.toFixed(4) + ', ' + poi.lon.toFixed(4) : '⚠️ Keine Koordinaten'}</span>
-        <span class="badge">🕒 ${poi.openingHours || 'k.A.'}</span>
-        <span class="badge">💵 ${poi.fee || 'k.A.'}</span>
-        <span class="badge">🚆 ${poi.transit || 'k.A.'}</span>
+        <span class="badge ${poi.lat ? 'ok' : 'warn'}">📍 ${poi.lat ? poi.lat.toFixed(4) + ', ' + poi.lon.toFixed(4) : 'Keine Koord'}</span>
+        <span class="badge" onclick="editBadgePrompt('openingHours', 'Öffnungszeiten')">🕒 ${poi.openingHours || 'k.A.'} ✏️</span>
+        <span class="badge" onclick="editBadgePrompt('fee', 'Eintrittspreis')">💵 ${poi.fee || 'k.A.'} ✏️</span>
+        <span class="badge" onclick="editBadgePrompt('transit', 'ÖV-Anbindung')">🚆 ${poi.transit || 'k.A.'} ✏️</span>
       `;
 
       if(poi.lat && poi.lon && poi.lat !== 0) {
@@ -693,7 +786,7 @@
       persistData();
     }
 
-    // --- GITHUB SYNC & SPEICHERUNG ---
+    // --- GITHUB SYNC ---
     function loadSettings() {
       const savedGh = localStorage.getItem('gh_config');
       if(savedGh) {
