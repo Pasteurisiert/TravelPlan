@@ -155,7 +155,7 @@
           <input type="text" id="new-poi-name" placeholder="z.B. Bryggen, St. Michael's Mount...">
           <button id="btn-add-poi" class="btn-primary" style="width: 220px;" onclick="searchAndAddPOI()">Auto-Suchen & Anlegen</button>
         </div>
-        <small style="color: #666;">Durchsucht Wikipedia & OSM. Fehlen Angaben, springt automatisch Gemini ein.</small>
+        <small style="color: #666;">Durchsucht Wikipedia & OSM. Fehlen Angaben, recherchiert Gemini automatisch weiter.</small>
       </div>
 
       <div class="card">
@@ -173,7 +173,11 @@
         <p>Wird für automatische Recherchen, Zusammenfassungen, Öffnungszeiten, ÖV & Preise verwendet.</p>
         <label>Gemini API-Key:</label>
         <input type="password" id="gemini-key" placeholder="AIzaSy...">
-        <small><a href="https://aistudio.google.com/app/apikey" target="_blank">Hier kostenlosen API-Key in Google AI Studio anlegen</a></small>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button type="button" class="btn-secondary" style="width:auto; margin:0;" onclick="testGeminiKey()">🔑 API-Key jetzt testen</button>
+          <span id="gemini-test-status" style="font-size:0.85rem;"></span>
+        </div>
+        <small style="display:block; margin-top:8px;"><a href="https://aistudio.google.com/app/apikey" target="_blank">Hier kostenlosen API-Key in Google AI Studio anlegen</a></small>
       </div>
 
       <div class="card">
@@ -296,55 +300,115 @@
       }
     }
 
-    // --- GEMINI KI RECHERCHE ENGINE ---
+    // --- TEST-BUTTON FÜR DEN GEMINI API KEY ---
+    async function testGeminiKey() {
+      const statusEl = document.getElementById('gemini-test-status');
+      const key = (document.getElementById('gemini-key').value || "").trim();
+
+      if (!key) {
+        statusEl.innerHTML = "<span style='color:red;'>Bitte zuerst einen API-Key eintragen!</span>";
+        return;
+      }
+
+      statusEl.innerHTML = "Prüfe Schlüssel...";
+
+      // Liste von Modellbezeichnungen für maximale Kompatibilität
+      const testModels = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+      let success = false;
+      let lastErrorMessage = "";
+
+      for (let model of testModels) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-goog-api-key": key
+            },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: "Antworte kurz mit: OK" }] }]
+            })
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            statusEl.innerHTML = `<span style='color:green; font-weight:bold;'>✅ Key ist gültig & bereit (${model})!</span>`;
+            geminiApiKey = key;
+            localStorage.setItem('gemini_api_key', key);
+            success = true;
+            break;
+          } else {
+            lastErrorMessage = data.error?.message || res.statusText;
+          }
+        } catch (e) {
+          lastErrorMessage = e.message;
+        }
+      }
+
+      if (!success) {
+        statusEl.innerHTML = `<span style='color:red; font-weight:bold;'>❌ Fehler: ${lastErrorMessage}</span>`;
+      }
+    }
+
+    // --- ROBUSTER GEMINI RECHERCHE-AUFRUF ---
     async function researchWithGemini(poiName, regionName) {
-      if(!geminiApiKey) {
-        alert("Hinweis: Kein Gemini API-Key hinterlegt. Bitte unter Setup eintragen für KI-Recherchen.");
+      const key = (geminiApiKey || "").trim();
+      if(!key) {
+        alert("Hinweis: Kein Gemini API-Key hinterlegt. Bitte unter Setup eintragen!");
         return null;
       }
 
       const prompt = `Recherchiere touristische Informationen für folgenden Ort:
 Ort: "${poiName}" in der Region/Stadt "${regionName}".
 
-Gib die Daten zwingend als JSON mit folgenden Feldern aus:
+Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
 - description: Ausführliche Kurzbeschreibung auf Deutsch (ca. 2-4 Sätze)
 - website: Offizielle Website URL oder verlässliche Infoseite
 - openingHours: Typische Öffnungszeiten (z.B. "Mo-So 10:00 - 18:00" oder "Rund um die Uhr zugänglich")
 - fee: Eintrittspreise (z.B. "Kostenlos" oder "Erwachsene ca. 15€")
-- publicTransit: Anbindung an den öffentlichen Verkehr (z.B. "Buslinie 4 bis Haltestelle Torget, 2 Min Fußweg")`;
+- publicTransit: Anbindung an den öffentlichen Verkehr (z.B. "Buslinie 4 bis Torget, 2 Min Fußweg")`;
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
+      const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash'];
 
-      const payload = {
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          response_mime_type: "application/json"
+      for (let model of candidateModels) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "x-goog-api-key": key
+            },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                response_mime_type: "application/json"
+              }
+            })
+          });
+
+          if(response.ok) {
+            const resData = await response.json();
+            const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+            if(rawText) {
+              return JSON.parse(rawText);
+            }
+          } else {
+            const errDetails = await response.json();
+            console.warn(`Modell ${model} meldete:`, errDetails);
+            if(model === candidateModels[candidateModels.length - 1]) {
+              alert(`Gemini Recherche-Fehler (${response.status}): ${errDetails.error?.message || response.statusText}`);
+            }
+          }
+        } catch(err) {
+          console.error(`Fehler bei Anfrage an ${model}:`, err);
         }
-      };
-
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        if(!response.ok) {
-          throw new Error(`Gemini API Fehler: ${response.statusText}`);
-        }
-
-        const resData = await response.json();
-        const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
-        if(rawText) {
-          return JSON.parse(rawText);
-        }
-      } catch(err) {
-        console.error("Gemini Recherchefehler:", err);
       }
       return null;
     }
 
-    // --- ORTE ERSTELLEN & AUTOMATISCH RECHERCHIEREN ---
+    // --- ORTE ERSTELLEN & RECHERCHIEREN ---
     async function searchAndAddPOI() {
       const regId = document.getElementById('admin-region-select').value;
       const name = document.getElementById('new-poi-name').value.trim();
@@ -385,7 +449,7 @@ Gib die Daten zwingend als JSON mit folgenden Feldern aus:
           }
         } catch(e) { console.warn("Wiki Abfrage übersprungen", e); }
 
-        // 3. Wenn Beschreibung fehlt -> Gemini AI Fallback
+        // 3. Wenn Beschreibung fehlt -> Gemini AI Recherche
         let transitInfo = "Mit lokalen Bussen/Bahnen erreichbar";
         if(!description || description.length < 20 || !osmOpeningHours) {
           const aiData = await researchWithGemini(name, regionObj.name);
@@ -439,7 +503,7 @@ Gib die Daten zwingend als JSON mit folgenden Feldern aus:
 
       if(!targetPOI || !targetRegion) return;
 
-      const ok = confirm(`Möchten Sie die Informationen zu "${targetPOI.name}" per Gemini KI neu recherchieren und überschreiben?`);
+      const ok = confirm(`Möchten Sie die Informationen zu "${targetPOI.name}" per Gemini KI neu recherchieren und aktualisieren?`);
       if(!ok) return;
 
       const aiData = await researchWithGemini(targetPOI.name, targetRegion.name);
@@ -456,9 +520,7 @@ Gib die Daten zwingend als JSON mit folgenden Feldern aus:
         }
         renderAdminPlaces();
         renderDayPlanList();
-        alert(`Informationen zu "${targetPOI.name}" aktualisiert!`);
-      } else {
-        alert("Recherche konnte nicht durchgeführt werden. Bitte prüfen Sie den Gemini API-Key.");
+        alert(`Informationen zu "${targetPOI.name}" erfolgreich aktualisiert!`);
       }
     }
 
@@ -673,10 +735,10 @@ Gib die Daten zwingend als JSON mit folgenden Feldern aus:
     }
 
     function saveAllSettings() {
-      ghConfig.owner = document.getElementById('gh-owner').value.trim();
-      ghConfig.repo = document.getElementById('gh-repo').value.trim();
-      ghConfig.token = document.getElementById('gh-token').value.trim();
-      geminiApiKey = document.getElementById('gemini-key').value.trim();
+      ghConfig.owner = (document.getElementById('gh-owner').value || '').trim();
+      ghConfig.repo = (document.getElementById('gh-repo').value || '').trim();
+      ghConfig.token = (document.getElementById('gh-token').value || '').trim();
+      geminiApiKey = (document.getElementById('gemini-key').value || '').trim();
 
       localStorage.setItem('gh_config', JSON.stringify(ghConfig));
       localStorage.setItem('gemini_api_key', geminiApiKey);
