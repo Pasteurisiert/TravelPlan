@@ -758,6 +758,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Kreuzfahrtterminal Altona\" (< 350m)",
           "visited": false
+        },
+        {
+          "id": "poi_1790436208987",
+          "name": "Cruise Center Steinwerder",
+          "city": "Hamburg",
+          "lat": 53.5294471,
+          "lon": 9.9612949,
+          "description": "Das Kreuzfahrtterminal Hamburg Cruise Center Steinwerder, auch Hamburg Cruise Center 3 (CC 3) genannt, wurde am 9. Juni 2015 in Betrieb genommen und liegt mitten im Hamburger Hafen.\nDie 80 Mio. Euro teure Anlage entstand am Kronprinzkai im Kaiser-Wilhelm-Hafen südlich der Norderelbe. Durch diese Lage auf einer Halbinsel mitten im Hafen ist die Inne...",
+          "website": "https://de.wikipedia.org/wiki/Hamburg_Cruise_Center_Steinwerder",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
