@@ -668,6 +668,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Skudeneshavn (A)\" (< 350m)",
           "visited": false
+        },
+        {
+          "id": "poi_1790435628611",
+          "name": "The Viking farm at Avaldsnes",
+          "city": "Avaldsnes",
+          "lat": 0,
+          "lon": 0,
+          "description": "Keine Kurzbeschreibung gefunden. Nutzen Sie die Google-Links.",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
