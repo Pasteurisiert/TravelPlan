@@ -487,6 +487,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790432578681",
+          "name": "Selja Kloster",
+          "city": "Selje",
+          "lat": 62.0507878,
+          "lon": 5.2988848,
+          "description": "Selja kloster, Selja, Selje, Stad, Vestland, 6740, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
