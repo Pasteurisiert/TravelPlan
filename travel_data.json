@@ -461,6 +461,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790432414616",
+          "name": "Kannesteinen",
+          "city": "Måløy",
+          "lat": 61.9703833,
+          "lon": 5.0691552,
+          "description": "Kannesteinen, Oppedalsvegen, Færestranda, Vågsvåg, Kinn, Vestland, 6700, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
