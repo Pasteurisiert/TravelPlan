@@ -3,7 +3,21 @@
     {
       "id": "bergen-no",
       "name": "Bergen, Norwegen",
-      "places": []
+      "places": [
+        {
+          "id": "poi_1790430740443",
+          "name": "Bryggen",
+          "city": "Bergen, Norwegen",
+          "lat": 60.3977257,
+          "lon": 5.3229328,
+          "description": "Das Hanseviertel Bryggen (deutsch Landungsbrücke, Kai) oder Tyskebryggen (Deutsche Brücke) besteht aus den ehemaligen Handelskontoren der Hanse in Bergen/Norwegen. Die Hansekontore nehmen fast das gesamte nordöstliche Ufer der Bucht Vågen ein.\n\n...",
+          "website": "https://de.wikipedia.org/wiki/Bryggen",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
+        }
+      ]
     },
     {
       "id": "kopenhagen",
