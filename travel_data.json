@@ -416,6 +416,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790432167392",
+          "name": "Trollveggen Besøkssenter",
+          "city": "Åndalsnes",
+          "lat": 62.489603,
+          "lon": 7.7601062,
+          "description": "Trollveggen besøkssenter, Romsdalsvegen, Rauma, Møre og Romsdal, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
