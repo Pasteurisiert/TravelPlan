@@ -784,6 +784,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Inselpark\" (< 350m)",
           "visited": false
+        },
+        {
+          "id": "poi_1790436301500",
+          "name": "Seumestrasse 33, 22089 Hamburg",
+          "city": "Hamburg",
+          "lat": 53.5722563,
+          "lon": 10.0541815,
+          "description": "33, Seumestraße, Eilbek, Wandsbek, Hamburg, 22089, Germany",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
