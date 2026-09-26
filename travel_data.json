@@ -144,14 +144,14 @@
         {
           "id": "poi_1790423601059",
           "name": "Roskilde Domkirke",
-          "lat": 55.6425,
-          "lon": 12.0803,
-          "description": "Die Roskilde Domkirke ist ein bedeutendes gotisches Meisterwerk aus Backstein und gehört seit 1995 zum UNESCO-Weltkulturerbe. Sie dient seit Jahrhunderten als traditionelle Begräbnisstätte der dänischen Monarchen und beherbergt fast 40 Königsgräber.",
-          "website": "https://roskildedomkirke.dk/",
+          "lat": 55.67933333,
+          "lon": 12.5725,
+          "description": "Die Frauenkirche (dänisch Vor Frue Kirke oder Frue Kirke [ˈfʀuːə ˈkiʀgə]) von Kopenhagen, auch Dom zu Kopenhagen (dänisch Københavns Domkirke), ist die Hauptkirche des Bistums Kopenhagen der Dänischen Volkskirche. Sie wurde vom Architekten Christian Frederik Hansen im klassizistischen Stil entworfen und 1829 fertiggestellt....",
+          "website": "http://www.koebenhavnsdomkirke.dk",
           "openingHours": "Mo–Sa 10:00 – 17:00, So 13:00 – 17:00 (saisonal abweichend)",
           "fee": "ca. 10 € (75 DKK), Kinder unter 18 Jahren frei",
           "visited": false,
-          "transit": "Regionalzug ab København H (Kopenhagen Hbf) nach Roskilde (ca. 20–25 Min.), danach etwa 10 Minuten Fußweg"
+          "transit": "Haltestelle \"Rådhuspladsen St.\" (< 450m)"
         },
         {
           "id": "poi_1790423618249",
