@@ -132,14 +132,14 @@
         {
           "id": "poi_1790423498131",
           "name": "Helsingør Kronborg Schloss",
-          "lat": 56.039,
-          "lon": 12.6218,
-          "description": "Schloss Kronborg in Helsingør ist eine der bedeutendsten Renaissancefestungen Nordeuropas und zählt zum UNESCO-Weltkulturerbe. Internationale Bekanntheit erlangte das majestätische Schloss am Öresund vor allem als Schauplatz von Shakespeares berühmter Tragödie „Hamlet“. Besucher können prunkvolle Säle, die unterirdischen Kasematten und die Statue des schlafenden Nationalhelden Holger Danske erkunden.",
-          "website": "https://kronborg.dk/",
+          "lat": 56.03902778,
+          "lon": 12.62180556,
+          "description": "Schloss Kronborg (dänisch Kronborg Slot [ˈkʀoːnbɔːʔʀ]; deutsch veraltet Kroneburg) ist eine Festung in Helsingør auf der dänischen Insel Seeland. Kronborg liegt auf einer Landzunge am äußersten nordöstlichen Ende der Insel Seeland. Nur etwa vier Kilometer von der schwedischen Küste bei Helsingborg entfernt, diente die Festung zur Überwachung der Ei...",
+          "website": "https://www.kronborg.dk",
           "openingHours": "10:00 - 17:00 Uhr (saisonal variierend, im Winter teils bis 16:00 Uhr)",
           "fee": "ca. 145 DKK (ca. 19,50 €), Kinder unter 18 Jahren frei",
           "visited": false,
-          "transit": "Regionalzug (Kystbanen) ab Kopenhagen Hbf bis Helsingør Station (ca. 45 Min.), danach ca. 15 Gehminuten"
+          "transit": "Mit ÖV erreichbar"
         },
         {
           "id": "poi_1790423522140",
