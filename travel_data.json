@@ -371,6 +371,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790431707573",
+          "name": "jostedalsbreen nasjonalparksenter",
+          "city": "Olden, Norwegen",
+          "lat": 61.9111035,
+          "lon": 7.0492437,
+          "description": "Jostedalsbreen (-en = bestimmter männlicher Artikel) in der norwegischen Provinz Vestland nördlich des Sognefjords ist der größte europäische Festlandsgletscher. In Nord-Ost-Richtung hat er eine Länge von etwa 40 km und ist in südwestlicher Richtung etwa 15 km breit. Die Eisschicht ist bis zu 500 m dick. Die Fläche betrug im Jahr 2006 474 km². Noch...",
+          "website": "http://www.jostedalsbreenadventure.com/",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Haltestelle \"Jostedalsbreen nasjonalparksenter\" (< 350m)",
+          "visited": false
         }
       ]
     }
