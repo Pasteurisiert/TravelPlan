@@ -19,6 +19,17 @@
           "openingHours": "Tu-Su 10:00-17:00",
           "fee": "k.A.",
           "visited": false
+        },
+        {
+          "id": "poi_1790423289343",
+          "name": "Rosenborg Slot",
+          "lat": 55.6856935,
+          "lon": 12.5774199,
+          "description": "Schloss Rosenborg befindet sich am Rande des königlichen Gartens Kongens Have in der dänischen Hauptstadt Kopenhagen.",
+          "website": "https://www.kongernessamling.dk/rosenborg/",
+          "openingHours": "Mo-Su 10:00-17:00",
+          "fee": "k.A.",
+          "visited": false
         }
       ]
     }
