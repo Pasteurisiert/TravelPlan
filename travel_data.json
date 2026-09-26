@@ -94,6 +94,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790430895824",
+          "name": "Hanseatic Museum",
+          "city": "Bergen, Norwegen",
+          "lat": 60.39594,
+          "lon": 5.32593,
+          "description": "Hanseatic Museum, Finnegården, Bryggen, Skuteviken, Bergenhus, Bergen, Vestland, 5003, Norway",
+          "website": "https://hanseatiskemuseum.museumvest.no/en/start",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Haltestelle \"Torget (C)\" (< 350m)",
+          "visited": false
         }
       ]
     },
