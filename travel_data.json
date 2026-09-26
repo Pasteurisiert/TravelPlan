@@ -621,13 +621,13 @@
           "id": "poi_1790434994587",
           "name": "Dokken Museum",
           "city": "Haugesund",
-          "lat": 0,
-          "lon": 0,
-          "description": "Keine Kurzbeschreibung gefunden. Nutzen Sie die Google-Links.",
+          "lat": 59.4164315,
+          "lon": 5.2598648,
+          "description": "Dokken friluftsmuseum, Hasseløy bru, Haugo, Haugesund, Rogaland, 5523, Norway",
           "website": "",
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
-          "transit": "Mit ÖV erreichbar",
+          "transit": "Haltestelle \"Havnaberg seniorsenter (B)\" (< 350m)",
           "visited": false
         },
         {
