@@ -72,13 +72,14 @@
         {
           "id": "poi_1790423362446",
           "name": "Staten Museum for Kunst",
-          "lat": 0,
-          "lon": 0,
-          "description": "Keine Kurzbeschreibung gefunden.",
-          "website": "https://google.com/search?q=Staten%20Museum%20for%20Kunst%20Kopenhagen",
+          "lat": 55.68888889,
+          "lon": 12.57861111,
+          "description": "Die dänische Nationalgalerie Statens Museum for Kunst (deutsch Staatliches Kunstmuseum) ist das größte Museum für Bildende Kunst in Dänemark und befindet sich im Zentrum der Hauptstadt Kopenhagen. Sie ist dem Kulturministerium unterstellt. Direktorin des Museums ist Astrid la Cour.\n\n...",
+          "website": "https://www.smk.dk",
           "openingHours": "k.A.",
           "fee": "k.A.",
-          "visited": false
+          "visited": false,
+          "transit": "Haltestelle \"Sølvtorvet\" (< 450m)"
         },
         {
           "id": "poi_1790423383588",
