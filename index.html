@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TravelPlan - GitHub Sync Edition</title>
+  
+  <!-- Leaflet CSS & JS für OpenStreetMap -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    :root {
+      --primary: #1976d2;
+      --primary-dark: #115293;
+      --bg: #f4f6f8;
+      --card-bg: #ffffff;
+      --text: #333333;
+      --border: #e0e0e0;
+      --success: #2e7d32;
+    }
+
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { margin: 0; padding: 0; background: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+    /* Navigation */
+    header { background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.15); z-index: 1000; }
+    .nav-buttons button { background: transparent; border: 1px solid white; color: white; padding: 8px 14px; margin-left: 8px; border-radius: 4px; cursor: pointer; font-weight: 500; }
+    .nav-buttons button.active, .nav-buttons button:hover { background: white; color: var(--primary); }
+
+    /* Status Bar */
+    #sync-status { font-size: 0.85rem; background: #e3f2fd; padding: 5px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+
+    /* Main Container */
+    main { flex: 1; display: flex; overflow: hidden; position: relative; }
+    .view-panel { width: 100%; height: 100%; display: none; overflow-y: auto; padding: 20px; }
+    .view-panel.active { display: flex; }
+
+    /* Tagesplanung Split-Screen */
+    #day-plan-view { display: none; padding: 0; }
+    #day-plan-view.active { display: flex; }
+    .sidebar { width: 450px; border-right: 1px solid var(--border); background: var(--card-bg); overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+    .map-container { flex: 1; height: 100%; position: relative; }
+    #map { width: 100%; height: 100%; }
+
+    /* Cards & Forms */
+    .card { background: white; border-radius: 8px; padding: 15px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 15px; }
+    h2, h3 { margin-top: 0; }
+    input, select, textarea, button { width: 100%; padding: 8px 10px; margin-top: 5px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; }
+    button.btn-primary { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
+    button.btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { background: #eee; border: 1px solid #ccc; cursor: pointer; }
+
+    /* POI Listen */
+    .poi-item { border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: background 0.2s; background: #fff; }
+    .poi-item:hover { background: #f0f7ff; }
+    .poi-item.selected { border-color: var(--primary); background: #e3f2fd; }
+    .poi-item.visited { opacity: 0.6; text-decoration: line-through; background: #f9f9f9; }
+    .poi-header { display: flex; justify-content: space-between; align-items: center; }
+
+    /* Details Panel */
+    .info-badge { display: inline-block; background: #eee; padding: 3px 7px; border-radius: 4px; font-size: 0.8rem; margin-right: 5px; margin-bottom: 5px; }
+    .route-info { background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 6px; padding: 10px; margin-top: 10px; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div style="font-weight: bold; font-size: 1.2rem;">🌍 TravelPlan</div>
+    <div class="nav-buttons">
+      <button id="btn-nav-day" class="active" onclick="switchView('day-plan')">Tagesplanung</button>
+      <button id="btn-nav-admin" onclick="switchView('admin')">Admin / Orte</button>
+      <button id="btn-nav-settings" onclick="switchView('settings')">GitHub Setup</button>
+    </div>
+  </header>
+
+  <div id="sync-status">
+    <span id="sync-text">GitHub: Nicht verbunden</span>
+    <button class="btn-secondary" style="width: auto; margin: 0; padding: 3px 10px;" onclick="syncWithGitHub()">Jetzt synchronisieren</button>
+  </div>
+
+  <main>
+    <!-- 1. TAGESPLANUNG VIEW -->
+    <div id="day-plan-view" class="view-panel active">
+      <div class="sidebar">
+        <div>
+          <h3>Planungsauswahl</h3>
+          <label>Region / Stadt wählen:</label>
+          <select id="day-region-select" onchange="onRegionChange()">
+            <option value="">-- Bitte wählen --</option>
+          </select>
+        </div>
+
+        <!-- Standorterfassung -->
+        <div class="card">
+          <h4>Mein aktueller Standort</h4>
+          <div style="display: flex; gap: 5px;">
+            <button class="btn-secondary" onclick="getCurrentGPSLocation()">📍 GPS Ermitteln</button>
+            <button class="btn-secondary" id="btn-map-pick" onclick="toggleMapPick()">🗺️ Klick auf Karte</button>
+          </div>
+          <input type="text" id="manual-loc-search" placeholder="Adresse/Ort eingeben..." onchange="geocodeLocationInput(this.value)">
+          <div id="current-pos-display" style="font-size: 0.8rem; color: #666; margin-top: 5px;">Standort nicht gesetzt</div>
+        </div>
+
+        <!-- Orte-Filter -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h4>Orte am Tag</h4>
+            <label style="font-size:0.85rem; cursor:pointer;">
+              <input type="checkbox" id="show-visited-checkbox" onchange="renderDayPlanList()" style="width:auto; margin:0;"> Besuchte anzeigen
+            </label>
+          </div>
+          <div id="day-poi-list">Wähle zuerst eine Region/Stadt aus.</div>
+        </div>
+
+        <!-- Detailansicht & Route -->
+        <div id="poi-detail-container" style="display:none;" class="card">
+          <h3 id="det-title" style="margin-bottom: 5px;">-</h3>
+          <p id="det-desc" style="font-size: 0.9rem; color: #555;">-</p>
+          <div>
+            <span class="info-badge" id="det-web">🌐 Keine Webseite</span>
+            <span class="info-badge" id="det-fee">💵 Eintritt: k.A.</span>
+            <span class="info-badge" id="det-hours">🕒 Öffnungszeiten: k.A.</span>
+          </div>
+
+          <div id="route-panel" class="route-info" style="display:none;">
+            <strong>Wegführung vom Standort:</strong>
+            <div id="route-time-dist">Distanz / Dauer: Berechnung...</div>
+            <div id="transit-link" style="margin-top:5px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="map-container">
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <!-- 2. ADMIN VIEW -->
+    <div id="admin-view" class="view-panel" style="flex-direction: column; max-width: 900px; margin: 0 auto;">
+      <h2>Adminbereich: Städte, Gebiete & Orte</h2>
+      
+      <div class="card">
+        <h3>Neue Region / Stadt anlegen</h3>
+        <div style="display:flex; gap: 10px;">
+          <input type="text" id="new-region-name" placeholder="z.B. Bergen, Cornwall...">
+          <button class="btn-primary" style="width: 200px;" onclick="addRegion()">Hinzufügen</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Neuen Ort eintragen</h3>
+        <label>Region:</label>
+        <select id="admin-region-select"></select>
+        <label>Ortsname / Attraktion:</label>
+        <div style="display:flex; gap:10px;">
+          <input type="text" id="new-poi-name" placeholder="z.B. Bryggen, St. Michael's Mount...">
+          <button class="btn-primary" style="width: 200px;" onclick="searchAndAddPOI()">Auto-Suchen & Anlegen</button>
+        </div>
+        <small style="color: #666;">Ruft automatisch Beschreibung, Webseite, Koordinaten & Links über Wikipedia/OSM ab.</small>
+      </div>
+
+      <div class="card">
+        <h3>Bestehende Orte verwalten</h3>
+        <div id="admin-poi-list">Keine Region ausgewählt.</div>
+      </div>
+    </div>
+
+    <!-- 3. SETTINGS VIEW -->
+    <div id="settings-view" class="view-panel" style="flex-direction: column; max-width: 700px; margin: 0 auto;">
+      <h2>GitHub Synchronisation Setup</h2>
+      <div class="card">
+        <p>Um Daten plattformübergreifend zu sichern, hinterlegen Sie hier ein GitHub-Repository und ein Personal Access Token (PAT mit <code>repo</code>-Rechten).</p>
+        <label>GitHub Username / Owner:</label>
+        <input type="text" id="gh-owner" placeholder="z.B. mein-name">
+        <label>Repository Name:</label>
+        <input type="text" id="gh-repo" placeholder="z.B. travel-plan-repo">
+        <label>GitHub Personal Access Token (Fine-grained oder Classic mit 'repo' scope):</label>
+        <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
+        <button class="btn-primary" onclick="saveGithubSettings()">Speichern & Testen</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // --- DATENSTRUKTUR ---
+    let appData = {
+      regions: [
+        {
+          id: "bergen-no",
+          name: "Bergen, Norwegen",
+          places: []
+        }
+      ]
+    };
+    
+    let ghConfig = { owner: "", repo: "", token: "", path: "travel_data.json", sha: null };
+    let currentPosition = null; // { lat, lng }
+    let pickMode = false;
+    let map, routeLayer, markersLayer;
+
+    // --- INITIALISIERUNG ---
+    window.addEventListener("DOMContentLoaded", () => {
+      initMap();
+      loadSettings();
+      if(ghConfig.token) syncWithGitHub();
+      updateRegionDropdowns();
+    });
+
+    function initMap() {
+      map = L.map('map').setView([60.3913, 5.3221], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap Contributors'
+      }).addTo(map);
+
+      markersLayer = L.layerGroup().addTo(map);
+
+      // Karten-Klick Modus zur Standorterfassung
+      map.on('click', (e) => {
+        if(pickMode) {
+          setCustomPosition(e.latlng.lat, e.latlng.lng, "Ausgewählter Kartenpunkt");
+          toggleMapPick();
+        }
+      });
+    }
+
+    // --- NAVIGATION & VIEWS ---
+    function switchView(viewName) {
+      document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-buttons button').forEach(b => b.classList.remove('active'));
+
+      if(viewName === 'day-plan') {
+        document.getElementById('day-plan-view').classList.add('active');
+        document.getElementById('btn-nav-day').classList.add('active');
+        setTimeout(() => map.invalidateSize(), 200);
+      } else if(viewName === 'admin') {
+        document.getElementById('admin-view').classList.add('active');
+        document.getElementById('btn-nav-admin').classList.add('active');
+        renderAdminPlaces();
+      } else if(viewName === 'settings') {
+        document.getElementById('settings-view').classList.add('active');
+        document.getElementById('btn-nav-settings').classList.add('active');
+      }
+    }
+
+    // --- STANDORT-LOGIK ---
+    function setCustomPosition(lat, lng, label) {
+      currentPosition = { lat, lng };
+      document.getElementById('current-pos-display').innerText = `${label} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+      
+      // Marker für Standort
+      if(window.posMarker) map.removeLayer(window.posMarker);
+      window.posMarker = L.circleMarker([lat, lng], { color: 'blue', radius: 8 }).addTo(map).bindPopup(label).openPopup();
+      map.panTo([lat, lng]);
+    }
+
+    function getCurrentGPSLocation() {
+      if (!navigator.geolocation) return alert("Geolocation nicht unterstützt.");
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setCustomPosition(pos.coords.latitude, pos.coords.longitude, "Aktueller GPS Standort"),
+        () => alert("Standort konnte nicht abgerufen werden.")
+      );
+    }
+
+    function toggleMapPick() {
+      pickMode = !pickMode;
+      const btn = document.getElementById('btn-map-pick');
+      btn.style.background = pickMode ? '#ffc107' : '#eee';
+      btn.innerText = pickMode ? "Klicke jetzt auf Karte..." : "🗺️ Klick auf Karte";
+    }
+
+    async function geocodeLocationInput(query) {
+      if(!query) return;
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      if(data && data.length > 0) {
+        setCustomPosition(parseFloat(data[0].lat), parseFloat(data[0].lon), query);
+      } else {
+        alert("Adresse nicht gefunden.");
+      }
+    }
+
+    // --- AUTO-INFORMATIONEN ERMITTELN (WIKIPEDIA / NOMINATIM) ---
+    async function searchAndAddPOI() {
+      const regId = document.getElementById('admin-region-select').value;
+      const name = document.getElementById('new-poi-name').value.trim();
+      if(!name || !regId) return alert("Region und Name erforderlich");
+
+      const regionObj = appData.regions.find(r => r.id === regId);
+      const query = `${name} ${regionObj.name}`;
+
+      try {
+        // 1. Koordinaten & Details via OpenStreetMap Nominatim
+        const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&extratags=1&q=${encodeURIComponent(query)}`);
+        const nomData = await nomRes.json();
+        
+        let lat = 0, lon = 0, osmOpeningHours = "k.A.", osmFee = "k.A.", website = "";
+        if(nomData.length > 0) {
+          const item = nomData[0];
+          lat = parseFloat(item.lat);
+          lon = parseFloat(item.lon);
+          if(item.extratags) {
+            osmOpeningHours = item.extratags.opening_hours || "k.A.";
+            osmFee = item.extratags.fee || "k.A.";
+            website = item.extratags.website || "";
+          }
+        }
+
+        // 2. Beschreibung & Link via Wikipedia API
+        const wikiRes = await fetch(`https://de.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`);
+        let description = "Keine Kurzbeschreibung gefunden.";
+        if(wikiRes.ok) {
+          const wikiData = await wikiRes.json();
+          if(wikiData.extract) description = wikiData.extract;
+          if(!website && wikiData.content_urls) website = wikiData.content_urls.desktop.page;
+        }
+
+        const newPOI = {
+          id: "poi_" + Date.now(),
+          name: name,
+          lat: lat,
+          lon: lon,
+          description: description,
+          website: website || "https://google.com/search?q=" + encodeURIComponent(query),
+          openingHours: osmOpeningHours,
+          fee: osmFee,
+          visited: false
+        };
+
+        regionObj.places.push(newPOI);
+        document.getElementById('new-poi-name').value = "";
+        renderAdminPlaces();
+        persistData();
+        alert("Ort erfolgreich angelegt!");
+      } catch(e) {
+        alert("Fehler beim Abrufen: " + e.toString());
+      }
+    }
+
+    // --- ROUTENBERECHNUNG (OSRM + ÖV-Link) ---
+    async function calculateRoute(destLat, destLon) {
+      if(!currentPosition) {
+        alert("Bitte zuerst aktuellen Standort angeben (GPS, Karte oder Eingabe)!");
+        return;
+      }
+      const p = document.getElementById('route-panel');
+      p.style.display = "block";
+      document.getElementById('route-time-dist').innerText = "Berechne Route...";
+
+      // OSRM Fußweg-Routing (Open Source Routing)
+      const url = `https://router.project-osrm.org/route/v1/foot/${currentPosition.lng},${currentPosition.lat};${destLon},${destLat}?overview=full&geometries=geojson`;
+      
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if(data.routes && data.routes.length > 0) {
+          const route = data.routes[0];
+          const distKm = (route.distance / 1000).toFixed(2);
+          const durMin = Math.round(route.duration / 60);
+
+          document.getElementById('route-time-dist').innerHTML = `
+            <strong>🚶 Fußweg:</strong> ca. ${distKm} km (${durMin} Min)<br>
+          `;
+
+          // Auf Karte zeichnen
+          if(routeLayer) map.removeLayer(routeLayer);
+          routeLayer = L.geoJSON(route.geometry, { style: { color: 'green', weight: 4 } }).addTo(map);
+          map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
+
+          // ÖV Verknüpfung via Google Transit / ÖV Link
+          const transitUrl = `https://www.google.com/maps/dir/?api=1&origin=${currentPosition.lat},${currentPosition.lng}&destination=${destLat},${destLon}&travelmode=transit`;
+          document.getElementById('transit-link').innerHTML = `
+            🚆 <strong>ÖV-Verbindung:</strong> <a href="${transitUrl}" target="_blank">Fahrplan & ÖV-Routen in externem Planer öffnen</a>
+          `;
+        }
+      } catch(err) {
+        document.getElementById('route-time-dist').innerText = "Routenabfrage nicht verfügbar.";
+      }
+    }
+
+    // --- RENDERING TAGESPLANUNG ---
+    function onRegionChange() {
+      const regId = document.getElementById('day-region-select').value;
+      const region = appData.regions.find(r => r.id === regId);
+      markersLayer.clearLayers();
+
+      if(region && region.places.length > 0) {
+        const bounds = [];
+        region.places.forEach(p => {
+          if(p.lat && p.lon) {
+            const m = L.marker([p.lat, p.lon]).addTo(markersLayer).bindPopup(`<b>${p.name}</b>`);
+            m.on('click', () => selectPOI(p));
+            bounds.push([p.lat, p.lon]);
+          }
+        });
+        if(bounds.length) map.fitBounds(bounds, { padding: [30, 30] });
+      }
+      renderDayPlanList();
+    }
+
+    function renderDayPlanList() {
+      const regId = document.getElementById('day-region-select').value;
+      const showVisited = document.getElementById('show-visited-checkbox').checked;
+      const container = document.getElementById('day-poi-list');
+      container.innerHTML = "";
+
+      const region = appData.regions.find(r => r.id === regId);
+      if(!region) return;
+
+      region.places.forEach(poi => {
+        if(!showVisited && poi.visited) return; // Ausblenden falls besucht
+
+        const el = document.createElement('div');
+        el.className = `poi-item ${poi.visited ? 'visited' : ''}`;
+        el.innerHTML = `
+          <div class="poi-header">
+            <strong>${poi.name}</strong>
+            <input type="checkbox" ${poi.visited ? 'checked' : ''} title="Als besucht markieren" style="width:auto; margin:0;" onclick="event.stopPropagation(); toggleVisited('${poi.id}')">
+          </div>
+        `;
+        el.onclick = () => selectPOI(poi);
+        container.appendChild(el);
+      });
+    }
+
+    function selectPOI(poi) {
+      document.getElementById('poi-detail-container').style.display = "block";
+      document.getElementById('det-title').innerText = poi.name;
+      document.getElementById('det-desc').innerText = poi.description;
+      document.getElementById('det-hours').innerText = `🕒 ${poi.openingHours}`;
+      document.getElementById('det-fee').innerText = `💵 ${poi.fee}`;
+      
+      const webEl = document.getElementById('det-web');
+      webEl.innerHTML = poi.website ? `<a href="${poi.website}" target="_blank">🌐 Offizielle Webseite</a>` : "🌐 Keine Webseite";
+
+      if(poi.lat && poi.lon) {
+        map.setView([poi.lat, poi.lon], 15);
+        calculateRoute(poi.lat, poi.lon);
+      }
+    }
+
+    function toggleVisited(poiId) {
+      for(let r of appData.regions) {
+        let p = r.places.find(item => item.id === poiId);
+        if(p) {
+          p.visited = !p.visited;
+          break;
+        }
+      }
+      renderDayPlanList();
+      persistData();
+    }
+
+    // --- RENDERING ADMIN ---
+    function updateRegionDropdowns() {
+      const daySel = document.getElementById('day-region-select');
+      const admSel = document.getElementById('admin-region-select');
+      
+      const opts = appData.regions.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+      daySel.innerHTML = '<option value="">-- Bitte wählen --</option>' + opts;
+      admSel.innerHTML = opts;
+
+      admSel.onchange = renderAdminPlaces;
+      renderAdminPlaces();
+    }
+
+    function renderAdminPlaces() {
+      const regId = document.getElementById('admin-region-select').value;
+      const listEl = document.getElementById('admin-poi-list');
+      listEl.innerHTML = "";
+
+      const region = appData.regions.find(r => r.id === regId);
+      if(!region || !region.places.length) {
+        listEl.innerHTML = "<p>Keine Orte eingetragen.</p>";
+        return;
+      }
+
+      region.places.forEach((p, idx) => {
+        const item = document.createElement('div');
+        item.className = "poi-item";
+        item.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <input type="checkbox" ${p.visited ? 'checked' : ''} onchange="toggleAdminVisited('${region.id}', ${idx})" style="width:auto; margin-right:8px;">
+              <strong style="${p.visited ? 'text-decoration: line-through;' : ''}">${p.name}</strong>
+              <small>(${p.lat ? p.lat.toFixed(3) : 0}, ${p.lon ? p.lon.toFixed(3) : 0})</small>
+            </div>
+            <button class="btn-secondary" style="width:auto; margin:0;" onclick="deletePOI('${region.id}', ${idx})">🗑️ Löschen</button>
+          </div>
+        `;
+        listEl.appendChild(item);
+      });
+    }
+
+    function toggleAdminVisited(regId, idx) {
+      const reg = appData.regions.find(r => r.id === regId);
+      if(reg) {
+        reg.places[idx].visited = !reg.places[idx].visited;
+        renderAdminPlaces();
+        renderDayPlanList();
+        persistData();
+      }
+    }
+
+    function deletePOI(regId, idx) {
+      const reg = appData.regions.find(r => r.id === regId);
+      if(reg && confirm("Ort wirklich löschen?")) {
+        reg.places.splice(idx, 1);
+        renderAdminPlaces();
+        persistData();
+      }
+    }
+
+    function addRegion() {
+      const name = document.getElementById('new-region-name').value.trim();
+      if(!name) return;
+      const id = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      appData.regions.push({ id, name, places: [] });
+      document.getElementById('new-region-name').value = "";
+      updateRegionDropdowns();
+      persistData();
+    }
+
+    // --- GITHUB SYNC (REST API) ---
+    function loadSettings() {
+      const saved = localStorage.getItem('gh_config');
+      if(saved) {
+        ghConfig = JSON.parse(saved);
+        document.getElementById('gh-owner').value = ghConfig.owner || '';
+        document.getElementById('gh-repo').value = ghConfig.repo || '';
+        document.getElementById('gh-token').value = ghConfig.token || '';
+      }
+      const localData = localStorage.getItem('travel_data');
+      if(localData) {
+        appData = JSON.parse(localData);
+      }
+    }
+
+    function saveGithubSettings() {
+      ghConfig.owner = document.getElementById('gh-owner').value.trim();
+      ghConfig.repo = document.getElementById('gh-repo').value.trim();
+      ghConfig.token = document.getElementById('gh-token').value.trim();
+      localStorage.setItem('gh_config', JSON.stringify(ghConfig));
+      syncWithGitHub();
+    }
+
+    function persistData() {
+      localStorage.setItem('travel_data', JSON.stringify(appData));
+      syncWithGitHub(true); // Automatisch zu GitHub pushen
+    }
+
+    async function syncWithGitHub(pushOnly = false) {
+      if(!ghConfig.token || !ghConfig.owner || !ghConfig.repo) {
+        document.getElementById('sync-text').innerText = "GitHub: Lokaler Offline-Modus (Nicht eingerichtet)";
+        return;
+      }
+
+      const url = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${ghConfig.path}`;
+      const headers = {
+        "Authorization": `token ${ghConfig.token}`,
+        "Accept": "application/vnd.github.v3+json"
+      };
+
+      try {
+        document.getElementById('sync-text').innerText = "GitHub: Synchronisiere...";
+
+        // 1. Datei holen um SHA & neueste Version zu kennen
+        const getRes = await fetch(url, { headers });
+        if(getRes.ok) {
+          const fileData = await getRes.json();
+          ghConfig.sha = fileData.sha;
+
+          if(!pushOnly) {
+            // Aus GitHub laden
+            const content = decodeURIComponent(escape(atob(fileData.content)));
+            appData = JSON.parse(content);
+            localStorage.setItem('travel_data', JSON.stringify(appData));
+            updateRegionDropdowns();
+            renderDayPlanList();
+            document.getElementById('sync-text').innerText = "GitHub: Aktuell geladen ✅";
+            return;
+          }
+        }
+
+        // 2. Schreiben / Updaten auf GitHub
+        const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(appData, null, 2))));
+        const body = {
+          message: "Update travel planning data",
+          content: contentBase64,
+          sha: ghConfig.sha || undefined
+        };
+
+        const putRes = await fetch(url, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify(body)
+        });
+
+        if(putRes.ok) {
+          const putData = await putRes.json();
+          ghConfig.sha = putData.content.sha;
+          document.getElementById('sync-text').innerText = "GitHub: Erfolgreich synchronisiert ✅";
+        } else {
+          document.getElementById('sync-text').innerText = "GitHub Fehler: Schreibzugriff fehlgeschlagen.";
+        }
+      } catch (err) {
+        document.getElementById('sync-text').innerText = "GitHub Verbindung fehlgeschlagen.";
+      }
+    }
+  </script>
+</body>
+</html>
