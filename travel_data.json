@@ -674,7 +674,21 @@
     {
       "id": "eidfjord",
       "name": "Eidfjord",
-      "places": []
+      "places": [
+        {
+          "id": "poi_1790435844543",
+          "name": "Eidfjord gamle kyrkje",
+          "city": "Eidfjord",
+          "lat": 60.461624,
+          "lon": 7.0710546,
+          "description": "Eidfjord gamle kyrkje, Lægreidsvegen, Evjo, Eidfjord, Vestland, 5783, Norway",
+          "website": "https://www.eidfjordkyrkje.no/",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
+        }
+      ]
     }
   ]
 }
