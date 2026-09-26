@@ -647,13 +647,13 @@
           "id": "poi_1790435037301",
           "name": "Haugesund billedgalleri",
           "city": "Haugesund",
-          "lat": 0,
-          "lon": 0,
-          "description": "Keine Kurzbeschreibung gefunden. Nutzen Sie die Google-Links.",
+          "lat": 59.4185335,
+          "lon": 5.2634412,
+          "description": "Haugesund billedgalleri, Erling Skjalgssons gate, Haugo, Kvala, Haugesund, Rogaland, 5523, Norway",
           "website": "",
           "openingHours": "Siehe Google-Info",
-          "fee": "Siehe Google-Info",
-          "transit": "Mit ÖV erreichbar",
+          "fee": "yes",
+          "transit": "Haltestelle \"Havnaberg seniorsenter (B)\" (< 350m)",
           "visited": false
         },
         {
