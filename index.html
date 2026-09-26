@@ -68,7 +68,6 @@
 
     .editable-field { background: #fafafa; border: 1px dashed #ccc; padding: 6px; border-radius: 4px; font-size: 0.85rem; }
 
-    /* Modal Styling */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 12px; }
     .modal-content { background: white; width: 100%; max-width: 480px; border-radius: 10px; padding: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
 
@@ -132,18 +131,17 @@
           </div>
           <div id="day-poi-list"></div>
 
-          <!-- Detailkarte (mit direkter Bearbeitung für Ziel & Stadt) -->
+          <!-- Detailkarte -->
           <div id="detail-card" class="card" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <span style="font-weight:bold; font-size:0.95rem; color:var(--primary);">Ort-Details & Bearbeiten</span>
+              <span style="font-weight:bold; font-size:0.95rem; color:var(--primary);">Ort-Details</span>
               <div style="display:flex; gap:4px;">
                 <button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 8px;" id="det-update-btn">🔄 Auto-Update</button>
                 <button class="btn btn-primary" style="font-size:0.75rem; padding:4px 8px;" id="det-save-btn" onclick="saveDirectEdits()">💾 Sichern</button>
               </div>
             </div>
 
-            <!-- Ziel & Stadt direkt editierbar -->
-            <label style="font-size:0.8rem; color:#666; margin-top:2px;">Sehenswürdigkeit / Ziel:</label>
+            <label style="font-size:0.8rem; color:#666;">Sehenswürdigkeit / Ziel / Adresse:</label>
             <input type="text" id="det-name-input" style="margin-bottom:6px;">
 
             <label style="font-size:0.8rem; color:#666;">Stadt / Ort:</label>
@@ -155,7 +153,6 @@
             <div style="font-size:0.8rem; color:#666; margin-top:2px;">Klicken zum schnellen Anpassen:</div>
             <div id="det-badges"></div>
 
-            <!-- Google Links -->
             <div class="google-actions">
               <a id="link-google" target="_blank">🔍 Google Suche</a>
               <a id="link-hours" target="_blank">🕒 Google Öffnungszeiten</a>
@@ -184,25 +181,25 @@
       <div class="card">
         <h4>Neues Gebiet / Region anlegen</h4>
         <div style="display:flex; gap:6px;">
-          <input type="text" id="admin-new-region" placeholder="z.B. Cornwall, Bayern, Südnorwegen">
+          <input type="text" id="admin-new-region" placeholder="z.B. Dänemark, Kopenhagen, Bayern">
           <button class="btn btn-primary" onclick="addRegion()">Anlegen</button>
         </div>
       </div>
 
       <div class="card">
-        <h4>Neuen Ort anlegen (Ziel & Stadt)</h4>
+        <h4>Neuen Ort anlegen</h4>
         <label style="font-size:0.85rem;">Region / Gebiet:</label>
         <select id="admin-region-select" onchange="syncAdminCityDefault()"></select>
 
-        <label style="font-size:0.85rem;">Ziel / Sehenswürdigkeit:</label>
-        <input type="text" id="admin-new-poi" placeholder="z.B. Schloss Neuschwanstein, Eden Project">
+        <label style="font-size:0.85rem;">Ziel / Adresse / Sehenswürdigkeit:</label>
+        <input type="text" id="admin-new-poi" placeholder="z.B. Studiestræde 57 oder Tivoli">
 
-        <label style="font-size:0.85rem;">Stadt / Ort des Ziels:</label>
-        <input type="text" id="admin-new-city" placeholder="z.B. Schwangau, Bodelva / St Austell">
+        <label style="font-size:0.85rem;">Stadt / Ort:</label>
+        <input type="text" id="admin-new-city" placeholder="z.B. Kopenhagen">
 
         <button class="btn btn-primary btn-block" id="btn-add-poi" style="margin-top:6px;" onclick="searchAndAddPOI()">Recherche & Hinzufügen</button>
         <div id="admin-search-status" style="font-size:0.8rem; color:#555; margin-top:4px;">
-          Kombiniert Wikivoyage, Wikipedia, Wikidata & OpenStreetMap.
+          Sucht präzise nach exakter Hausnummer, Straße oder Attraktion.
         </div>
       </div>
 
@@ -229,7 +226,6 @@
     </div>
   </main>
 
-  <!-- Mobile Bottom Nav -->
   <nav class="bottom-nav">
     <button class="active" id="nav-day" onclick="switchNav('day')">
       <span class="icon">📅</span>Tagesplan
@@ -248,7 +244,7 @@
       <h4>Ort im Admin bearbeiten</h4>
       <input type="hidden" id="modal-poi-id">
       
-      <label style="font-size:0.85rem;">Sehenswürdigkeit / Ziel:</label>
+      <label style="font-size:0.85rem;">Ziel / Adresse / Sehenswürdigkeit:</label>
       <input type="text" id="modal-name">
 
       <label style="font-size:0.85rem;">Stadt / Ort:</label>
@@ -280,7 +276,7 @@
     // --- DATENMODELL ---
     let appData = {
       regions: [
-        { id: "cornwall", name: "Cornwall", places: [] }
+        { id: "copenhagen", name: "Kopenhagen", places: [] }
       ]
     };
     let ghConfig = { owner: "", repo: "", token: "", path: "travel_data.json", sha: null };
@@ -297,7 +293,7 @@
     });
 
     function initMap() {
-      map = L.map('map', { zoomControl: false }).setView([50.2660, -5.0527], 10);
+      map = L.map('map', { zoomControl: false }).setView([55.6761, 12.5683], 13);
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -357,7 +353,7 @@
       const reg = appData.regions.find(r => r.id === regId);
       const cityInput = document.getElementById('admin-new-city');
       if (reg && !cityInput.value) {
-        cityInput.placeholder = `z.B. Stadt in ${reg.name}`;
+        cityInput.placeholder = `z.B. ${reg.name}`;
       }
     }
 
@@ -447,7 +443,7 @@
       } catch(e) { }
     }
 
-    // --- RECHERCHE ---
+    // --- PRÄZISE RECHERCHE: OSM-GEODATEN ZUERST ---
     async function deepSearchPOI(poiName, cityName, regionName) {
       const info = {
         lat: 0,
@@ -459,125 +455,81 @@
         transit: ""
       };
 
-      const cityOrRegion = (cityName || regionName || "").split(',')[0].trim();
-      const combinedSearch = cityName ? `${poiName} ${cityName}` : `${poiName} ${regionName}`;
+      const cityClean = (cityName || regionName || "").trim();
 
-      // 1. Wikivoyage
-      try {
-        const wvUrl = `https://de.wikivoyage.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(combinedSearch)}&format=json&origin=*`;
-        const wvRes = await fetch(wvUrl);
-        const wvData = await wvRes.json();
-        
-        if (wvData.query?.search?.length > 0) {
-          const pageTitle = wvData.query.search[0].title;
-          const parseUrl = `https://de.wikivoyage.org/w/api.php?action=parse&page=${encodeURIComponent(pageTitle)}&prop=wikitext&format=json&origin=*`;
-          const parseRes = await fetch(parseUrl);
-          const parseData = await parseRes.json();
-          const wikitext = parseData.parse?.wikitext?.['*'] || '';
+      // 1. SCHRITT: OPENSTREETMAP NOMINATIM ZUERST (Genaue Adresse & Hausnummer)
+      // Suchkaskade: Adresse mit Stadt -> nur Name
+      const searchQueries = [
+        `${poiName}, ${cityClean}`,
+        `${poiName} ${cityClean}`,
+        poiName
+      ];
 
-          const lines = wikitext.split('\n');
-          for (let line of lines) {
-            if (line.toLowerCase().includes(poiName.toLowerCase())) {
-              const hoursMatch = line.match(/\|\s*hours\s*=\s*([^\|\}]+)/i);
-              if (hoursMatch) info.openingHours = hoursMatch[1].trim();
+      for (let q of searchQueries) {
+        try {
+          const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&extratags=1&limit=1&q=${encodeURIComponent(q)}`);
+          const nomData = await nomRes.json();
+          if (nomData && nomData.length > 0) {
+            const item = nomData[0];
+            info.lat = parseFloat(item.lat);
+            info.lon = parseFloat(item.lon);
 
-              const priceMatch = line.match(/\|\s*price\s*=\s*([^\|\}]+)/i);
-              if (priceMatch) info.fee = priceMatch[1].trim();
-
-              const urlMatch = line.match(/\|\s*url\s*=\s*([^\|\}]+)/i);
-              if (urlMatch) info.website = urlMatch[1].trim();
-
-              const dirMatch = line.match(/\|\s*directions\s*=\s*([^\|\}]+)/i);
-              if (dirMatch) info.transit = dirMatch[1].trim();
-
-              const latMatch = line.match(/\|\s*lat\s*=\s*([0-9\.\-]+)/i);
-              const lonMatch = line.match(/\|\s*long?\s*=\s*([0-9\.\-]+)/i);
-              if (latMatch && lonMatch) {
-                info.lat = parseFloat(latMatch[1]);
-                info.lon = parseFloat(lonMatch[1]);
-              }
-              break;
+            if (item.display_name) {
+              info.description = item.display_name;
             }
-          }
-        }
-      } catch (e) { }
 
-      // 2. Wikipedia & Wikidata
+            if (item.extratags) {
+              if (item.extratags.opening_hours) info.openingHours = item.extratags.opening_hours;
+              if (item.extratags.fee) info.fee = item.extratags.fee;
+              if (item.extratags.website) info.website = item.extratags.website;
+            }
+            break; // Exakter Treffer gefunden!
+          }
+        } catch(e) {}
+      }
+
+      // 2. SCHRITT: WIKIPEDIA / WIKIVOYAGE NUR WENN ES EIN ECHTER ARTIKEL IST
+      // (Verhindert, dass fremde Plätze wie Radhuspladsen genommen werden)
       try {
-        const wpSearchUrl = `https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(combinedSearch)}&format=json&origin=*`;
+        const wpSearchUrl = `https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(poiName + ' ' + cityClean)}&format=json&origin=*`;
         const wpRes = await fetch(wpSearchUrl);
         const wpData = await wpRes.json();
 
         if (wpData.query?.search?.length > 0) {
-          const wpTitle = wpData.query.search[0].title;
-          const detailUrl = `https://de.wikipedia.org/w/api.php?action=query&prop=extracts|coordinates|pageprops&inprop=url&exintro=1&explaintext=1&titles=${encodeURIComponent(wpTitle)}&format=json&origin=*`;
-          const dRes = await fetch(detailUrl);
-          const dData = await dRes.json();
-          const pages = dData.query?.pages || {};
-          const firstKey = Object.keys(pages)[0];
+          const topResult = wpData.query.search[0];
+          // Prüfen ob der gefundene Wikipedia-Titel zum gesuchten Begriff passt
+          const cleanSearchTerm = poiName.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const cleanTitle = topResult.title.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-          if (firstKey && firstKey !== "-1") {
-            const p = pages[firstKey];
-            if (!info.description && p.extract) {
-              info.description = p.extract.slice(0, 350) + "...";
-            }
-            if (!info.lat && p.coordinates?.length > 0) {
-              info.lat = p.coordinates[0].lat;
-              info.lon = p.coordinates[0].lon;
-            }
+          if (cleanTitle.includes(cleanSearchTerm) || cleanSearchTerm.includes(cleanTitle)) {
+            const detailUrl = `https://de.wikipedia.org/w/api.php?action=query&prop=extracts|info&inprop=url&exintro=1&explaintext=1&titles=${encodeURIComponent(topResult.title)}&format=json&origin=*`;
+            const dRes = await fetch(detailUrl);
+            const dData = await dRes.json();
+            const pages = dData.query?.pages || {};
+            const firstKey = Object.keys(pages)[0];
 
-            const wikibaseItem = p.pageprops?.wikibase_item;
-            if (wikibaseItem && !info.website) {
-              try {
-                const wdRes = await fetch(`https://www.wikidata.org/wiki/Special:EntityData/${wikibaseItem}.json`);
-                const wdData = await wdRes.json();
-                const claims = wdData.entities?.[wikibaseItem]?.claims;
-                if (claims?.P856?.length > 0) {
-                  info.website = claims.P856[0].mainsnak?.datavalue?.value;
-                }
-              } catch(e) {}
+            if (firstKey && firstKey !== "-1") {
+              const p = pages[firstKey];
+              if (p.extract) {
+                info.description = p.extract.slice(0, 350) + "...";
+              }
+              if (!info.website && p.fullurl) {
+                info.website = p.fullurl;
+              }
             }
           }
         }
       } catch (e) { }
 
-      // 3. OpenStreetMap
-      if (!info.lat || !info.lon || !info.openingHours) {
-        const queries = [
-          `${poiName}, ${cityOrRegion}`,
-          `${poiName} ${cityOrRegion}`,
-          poiName
-        ];
-        for (let q of queries) {
-          try {
-            const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&extratags=1&limit=1&q=${encodeURIComponent(q)}`);
-            const nomData = await nomRes.json();
-            if (nomData && nomData.length > 0) {
-              const item = nomData[0];
-              if (!info.lat) {
-                info.lat = parseFloat(item.lat);
-                info.lon = parseFloat(item.lon);
-              }
-              if (item.extratags) {
-                if (!info.openingHours && item.extratags.opening_hours) info.openingHours = item.extratags.opening_hours;
-                if (!info.fee && item.extratags.fee) info.fee = item.extratags.fee;
-                if (!info.website && item.extratags.website) info.website = item.extratags.website;
-              }
-              break;
-            }
-          } catch(e) {}
-        }
-      }
-
-      // 4. ÖV
+      // 3. SCHRITT: ÖV-HALTESTELLE IM UMKREIS (Overpass)
       if (info.lat && info.lon && !info.transit) {
         try {
-          const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:450,${info.lat},${info.lon})[highway=bus_stop];out 1;`;
+          const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:350,${info.lat},${info.lon})[highway=bus_stop];out 1;`;
           const opRes = await fetch(overpassUrl);
           const opData = await opRes.json();
           if (opData.elements?.length > 0) {
             const stopName = opData.elements[0].tags?.name || "ÖV-Station";
-            info.transit = `Haltestelle "${stopName}" (< 450m)`;
+            info.transit = `Haltestelle "${stopName}" (< 350m)`;
           }
         } catch(e) {}
       }
@@ -597,13 +549,13 @@
       const city = document.getElementById('admin-new-city').value.trim();
       const statusEl = document.getElementById('admin-search-status');
 
-      if (!name || !regId) return alert("Region und Ziel/Sehenswürdigkeit sind erforderlich!");
+      if (!name || !regId) return alert("Region und Ziel/Adresse sind erforderlich!");
 
       const region = appData.regions.find(r => r.id === regId);
       const btn = document.getElementById('btn-add-poi');
       btn.disabled = true;
       btn.innerText = "Recherchiere...";
-      statusEl.innerText = `Suche nach "${name}" in "${city || region.name}"...`;
+      statusEl.innerText = `Präzise Suche nach "${name}" in "${city || region.name}"...`;
 
       try {
         const info = await deepSearchPOI(name, city, region.name);
@@ -628,8 +580,8 @@
         renderAdminList();
         updateStartPoiDropdown();
         persistData();
-        statusEl.innerText = info.lat ? `✅ Gefunden & eingetragen: [${info.lat.toFixed(4)}, ${info.lon.toFixed(4)}]` : `⚠️ Angelegt (Keine Geodaten gefunden).`;
-        alert(`Ort "${name}" (${newPOI.city}) erfolgreich hinzugefügt!`);
+        statusEl.innerText = info.lat ? `✅ Gefunden & platziert: [${info.lat.toFixed(5)}, ${info.lon.toFixed(5)}]` : `⚠️ Angelegt (Keine Geodaten gefunden).`;
+        alert(`Ort "${name}" (${newPOI.city}) erfolgreich angelegt!`);
       } catch(e) {
         alert("Fehler beim Abrufen: " + e.message);
       } finally {
@@ -669,7 +621,7 @@
       alert(`Daten zu "${targetPOI.name}" aktualisiert!`);
     }
 
-    // --- DIREKTES SCHNELL-SPEICHERN IM TAGESPLAN (Ziel, Stadt, Text) ---
+    // --- DIREKTES SCHNELL-SPEICHERN IM TAGESPLAN ---
     function saveDirectEdits() {
       if (!selectedPoi) return;
 
@@ -678,7 +630,7 @@
       const newDesc = document.getElementById('det-desc-input').value.trim();
 
       if (!newName) {
-        alert("Der Name der Sehenswürdigkeit darf nicht leer sein.");
+        alert("Der Name darf nicht leer sein.");
         return;
       }
 
@@ -693,7 +645,7 @@
       onRegionChange();
       selectPoi(selectedPoi);
 
-      alert("Änderungen erfolgreich gesichert!");
+      alert("Änderungen gesichert!");
     }
 
     function editBadgePrompt(fieldKey, label) {
@@ -798,8 +750,19 @@
         const bounds = [];
         region.places.forEach(p => {
           if(p.lat && p.lon && p.lat !== 0) {
-            const m = L.marker([p.lat, p.lon]).addTo(markersLayer).bindPopup(`<b>${p.name}</b><br><small>${p.city || ''}</small>`);
+            // Marker ist draggable (verschiebbar für Feinjustierung)
+            const m = L.marker([p.lat, p.lon], { draggable: true }).addTo(markersLayer)
+              .bindPopup(`<b>${p.name}</b><br><small>${p.city || ''}</small>`);
+            
             m.on('click', () => selectPoi(p));
+            m.on('dragend', (e) => {
+              const newPos = e.target.getLatLng();
+              p.lat = newPos.lat;
+              p.lon = newPos.lng;
+              persistData();
+              if (selectedPoi && selectedPoi.id === p.id) selectPoi(p);
+            });
+
             bounds.push([p.lat, p.lon]);
           }
         });
@@ -857,7 +820,7 @@
 
       document.getElementById('det-update-btn').onclick = () => autoUpdatePOI(poi.id);
 
-      // Google Links dynamisch generieren mit Ziel & Stadt
+      // Google Links dynamisch mit Ziel & Stadt
       document.getElementById('link-google').href = `https://www.google.com/search?q=${encodeURIComponent(targetQuery)}`;
       document.getElementById('link-hours').href = `https://www.google.com/search?q=${encodeURIComponent(targetQuery + ' öffnungszeiten eintritt')}`;
       
@@ -875,14 +838,15 @@
       // Badges
       const badgesEl = document.getElementById('det-badges');
       badgesEl.innerHTML = `
-        <span class="badge ${poi.lat ? 'ok' : 'warn'}">📍 ${poi.lat ? poi.lat.toFixed(4) + ', ' + poi.lon.toFixed(4) : 'Keine Koord'}</span>
+        <span class="badge ${poi.lat ? 'ok' : 'warn'}">📍 ${poi.lat ? poi.lat.toFixed(5) + ', ' + poi.lon.toFixed(5) : 'Keine Koord'}</span>
+        <span class="badge" onclick="editBadgePrompt('city', 'Stadt / Ort')">🏙️ Stadt: ${poi.city || 'k.A.'} ✏️</span>
         <span class="badge" onclick="editBadgePrompt('openingHours', 'Öffnungszeiten')">🕒 ${poi.openingHours || 'k.A.'} ✏️</span>
         <span class="badge" onclick="editBadgePrompt('fee', 'Eintrittspreis')">💵 ${poi.fee || 'k.A.'} ✏️</span>
         <span class="badge" onclick="editBadgePrompt('transit', 'ÖV-Anbindung')">🚆 ${poi.transit || 'k.A.'} ✏️</span>
       `;
 
       if(poi.lat && poi.lon && poi.lat !== 0) {
-        map.setView([poi.lat, poi.lon], 15);
+        map.setView([poi.lat, poi.lon], 16);
         if(currentPosition) {
           calcRoute(poi.lat, poi.lon);
         } else {
@@ -937,7 +901,7 @@
             <div>
               <strong style="${p.visited ? 'text-decoration: line-through;' : ''}">${p.name}</strong>
               <div style="font-size:0.75rem; color:#555;">🏙️ ${p.city || region.name}</div>
-              <div style="font-size:0.72rem; color:${p.lat ? '#666' : 'red'};">${p.lat ? `[${p.lat.toFixed(3)},${p.lon.toFixed(3)}]` : '⚠️ Keine Koord'}</div>
+              <div style="font-size:0.72rem; color:${p.lat ? '#666' : 'red'};">${p.lat ? `[${p.lat.toFixed(4)},${p.lon.toFixed(4)}]` : '⚠️ Keine Koord'}</div>
             </div>
             <div style="display:flex; gap:4px;">
               <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="openAdminEditModal('${p.id}')">✏️ Edit</button>
