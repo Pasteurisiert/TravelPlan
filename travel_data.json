@@ -292,12 +292,12 @@
           "id": "poi_1790431913824",
           "name": "M/S Museet for Søfart",
           "city": "Helsingør",
-          "lat": 0,
-          "lon": 0,
-          "description": "Keine Kurzbeschreibung gefunden. Nutzen Sie die Google-Links.",
-          "website": "",
-          "openingHours": "Siehe Google-Info",
-          "fee": "Siehe Google-Info",
+          "lat": 56.0389368,
+          "lon": 12.6162684,
+          "description": "M/S Museet for Søfart, Ny Kronborgvej, Elsinore, Helsingør Municipality, Capital Region of Denmark, 3000, Denmark",
+          "website": "https://mfs.dk/",
+          "openingHours": "Jan-Jun:Tu-Su 11:00-17:00; Jul-Aug 11:00-18:00; Sep-Dec:Tu-Su 11:00-17:00",
+          "fee": "yes",
           "transit": "Mit ÖV erreichbar",
           "visited": false
         }
