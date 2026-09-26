@@ -41,6 +41,17 @@
           "openingHours": "k.A.",
           "fee": "k.A.",
           "visited": false
+        },
+        {
+          "id": "poi_1790423318612",
+          "name": "Amalienborg Slot",
+          "lat": 0,
+          "lon": 0,
+          "description": "Keine Kurzbeschreibung gefunden.",
+          "website": "https://google.com/search?q=Amalienborg%20Slot%20Kopenhagen",
+          "openingHours": "k.A.",
+          "fee": "k.A.",
+          "visited": false
         }
       ]
     }
