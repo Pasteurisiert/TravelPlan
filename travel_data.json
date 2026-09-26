@@ -142,18 +142,6 @@
           "transit": "Mit ÖV erreichbar"
         },
         {
-          "id": "poi_1790423522140",
-          "name": "Helsingør Museum für Seefahrt",
-          "lat": 56.03902778,
-          "lon": 12.62180556,
-          "description": "Schloss Kronborg (dänisch Kronborg Slot [ˈkʀoːnbɔːʔʀ]; deutsch veraltet Kroneburg) ist eine Festung in Helsingør auf der dänischen Insel Seeland. Kronborg liegt auf einer Landzunge am äußersten nordöstlichen Ende der Insel Seeland. Nur etwa vier Kilometer von der schwedischen Küste bei Helsingborg entfernt, diente die Festung zur Überwachung der Ei...",
-          "website": "https://www.kronborg.dk",
-          "openingHours": "k.A.",
-          "fee": "k.A.",
-          "visited": false,
-          "transit": "Mit ÖV erreichbar"
-        },
-        {
           "id": "poi_1790423552905",
           "name": "Hillerød Frederiksborg",
           "lat": 55.88,
