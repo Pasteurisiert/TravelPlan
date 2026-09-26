@@ -182,6 +182,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790430473390",
+          "name": "Domkirke",
+          "city": "Roskilde",
+          "lat": 55.6426437,
+          "lon": 12.0804349,
+          "description": "Roskilde Cathedral, Domkirkepladsen, Sankt Agnes Huse, Roskilde, Roskilde Municipality, Region Zealand, 4000, Denmark",
+          "website": "https://roskildedomkirke.dk/",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Haltestelle \"Sankt Peders Stræde\" (< 350m)",
+          "visited": false
         }
       ]
     }
