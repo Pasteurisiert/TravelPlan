@@ -142,18 +142,6 @@
           "transit": "Mit ÖV erreichbar"
         },
         {
-          "id": "poi_1790423601059",
-          "name": "Roskilde Domkirke",
-          "lat": 55.67933333,
-          "lon": 12.5725,
-          "description": "Die Frauenkirche (dänisch Vor Frue Kirke oder Frue Kirke [ˈfʀuːə ˈkiʀgə]) von Kopenhagen, auch Dom zu Kopenhagen (dänisch Københavns Domkirke), ist die Hauptkirche des Bistums Kopenhagen der Dänischen Volkskirche. Sie wurde vom Architekten Christian Frederik Hansen im klassizistischen Stil entworfen und 1829 fertiggestellt....",
-          "website": "http://www.koebenhavnsdomkirke.dk",
-          "openingHours": "Mo–Sa 10:00 – 17:00, So 13:00 – 17:00 (saisonal abweichend)",
-          "fee": "ca. 10 € (75 DKK), Kinder unter 18 Jahren frei",
-          "visited": false,
-          "transit": "Haltestelle \"Rådhuspladsen St.\" (< 450m)"
-        },
-        {
           "id": "poi_1790423618249",
           "name": "Roskilde Vikingeskibsmuseet",
           "lat": 55.6508,
