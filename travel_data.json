@@ -169,6 +169,19 @@
           "fee": "yes",
           "transit": "Haltestelle \"Louisiana\" (< 350m)",
           "visited": false
+        },
+        {
+          "id": "poi_1790430371342",
+          "name": "Frederiksborg",
+          "city": "Hillerød",
+          "lat": 55.9350553,
+          "lon": 12.3017448,
+          "description": "Schloss Frederiksborg (dänisch Frederiksborg Slot) ist ein Wasserschloss in Hillerød auf der dänischen Insel Seeland. Es gilt als größtes und bedeutendstes Bauwerk der nordischen Renaissance und beherbergt heute das Dänische Nationalhistorische Museum....",
+          "website": "https://www.slke.dk/ejendomme/drift-af-slotte-og-haver/liste-over-ejendomme/frederiksborg-slot/",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
