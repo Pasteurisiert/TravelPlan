@@ -741,6 +741,11 @@
           "visited": false
         }
       ]
+    },
+    {
+      "id": "hamburg",
+      "name": "Hamburg",
+      "places": []
     }
   ]
 }
