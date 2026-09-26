@@ -485,13 +485,13 @@
           "id": "poi_1790434212621",
           "name": "Wittgenstein's Hus",
           "city": "Skjolden",
-          "lat": 50.943319,
-          "lon": 8.0553942,
-          "description": "De Hut, 28, Hüttentaler Straße, Unglinghausen, Netphen, Kreis Siegen-Wittgenstein, North Rhine-Westphalia, 57250, Germany",
+          "lat": 50.9165437,
+          "lon": 8.0099405,
+          "description": "Johann-Hus-Straße, Geisweid, Niedersetzen, Siegen, Kreis Siegen-Wittgenstein, North Rhine-Westphalia, 57078, Germany",
           "website": "",
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
-          "transit": "Mit ÖV erreichbar",
+          "transit": "Haltestelle \"Geisweid Thymianweg\" (< 350m)",
           "visited": false
         },
         {
