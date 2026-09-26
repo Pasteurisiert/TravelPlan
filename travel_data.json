@@ -485,13 +485,13 @@
           "id": "poi_1790434212621",
           "name": "Østerrike",
           "city": "Skjolden",
-          "lat": 48.2034488,
-          "lon": 16.3942741,
-          "description": "",
-          "website": "",
+          "lat": 61.4874764,
+          "lon": 7.6313628,
+          "description": "Østerrike ist ein denkmalgeschütztes Blockhaus in der norwegischen Kommune Luster in der Provinz Vestland. Es ist bekannt als Wohnhaus des Philosophen Ludwig Wittgenstein....",
+          "website": "https://de.wikipedia.org/wiki/%C3%98sterrike",
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
-          "transit": "Haltestelle \"Rochusgasse\" (< 350m)",
+          "transit": "Mit ÖV erreichbar",
           "visited": false
         },
         {
