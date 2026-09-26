@@ -506,6 +506,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790434246995",
+          "name": "Dale kyrkje",
+          "city": "Skjolden",
+          "lat": 61.4412687,
+          "lon": 7.455327,
+          "description": "Dale kyrkje, Lustravegen, Dale, Luster, Vestland, 6872, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Haltestelle \"Luster\" (< 350m)",
+          "visited": false
         }
       ]
     }
