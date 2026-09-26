@@ -532,6 +532,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790434275387",
+          "name": "Sognefjellet",
+          "city": "Skjolden",
+          "lat": 61.556538,
+          "lon": 7.9475,
+          "description": "Sognefjellet fylkesgrensa, Sognefjellsvegen, Luster, Vestland, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Haltestelle \"Sognefjellet fylkesgrensa\" (< 350m)",
+          "visited": false
         }
       ]
     }
