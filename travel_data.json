@@ -487,6 +487,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790432755843",
+          "name": "Måløyraid Senteret",
+          "city": "Måløy",
+          "lat": 0,
+          "lon": 0,
+          "description": "Keine Kurzbeschreibung gefunden. Nutzen Sie die Google-Links.",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
