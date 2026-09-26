@@ -107,6 +107,17 @@
           "openingHours": "Tu-We, Fr-Su 10:00-18:00; Th 10:00-20:00",
           "fee": "k.A.",
           "visited": false
+        },
+        {
+          "id": "poi_1790423456189",
+          "name": "Humlebæk Louisiana",
+          "lat": 0,
+          "lon": 0,
+          "description": "Keine Kurzbeschreibung gefunden.",
+          "website": "https://google.com/search?q=Humleb%C3%A6k%20Louisiana%20Kopenhagen",
+          "openingHours": "k.A.",
+          "fee": "k.A.",
+          "visited": false
         }
       ]
     }
