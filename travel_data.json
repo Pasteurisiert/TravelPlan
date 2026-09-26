@@ -545,6 +545,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Sognefjellet fylkesgrensa\" (< 350m)",
           "visited": false
+        },
+        {
+          "id": "poi_1790434776500",
+          "name": "Skjolden",
+          "city": "Skjolden",
+          "lat": 61.4902296,
+          "lon": 7.6003105,
+          "description": "Skjolden ist ein Tettsted und liegt in der norwegischen Kommune Luster in der Provinz Vestland....",
+          "website": "https://de.wikipedia.org/wiki/Skjolden",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
