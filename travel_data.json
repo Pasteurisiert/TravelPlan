@@ -162,6 +162,17 @@
           "openingHours": "k.A.",
           "fee": "k.A.",
           "visited": false
+        },
+        {
+          "id": "poi_1790423601059",
+          "name": "Roskilde Domkirke",
+          "lat": 0,
+          "lon": 0,
+          "description": "Keine Kurzbeschreibung gefunden.",
+          "website": "https://google.com/search?q=Roskilde%20Domkirke%20Kopenhagen",
+          "openingHours": "k.A.",
+          "fee": "k.A.",
+          "visited": false
         }
       ]
     }
