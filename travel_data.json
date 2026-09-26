@@ -16,6 +16,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790430770852",
+          "name": "Edvard-Grieg-Museum",
+          "city": "Troldhaugen",
+          "lat": 60.319623,
+          "lon": 5.329455,
+          "description": "Troldhaugen ist der Name des Hauses des norwegischen Komponisten Edvard Grieg und dessen Frau Nina. Es liegt in Hop im Stadtteil Fana im Süden beider Heimatstadt Bergen am Ufer des Nordåsvannet. Sie lebten dort von 1885 bis zu seinem Tode im Jahre 1907. Ihrer beiden sterblichen Überreste ruhen im Inneren eines Berggrabes in der Nähe des Hauses. Das...",
+          "website": "https://www.griegmuseum.no/",
+          "openingHours": "Jan-Apr: Mo-Su 10:00-16:00; May-Sep: Mo-Su 09:00-18:00; Oct-Dec: Mo-Su 10:00-16:00",
+          "fee": "yes",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     },
