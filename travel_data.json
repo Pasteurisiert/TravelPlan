@@ -726,6 +726,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790435914652",
+          "name": "Eidfjord",
+          "city": "Eidfjord",
+          "lat": 60.4667799,
+          "lon": 7.0701188,
+          "description": "Eidfjord, Vestland, 5783, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
