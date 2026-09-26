@@ -118,6 +118,17 @@
           "openingHours": "k.A.",
           "fee": "k.A.",
           "visited": false
+        },
+        {
+          "id": "poi_1790423498131",
+          "name": "Helsingør Kronborg Schloss",
+          "lat": 0,
+          "lon": 0,
+          "description": "Keine Kurzbeschreibung gefunden.",
+          "website": "https://google.com/search?q=Helsing%C3%B8r%20Kronborg%20Schloss%20Kopenhagen",
+          "openingHours": "k.A.",
+          "fee": "k.A.",
+          "visited": false
         }
       ]
     }
