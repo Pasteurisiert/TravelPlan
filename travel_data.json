@@ -700,6 +700,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790435872103",
+          "name": "Vøringsfossen",
+          "city": "Eidfjord",
+          "lat": 60.4270509,
+          "lon": 7.2508812,
+          "description": "Vøringsfossen ist ein Wasserfall in Norwegen. Die Fallhöhe beträgt 183 m, die größte Freifallstrecke des Wassers 145 m. Der Wasserfall liegt am Westrand der Hardangervidda in Eidfjord unweit des Rv 7, der Oslo mit Bergen verbindet.\nDer Durchfluss des kleinen Flusses Bjoreio im Tal Sysendalen, in dessen Verlauf der Vøringsfossen liegt, ist seit den ...",
+          "website": "https://de.wikipedia.org/wiki/V%C3%B8ringsfossen",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Haltestelle \"Fossatromma\" (< 350m)",
+          "visited": false
         }
       ]
     }
