@@ -4,6 +4,11 @@
       "id": "bergen-no",
       "name": "Bergen, Norwegen",
       "places": []
+    },
+    {
+      "id": "kopenhagen",
+      "name": "Kopenhagen",
+      "places": []
     }
   ]
 }
