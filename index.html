@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TravelPlan Mobile Pro</title>
+  <title>TravelPlan Mobile Pro - Live GPS</title>
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -17,6 +17,7 @@
       --text: #212529;
       --border: #dee2e6;
       --success: #28a745;
+      --live: #e53935;
     }
 
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -51,8 +52,16 @@
     button.btn { padding: 9px 12px; border-radius: 6px; border: none; font-size: 0.88rem; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
     .btn-primary { background: var(--primary); color: white; }
     .btn-secondary { background: #e9ecef; color: #333; }
+    .btn-live { background: #ffebee; color: var(--live); border: 1px solid var(--live); }
+    .btn-live.active { background: var(--live); color: white; animation: pulse 1.5s infinite; }
     .btn-danger { background: #dc3545; color: white; }
     .btn-block { width: 100%; }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.75; }
+      100% { opacity: 1; }
+    }
 
     .poi-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; cursor: pointer; }
     .poi-card.active { border: 2px solid var(--primary); background: #f0f7ff; }
@@ -104,18 +113,18 @@
             <select id="day-region-select" onchange="onRegionChange()"></select>
           </div>
 
-          <!-- Standort / Startpunkt -->
+          <!-- Standort / Live GPS Tracking -->
           <div class="card">
-            <div style="font-weight:bold; font-size:0.9rem; margin-bottom:6px;">📍 Startpunkt / Standort</div>
+            <div style="font-weight:bold; font-size:0.9rem; margin-bottom:6px;">📍 Live-Standort / Startpunkt</div>
             
             <label style="font-size:0.8rem; color:#444;">Aus Liste starten (auch besuchte):</label>
             <select id="start-poi-select" onchange="onStartPoiSelect(this.value)">
               <option value="">-- Ort als Start wählen --</option>
             </select>
 
-            <div style="font-size:0.8rem; color:#444; margin-top:4px;">Oder frei festlegen:</div>
+            <div style="font-size:0.8rem; color:#444; margin-top:4px;">Oder Live-Tracking aktivieren:</div>
             <div style="display:flex; gap:6px;">
-              <button class="btn btn-secondary" style="flex:1;" onclick="getGPSLocation()">📡 GPS</button>
+              <button class="btn btn-live" id="btn-live-gps" style="flex:1;" onclick="toggleLiveGPS()">🔴 Live GPS AN</button>
               <button class="btn btn-secondary" style="flex:1;" id="btn-pick" onclick="toggleMapPick()">🗺️ Klick</button>
             </div>
             <input type="text" id="manual-loc-input" placeholder="Adresse eingeben..." style="margin-top:6px;" onchange="geocodeAddress(this.value)">
@@ -134,7 +143,7 @@
           <!-- Detailkarte -->
           <div id="detail-card" class="card" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-              <span style="font-weight:bold; font-size:0.95rem; color:var(--primary);">Ort-Details</span>
+              <span style="font-weight:bold; font-size:0.95rem; color:var(--primary);">Ort-Details & Bearbeiten</span>
               <div style="display:flex; gap:4px;">
                 <button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 8px;" id="det-update-btn">🔄 Auto-Update</button>
                 <button class="btn btn-primary" style="font-size:0.75rem; padding:4px 8px;" id="det-save-btn" onclick="saveDirectEdits()">💾 Sichern</button>
@@ -160,9 +169,9 @@
               <a id="link-web" target="_blank">🌐 Offizielle Website</a>
             </div>
 
-            <!-- Route -->
+            <!-- Live-aktualisierte Route -->
             <div id="route-box" style="margin-top:10px; background:#e8f5e9; border:1px solid #c8e6c9; border-radius:6px; padding:8px; font-size:0.85rem; display:none;">
-              <strong>Weg vom Startpunkt:</strong>
+              <strong>Live-Weg vom Standort:</strong>
               <div id="route-calc-text">Berechnung...</div>
             </div>
           </div>
@@ -181,7 +190,7 @@
       <div class="card">
         <h4>Neues Gebiet / Region anlegen</h4>
         <div style="display:flex; gap:6px;">
-          <input type="text" id="admin-new-region" placeholder="z.B. Dänemark, Kopenhagen, Bayern">
+          <input type="text" id="admin-new-region" placeholder="z.B. Cornwall, Dänemark, Bayern">
           <button class="btn btn-primary" onclick="addRegion()">Anlegen</button>
         </div>
       </div>
@@ -273,7 +282,6 @@
   </div>
 
   <script>
-    // --- DATENMODELL ---
     let appData = {
       regions: [
         { id: "copenhagen", name: "Kopenhagen", places: [] }
@@ -284,6 +292,11 @@
     let selectedPoi = null;
     let map, markersLayer, routeLayer;
     let pickMode = false;
+
+    // --- LIVE GPS TRACKING VARIABLEN ---
+    let gpsWatchId = null;
+    let accuracyCircle = null;
+    let lastRouteCalcTime = 0;
 
     window.addEventListener("DOMContentLoaded", () => {
       initMap();
@@ -304,6 +317,7 @@
 
       map.on('click', (e) => {
         if(pickMode) {
+          stopLiveGPS();
           document.getElementById('start-poi-select').value = "";
           setCustomPosition(e.latlng.lat, e.latlng.lng, "Karten-Punkt");
           toggleMapPick();
@@ -357,8 +371,99 @@
       }
     }
 
-    // --- STANDORT & STARTPUNKT ---
+    // --- KONTINUIERLICHES LIVE GPS TRACKING ---
+    function toggleLiveGPS() {
+      if (gpsWatchId !== null) {
+        stopLiveGPS();
+      } else {
+        startLiveGPS();
+      }
+    }
+
+    function startLiveGPS() {
+      if (!navigator.geolocation) {
+        alert("GPS wird von Ihrem Browser nicht unterstützt.");
+        return;
+      }
+
+      document.getElementById('start-poi-select').value = "";
+      const btn = document.getElementById('btn-live-gps');
+      btn.classList.add('active');
+      btn.innerText = "⏹️ Live GPS AUS";
+      document.getElementById('loc-status').innerText = "Verbinde mit Satelliten...";
+
+      gpsWatchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const acc = Math.round(pos.coords.accuracy);
+
+          currentPosition = { lat, lng };
+          document.getElementById('loc-status').innerHTML = `🔵 <b>Live:</b> ${lat.toFixed(4)}, ${lng.toFixed(4)} (±${acc}m)`;
+
+          // 1. Live Marker aktualisieren / bewegen
+          if (window.posMarker) {
+            window.posMarker.setLatLng([lat, lng]);
+          } else {
+            window.posMarker = L.circleMarker([lat, lng], {
+              color: '#0d47a1',
+              fillColor: '#2196f3',
+              fillOpacity: 0.9,
+              radius: 9,
+              weight: 3
+            }).addTo(map).bindPopup("<b>Mein aktueller Standort</b>");
+          }
+
+          // 2. Genauigkeits-Radius zeichnen
+          if (accuracyCircle) {
+            accuracyCircle.setLatLng([lat, lng]);
+            accuracyCircle.setRadius(acc);
+          } else {
+            accuracyCircle = L.circle([lat, lng], {
+              radius: acc,
+              color: '#2196f3',
+              weight: 1,
+              fillColor: '#90caf9',
+              fillOpacity: 0.2
+            }).addTo(map);
+          }
+
+          // 3. Route dynamisch aktualisieren (alle 8 Sekunden maximal)
+          const now = Date.now();
+          if (selectedPoi && selectedPoi.lat && selectedPoi.lon && (now - lastRouteCalcTime > 8000)) {
+            lastRouteCalcTime = now;
+            calcRoute(selectedPoi.lat, selectedPoi.lon, false); // false = Karte nicht ruckartig zoomen
+          }
+        },
+        (err) => {
+          document.getElementById('loc-status').innerText = "GPS Signal verloren: " + err.message;
+          stopLiveGPS();
+        },
+        {
+          enableHighAccuracy: true,
+          maximumAge: 3000,
+          timeout: 12000
+        }
+      );
+    }
+
+    function stopLiveGPS() {
+      if (gpsWatchId !== null) {
+        navigator.geolocation.clearWatch(gpsWatchId);
+        gpsWatchId = null;
+      }
+      const btn = document.getElementById('btn-live-gps');
+      btn.classList.remove('active');
+      btn.innerText = "🔴 Live GPS AN";
+      if (accuracyCircle) {
+        map.removeLayer(accuracyCircle);
+        accuracyCircle = null;
+      }
+    }
+
+    // Manueller Standort / Klick / Dropdown
     function setCustomPosition(lat, lng, label) {
+      stopLiveGPS();
       currentPosition = { lat, lng };
       document.getElementById('loc-status').innerText = `${label} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
 
@@ -369,22 +474,20 @@
         .openPopup();
 
       if(selectedPoi && selectedPoi.lat && selectedPoi.lon) {
-        calcRoute(selectedPoi.lat, selectedPoi.lon);
+        calcRoute(selectedPoi.lat, selectedPoi.lon, true);
       }
     }
 
     function onStartPoiSelect(poiId) {
       if(!poiId) return;
+      stopLiveGPS();
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
       if(!region) return;
 
       const p = region.places.find(item => item.id === poiId);
-      if(!p) return;
-
-      if(!p.lat || !p.lon) {
-        alert(`Für den Ort "${p.name}" sind keine Koordinaten hinterlegt.`);
-        document.getElementById('start-poi-select').value = "";
+      if(!p || !p.lat || !p.lon) {
+        alert("Für diesen Ort sind keine Koordinaten hinterlegt.");
         return;
       }
 
@@ -410,29 +513,19 @@
       });
     }
 
-    function getGPSLocation() {
-      if(!navigator.geolocation) return alert("GPS nicht verfügbar");
-      document.getElementById('start-poi-select').value = "";
-      document.getElementById('loc-status').innerText = "Suche GPS Signal...";
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setCustomPosition(pos.coords.latitude, pos.coords.longitude, "GPS Position"),
-        (err) => alert("GPS Signal nicht empfangen: " + err.message),
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    }
-
     function toggleMapPick() {
       pickMode = !pickMode;
       const btn = document.getElementById('btn-pick');
       btn.style.background = pickMode ? '#ffc107' : '#e9ecef';
       if(pickMode) {
-        alert("Tippen Sie auf die Karte.");
+        alert("Tippen Sie auf die Karte, um den Startpunkt festzulegen.");
         if(window.innerWidth <= 768) setMobileSubTab('map');
       }
     }
 
     async function geocodeAddress(query) {
       if(!query) return;
+      stopLiveGPS();
       document.getElementById('start-poi-select').value = "";
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
@@ -443,7 +536,7 @@
       } catch(e) { }
     }
 
-    // --- PRÄZISE RECHERCHE: OSM-GEODATEN ZUERST ---
+    // --- RECHERCHE (OSM ADRESSE ZUERST) ---
     async function deepSearchPOI(poiName, cityName, regionName) {
       const info = {
         lat: 0,
@@ -457,8 +550,6 @@
 
       const cityClean = (cityName || regionName || "").trim();
 
-      // 1. SCHRITT: OPENSTREETMAP NOMINATIM ZUERST (Genaue Adresse & Hausnummer)
-      // Suchkaskade: Adresse mit Stadt -> nur Name
       const searchQueries = [
         `${poiName}, ${cityClean}`,
         `${poiName} ${cityClean}`,
@@ -474,22 +565,19 @@
             info.lat = parseFloat(item.lat);
             info.lon = parseFloat(item.lon);
 
-            if (item.display_name) {
-              info.description = item.display_name;
-            }
+            if (item.display_name) info.description = item.display_name;
 
             if (item.extratags) {
               if (item.extratags.opening_hours) info.openingHours = item.extratags.opening_hours;
               if (item.extratags.fee) info.fee = item.extratags.fee;
               if (item.extratags.website) info.website = item.extratags.website;
             }
-            break; // Exakter Treffer gefunden!
+            break;
           }
         } catch(e) {}
       }
 
-      // 2. SCHRITT: WIKIPEDIA / WIKIVOYAGE NUR WENN ES EIN ECHTER ARTIKEL IST
-      // (Verhindert, dass fremde Plätze wie Radhuspladsen genommen werden)
+      // Wikipedia nur prüfen wenn Titel genau passt
       try {
         const wpSearchUrl = `https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(poiName + ' ' + cityClean)}&format=json&origin=*`;
         const wpRes = await fetch(wpSearchUrl);
@@ -497,11 +585,10 @@
 
         if (wpData.query?.search?.length > 0) {
           const topResult = wpData.query.search[0];
-          // Prüfen ob der gefundene Wikipedia-Titel zum gesuchten Begriff passt
-          const cleanSearchTerm = poiName.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const cleanSearch = poiName.toLowerCase().replace(/[^a-z0-9]/g, '');
           const cleanTitle = topResult.title.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-          if (cleanTitle.includes(cleanSearchTerm) || cleanSearchTerm.includes(cleanTitle)) {
+          if (cleanTitle.includes(cleanSearch) || cleanSearch.includes(cleanTitle)) {
             const detailUrl = `https://de.wikipedia.org/w/api.php?action=query&prop=extracts|info&inprop=url&exintro=1&explaintext=1&titles=${encodeURIComponent(topResult.title)}&format=json&origin=*`;
             const dRes = await fetch(detailUrl);
             const dData = await dRes.json();
@@ -510,18 +597,14 @@
 
             if (firstKey && firstKey !== "-1") {
               const p = pages[firstKey];
-              if (p.extract) {
-                info.description = p.extract.slice(0, 350) + "...";
-              }
-              if (!info.website && p.fullurl) {
-                info.website = p.fullurl;
-              }
+              if (p.extract) info.description = p.extract.slice(0, 350) + "...";
+              if (!info.website && p.fullurl) info.website = p.fullurl;
             }
           }
         }
       } catch (e) { }
 
-      // 3. SCHRITT: ÖV-HALTESTELLE IM UMKREIS (Overpass)
+      // ÖV-Haltestelle im Umkreis
       if (info.lat && info.lon && !info.transit) {
         try {
           const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:350,${info.lat},${info.lon})[highway=bus_stop];out 1;`;
@@ -555,7 +638,7 @@
       const btn = document.getElementById('btn-add-poi');
       btn.disabled = true;
       btn.innerText = "Recherchiere...";
-      statusEl.innerText = `Präzise Suche nach "${name}" in "${city || region.name}"...`;
+      statusEl.innerText = `Suche nach "${name}" in "${city || region.name}"...`;
 
       try {
         const info = await deepSearchPOI(name, city, region.name);
@@ -621,7 +704,6 @@
       alert(`Daten zu "${targetPOI.name}" aktualisiert!`);
     }
 
-    // --- DIREKTES SCHNELL-SPEICHERN IM TAGESPLAN ---
     function saveDirectEdits() {
       if (!selectedPoi) return;
 
@@ -710,12 +792,11 @@
       }
     }
 
-    // --- ROUTENBERECHNUNG ---
-    async function calcRoute(destLat, destLon) {
+    // --- ROUTENBERECHNUNG MIT LIVE-UNTERSTÜTZUNG ---
+    async function calcRoute(destLat, destLon, autoZoom = true) {
       if(!currentPosition) return;
       const rBox = document.getElementById('route-box');
       rBox.style.display = "block";
-      document.getElementById('route-calc-text').innerText = "Berechne Fußweg...";
 
       const url = `https://router.project-osrm.org/route/v1/foot/${currentPosition.lng},${currentPosition.lat};${destLon},${destLat}?overview=full&geometries=geojson`;
 
@@ -733,7 +814,9 @@
 
           if(routeLayer) map.removeLayer(routeLayer);
           routeLayer = L.geoJSON(route.geometry, { style: { color: '#28a745', weight: 4 } }).addTo(map);
-          map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
+          if (autoZoom) {
+            map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
+          }
         }
       } catch(e) {
         document.getElementById('route-calc-text').innerText = "Fußwegberechnung nicht erreichbar.";
@@ -750,7 +833,6 @@
         const bounds = [];
         region.places.forEach(p => {
           if(p.lat && p.lon && p.lat !== 0) {
-            // Marker ist draggable (verschiebbar für Feinjustierung)
             const m = L.marker([p.lat, p.lon], { draggable: true }).addTo(markersLayer)
               .bindPopup(`<b>${p.name}</b><br><small>${p.city || ''}</small>`);
             
@@ -848,10 +930,10 @@
       if(poi.lat && poi.lon && poi.lat !== 0) {
         map.setView([poi.lat, poi.lon], 16);
         if(currentPosition) {
-          calcRoute(poi.lat, poi.lon);
+          calcRoute(poi.lat, poi.lon, true);
         } else {
           document.getElementById('route-box').style.display = "block";
-          document.getElementById('route-calc-text').innerText = "Startpunkt setzen, um Wegzeit zu berechnen.";
+          document.getElementById('route-calc-text').innerText = "Live-GPS oder Startpunkt aktivieren, um Wegzeit zu berechnen.";
         }
       } else {
         document.getElementById('route-box').style.display = "none";
