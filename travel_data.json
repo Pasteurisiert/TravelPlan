@@ -120,14 +120,14 @@
         {
           "id": "poi_1790423456189",
           "name": "Humlebæk Louisiana",
-          "lat": 55.9698,
-          "lon": 12.5431,
-          "description": "Das Louisiana Museum of Modern Art in Humlebæk, nördlich von Kopenhagen, zählt zu den weltweit führenden Museen für moderne und zeitgenössische Kunst. Die Institution begeistert durch das einzigartige Zusammenspiel von hochkarätigen Kunstwerken, skandinavischer Architektur und einem malerischen Skulpturenpark direkt am Ufer des Öresunds. Besucher können hier wechselnde internationale Ausstellungen sowie eine herausragende ständige Sammlung in entspannter Atmosphäre erleben.",
-          "website": "https://louisiana.dk",
-          "openingHours": "Di-Fr 11:00 - 22:00, Sa-So 11:00 - 18:00, Mo geschlossen",
-          "fee": "ca. 20€ (145 DKK für Erwachsene)",
+          "lat": 55.96944444,
+          "lon": 12.54305556,
+          "description": "Das Louisiana Museum of Modern Art, auch bekannt als das Louisiana, ist ein Kunstmuseum nördlich von Kopenhagen in Dänemark. Mit über 700.000 Besuchern jährlich ist das Louisiana das meistbesuchte Museum für moderne und zeitgenössische Kunst in Skandinavien und wird für seine herausragenden Ausstellungen und Sammlungen gefeiert, einschließlich eine...",
+          "website": "http://www.louisiana.dk",
+          "openingHours": "Mo off; Tu-Fr 11:00-22:00; Sa-Su 11:00-18:00",
+          "fee": "yes",
           "visited": false,
-          "transit": "Mit der Regionalbahn (Kystbanen) ab Kopenhagen Hbf bis Bahnhof Humlebæk (ca. 35 Min.), von dort ca. 10 Gehminuten oder per Bus 388"
+          "transit": "Haltestelle \"Krogerupvej\" (< 450m)"
         },
         {
           "id": "poi_1790423498131",
