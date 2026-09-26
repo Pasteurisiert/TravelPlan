@@ -560,6 +560,11 @@
           "visited": false
         }
       ]
+    },
+    {
+      "id": "haugesund",
+      "name": "Haugesund",
+      "places": []
     }
   ]
 }
