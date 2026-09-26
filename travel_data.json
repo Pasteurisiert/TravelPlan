@@ -156,6 +156,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790430288868",
+          "name": "Louisiana",
+          "city": "Humlebæk",
+          "lat": 55.969352,
+          "lon": 12.5431572,
+          "description": "Louisiana Museum of Modern Art, Gammel Strandvej, Gammel Humlebæk, Krogerup, Humlebæk, Fredensborg Municipality, Capital Region of Denmark, 3050, Denmark",
+          "website": "https://www.louisiana.dk/",
+          "openingHours": "Mo off; Tu-Fr 11:00-22:00; Sa-Su 11:00-18:00",
+          "fee": "yes",
+          "transit": "Haltestelle \"Louisiana\" (< 350m)",
+          "visited": false
         }
       ]
     }
