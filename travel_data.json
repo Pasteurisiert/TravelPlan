@@ -797,6 +797,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790436335468",
+          "name": "Flughafen",
+          "city": "Hamburg",
+          "lat": 53.6363621,
+          "lon": 9.9945501,
+          "description": "Der Flughafen Hamburg (IATA-Code: HAM, ICAO-Code: EDDH, Eigenbezeichnung Hamburg Airport, seit 2016 auch Hamburg Airport Helmut Schmidt, früher Flughafen Hamburg-Fuhlsbüttel) ist der internationale Verkehrsflughafen der Stadt Hamburg (mit einem kleinen Teil auf der Gemarkung der Stadt Norderstedt). Er ist der älteste noch in Betrieb befindliche und...",
+          "website": "https://www.hamburg-airport.de/",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
