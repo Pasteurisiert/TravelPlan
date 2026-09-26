@@ -519,6 +519,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Luster\" (< 350m)",
           "visited": false
+        },
+        {
+          "id": "poi_1790434257737",
+          "name": "Feigefossen",
+          "city": "Skjolden",
+          "lat": 61.3805978,
+          "lon": 7.4423964,
+          "description": "Feigefossen, Luster, Vestland, 6875, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
