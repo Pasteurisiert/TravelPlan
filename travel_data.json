@@ -713,6 +713,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Fossatromma\" (< 350m)",
           "visited": false
+        },
+        {
+          "id": "poi_1790435895741",
+          "name": "Kjeåsen",
+          "city": "Eidfjord",
+          "lat": 60.5043406,
+          "lon": 7.1303826,
+          "description": "Kjeåsen, Eidfjord, Vestland, 5783, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
