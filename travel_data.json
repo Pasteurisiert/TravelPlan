@@ -345,6 +345,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"North Clinton Ave at North Olden Ave\" (< 350m)",
           "visited": false
+        },
+        {
+          "id": "poi_1790431553609",
+          "name": "Olden Old Church",
+          "city": "Olden, Norwegen",
+          "lat": 0,
+          "lon": 0,
+          "description": "Keine Kurzbeschreibung gefunden. Nutzen Sie die Google-Links.",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
