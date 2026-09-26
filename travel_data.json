@@ -429,6 +429,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790432209780",
+          "name": "Rødven",
+          "city": "Åndalsnes",
+          "lat": 62.6241807,
+          "lon": 7.4946431,
+          "description": "Rødven, Rauma, Møre og Romsdal, 6350, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
