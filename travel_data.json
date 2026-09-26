@@ -154,18 +154,6 @@
           "transit": "Mit ÖV erreichbar"
         },
         {
-          "id": "poi_1790423575952",
-          "name": "Hillerød Nationalmuseet",
-          "lat": 55.67570611,
-          "lon": 12.578745,
-          "description": "Kopenhagen (dänisch  [kʰøb̥m̩ˈhɑʊ̯ˀn], bis ins 19. Jahrhundert gültige Rechtschreibung Kjøbenhavn) ist die Hauptstadt Dänemarks und das kulturelle und wirtschaftliche Zentrum des Landes. Die Stadt ist Sitz von Parlament (Folketing), höchstem Gericht (Højesteret), Regierung sowie Residenz des dänischen Königs Frederik X.\nDie dänische Hauptstadt gehö...",
-          "website": "https://www.kk.dk/",
-          "openingHours": "Nicht erfasst (siehe Google)",
-          "fee": "Nicht erfasst (siehe Google)",
-          "visited": false,
-          "transit": "Haltestelle \"Gammel Strand St., Christiansborg\" (< 450m)"
-        },
-        {
           "id": "poi_1790423601059",
           "name": "Roskilde Domkirke",
           "lat": 55.6425,
