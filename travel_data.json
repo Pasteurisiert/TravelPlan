@@ -437,19 +437,6 @@
       "name": "Måløy",
       "places": [
         {
-          "id": "poi_1790432397435",
-          "name": "Vågsberget",
-          "city": "Måløy",
-          "lat": 61.48118,
-          "lon": 7.31899,
-          "description": "Vågsberget, Luster, Vestland, Norway",
-          "website": "",
-          "openingHours": "Siehe Google-Info",
-          "fee": "Siehe Google-Info",
-          "transit": "Mit ÖV erreichbar",
-          "visited": false
-        },
-        {
           "id": "poi_1790432425907",
           "name": "Kannesteinen",
           "city": "Måløy",
