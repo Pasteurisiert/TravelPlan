@@ -8,7 +8,19 @@
     {
       "id": "kopenhagen",
       "name": "Kopenhagen",
-      "places": []
+      "places": [
+        {
+          "id": "poi_1790423270076",
+          "name": "Thorvaldsen Museum",
+          "lat": 55.6767531,
+          "lon": 12.5787879,
+          "description": "Thorvaldsens Museum ist ein Einzel-Künstler-Museum in Kopenhagen, Dänemark, das der Kunst des dänischen Bildhauers des Klassizismus Bertel Thorvaldsen (1770–1844) gewidmet ist. Dieser lebte und arbeitete die meiste Zeit seines Lebens (1796–1838) in Rom. Das Museum befindet sich auf der kleinen Insel Slotsholmen im Zentrum von Kopenhagen unweit des Schlosses Christiansborg. Entworfen von dem Architekten Gottlieb Bindesbøll, wurde das Gebäude nach einer öffentlichen Sammlung finanzieller Mittel im Jahre 1837 dann von 1838 bis 1848 errichtet.",
+          "website": "https://www.thorvaldsensmuseum.dk/",
+          "openingHours": "Tu-Su 10:00-17:00",
+          "fee": "k.A.",
+          "visited": false
+        }
+      ]
     }
   ]
 }
