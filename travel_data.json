@@ -334,19 +334,6 @@
           "visited": false
         },
         {
-          "id": "poi_1790431535914",
-          "name": "Olden New Church",
-          "city": "Olden, Norwegen",
-          "lat": 40.233004,
-          "lon": -74.7446809,
-          "description": "St. Joseph's Catholic Church, 540, North Olden Avenue, East Trenton, Trenton, Mercer County, New Jersey, 08638, United States",
-          "website": "",
-          "openingHours": "Siehe Google-Info",
-          "fee": "Siehe Google-Info",
-          "transit": "Haltestelle \"North Clinton Ave at North Olden Ave\" (< 350m)",
-          "visited": false
-        },
-        {
           "id": "poi_1790431594036",
           "name": "Briksdalsbreen",
           "city": "Olden, Norwegen",
