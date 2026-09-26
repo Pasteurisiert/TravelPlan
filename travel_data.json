@@ -403,6 +403,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790432134628",
+          "name": "Romsdalsgondolen",
+          "city": "Åndalsnes",
+          "lat": 62.5642715,
+          "lon": 7.7041609,
+          "description": "Romsdalsgondolen, Skogstien, Åndalsnes, Rauma, Møre og Romsdal, 6300, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
