@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TravelPlan - GitHub & Gemini AI</title>
   
-  <!-- Leaflet CSS & JS für OpenStreetMap -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -115,6 +114,7 @@
           </div>
           <p id="det-desc" style="font-size: 0.9rem; color: #444; line-height: 1.4;">-</p>
           <div>
+            <div class="info-badge" id="det-coords">📍 Koord: -</div>
             <div class="info-badge" id="det-web">🌐 Keine Webseite</div>
             <div class="info-badge" id="det-fee">💵 Eintritt: k.A.</div>
             <div class="info-badge" id="det-hours">🕒 Öffnungszeiten: k.A.</div>
@@ -155,7 +155,7 @@
           <input type="text" id="new-poi-name" placeholder="z.B. Bryggen, St. Michael's Mount...">
           <button id="btn-add-poi" class="btn-primary" style="width: 220px;" onclick="searchAndAddPOI()">Auto-Suchen & Anlegen</button>
         </div>
-        <small style="color: #666;">Durchsucht Wikipedia & OSM. Fehlen Angaben, recherchiert Gemini automatisch weiter.</small>
+        <div id="poi-create-status" style="font-size:0.85rem; color:#555;">Recherchiert Daten & Geokoordinaten automatisch.</div>
       </div>
 
       <div class="card">
@@ -170,7 +170,7 @@
       
       <div class="card">
         <h3>Google Gemini API</h3>
-        <p>Wird für automatische Recherchen, Zusammenfassungen, Öffnungszeiten, ÖV & Preise verwendet.</p>
+        <p>Wird für automatische Recherchen, Zusammenfassungen, Öffnungszeiten, ÖV, Preise und <b>Geokoordinaten</b> verwendet.</p>
         <label>Gemini API-Key:</label>
         <input type="password" id="gemini-key" placeholder="AIzaSy...">
         <div style="display:flex; gap:10px; align-items:center;">
@@ -300,7 +300,7 @@
       }
     }
 
-    // --- TEST-BUTTON FÜR DEN GEMINI API KEY ---
+    // --- TEST-BUTTON FÜR GEMINI KEY ---
     async function testGeminiKey() {
       const statusEl = document.getElementById('gemini-test-status');
       const key = (document.getElementById('gemini-key').value || "").trim();
@@ -311,8 +311,6 @@
       }
 
       statusEl.innerHTML = "Prüfe Schlüssel...";
-
-      // Verwende das empfohlene Standardmodell gemini-3.8-flash
       const model = 'gemini-3.8-flash';
       try {
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
@@ -339,64 +337,68 @@
       }
     }
 
-    // --- GEMINI RECHERCHE-AUFRUF (gemini-3.8-flash) ---
-    async function researchWithGemini(poiName, regionName) {
+    // --- GEMINI RECHERCHE MIT RETRY-LOGIK GEGEN RATE-LIMITS & INKLUSIVE KOORDINATEN ---
+    async function researchWithGemini(poiName, regionName, retries = 2) {
       const key = (geminiApiKey || "").trim();
       if(!key) {
         alert("Hinweis: Kein Gemini API-Key hinterlegt. Bitte unter Setup eintragen!");
         return null;
       }
 
-      const prompt = `Recherchiere touristische Informationen für folgenden Ort:
-Ort: "${poiName}" in der Region/Stadt "${regionName}".
+      const prompt = `Recherchiere diesen touristischen Ort:
+Name: "${poiName}" in "${regionName}".
 
-Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
-- description: Ausführliche Kurzbeschreibung auf Deutsch (ca. 2-4 Sätze)
-- website: Offizielle Website URL oder verlässliche Infoseite
-- openingHours: Typische Öffnungszeiten (z.B. "Mo-So 10:00 - 18:00" oder "Rund um die Uhr zugänglich")
-- fee: Eintrittspreise (z.B. "Kostenlos" oder "Erwachsene ca. 15€")
-- publicTransit: Anbindung an den öffentlichen Verkehr (z.B. "Buslinie 4 bis Torget, 2 Min Fußweg")`;
+Gib das Ergebnis zwingend als reines JSON mit folgenden Schlüsseln zurück:
+- description: Kurzbeschreibung auf Deutsch (2-3 Sätze)
+- website: Offizielle Website URL oder Informationsseite
+- openingHours: Öffnungszeiten (z.B. "10:00 - 18:00" oder "Frei zugänglich")
+- fee: Eintritt (z.B. "Kostenlos" oder "ca. 10€")
+- publicTransit: Kurze Angabe zur ÖV-Anbindung
+- latitude: Breitengrad als Dezimalzahl (z.B. 60.3975)
+- longitude: Längengrad als Dezimalzahl (z.B. 5.3242)`;
 
       const model = 'gemini-3.8-flash';
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "x-goog-api-key": key
-          },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              response_mime_type: "application/json"
-            }
-          })
-        });
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { 
+              "Content-Type": "application/json",
+              "x-goog-api-key": key
+            },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { response_mime_type: "application/json" }
+            })
+          });
 
-        if(response.ok) {
-          const resData = await response.json();
-          const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
-          if(rawText) {
-            return JSON.parse(rawText);
+          if (response.ok) {
+            const resData = await response.json();
+            const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+            if(rawText) return JSON.parse(rawText);
+          } else if (response.status === 429 && attempt < retries) {
+            // Zu viel Traffic: 2.5 Sekunden warten und automatisch wiederholen
+            await new Promise(r => setTimeout(r, 2500));
+            continue;
+          } else {
+            const errDetails = await response.json();
+            alert(`Recherche-Meldung (${response.status}): ${errDetails.error?.message || response.statusText}`);
+            return null;
           }
-        } else {
-          const errDetails = await response.json();
-          console.error(`Gemini Fehler:`, errDetails);
-          alert(`Gemini Recherche-Fehler (${response.status}): ${errDetails.error?.message || response.statusText}`);
+        } catch(err) {
+          if (attempt === retries) alert(`Verbindungsfehler: ${err.message}`);
         }
-      } catch(err) {
-        console.error(`Fehler bei Anfrage an ${model}:`, err);
-        alert(`Netzwerkfehler: ${err.message}`);
       }
       return null;
     }
 
-    // --- ORTE ERSTELLEN & RECHERCHIEREN ---
+    // --- ORTE ERSTELLEN & KOORDINATEN FESTLEGEN ---
     async function searchAndAddPOI() {
       const regId = document.getElementById('admin-region-select').value;
       const name = document.getElementById('new-poi-name').value.trim();
+      const statusEl = document.getElementById('poi-create-status');
       if(!name || !regId) return alert("Region und Name erforderlich!");
 
       const regionObj = appData.regions.find(r => r.id === regId);
@@ -404,54 +406,60 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
       const btn = document.getElementById('btn-add-poi');
       btn.innerHTML = `<span class="spinner"></span> Recherche...`;
       btn.disabled = true;
+      statusEl.innerText = "1/2: Suche Geokoordinaten & Basisdaten...";
+
+      let lat = 0, lon = 0, osmOpeningHours = "", osmFee = "", website = "", description = "";
 
       try {
-        // 1. Nominatim OpenStreetMap Abfrage
-        let lat = 0, lon = 0, osmOpeningHours = "", osmFee = "", website = "";
-        try {
-          const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&extratags=1&q=${encodeURIComponent(query)}`);
-          const nomData = await nomRes.json();
-          if(nomData && nomData.length > 0) {
-            const item = nomData[0];
-            lat = parseFloat(item.lat);
-            lon = parseFloat(item.lon);
-            if(item.extratags) {
-              osmOpeningHours = item.extratags.opening_hours || "";
-              osmFee = item.extratags.fee || "";
-              website = item.extratags.website || "";
-            }
-          }
-        } catch(e) { console.warn("OSM Abfrage übersprungen", e); }
-
-        // 2. Wikipedia Abfrage
-        let description = "";
+        // 1. Wikipedia Abfrage (schnell und ohne strikte Rate-Limits)
         try {
           const wikiRes = await fetch(`https://de.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`);
           if(wikiRes.ok) {
             const wikiData = await wikiRes.json();
             if(wikiData.extract) description = wikiData.extract;
-            if(!website && wikiData.content_urls) website = wikiData.content_urls.desktop.page;
+            if(wikiData.content_urls) website = wikiData.content_urls.desktop.page;
+            if(wikiData.coordinates) {
+              lat = wikiData.coordinates.lat;
+              lon = wikiData.coordinates.lon;
+            }
           }
-        } catch(e) { console.warn("Wiki Abfrage übersprungen", e); }
+        } catch(e) { }
 
-        // 3. Wenn Beschreibung fehlt -> Gemini AI Recherche
-        let transitInfo = "Mit lokalen Bussen/Bahnen erreichbar";
-        if(!description || description.length < 20 || !osmOpeningHours) {
+        // 2. OpenStreetMap nur anfragen wenn Wikipedia keine Koordinaten hatte
+        if(!lat || !lon) {
+          try {
+            const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
+            if(nomRes.ok) {
+              const nomData = await nomRes.json();
+              if(nomData && nomData.length > 0) {
+                lat = parseFloat(nomData[0].lat);
+                lon = parseFloat(nomData[0].lon);
+              }
+            }
+          } catch(e) { }
+        }
+
+        // 3. Wenn Koordinaten oder Beschreibung fehlen -> Gemini KI übernimmt
+        let transitInfo = "Mit ÖV / Nahverkehr erreichbar";
+        if(!description || !lat || !lon) {
+          statusEl.innerText = "2/2: Gemini recherchiert Koordinaten & Details...";
           const aiData = await researchWithGemini(name, regionObj.name);
           if(aiData) {
             description = aiData.description || description;
             website = website || aiData.website;
-            osmOpeningHours = osmOpeningHours || aiData.openingHours;
-            osmFee = osmFee || aiData.fee;
+            osmOpeningHours = aiData.openingHours || osmOpeningHours;
+            osmFee = aiData.fee || osmFee;
             transitInfo = aiData.publicTransit || transitInfo;
+            if(!lat && aiData.latitude) lat = parseFloat(aiData.latitude);
+            if(!lon && aiData.longitude) lon = parseFloat(aiData.longitude);
           }
         }
 
         const newPOI = {
           id: "poi_" + Date.now(),
           name: name,
-          lat: lat,
-          lon: lon,
+          lat: lat || 0,
+          lon: lon || 0,
           description: description || "Keine Beschreibung verfügbar.",
           website: website || `https://www.google.com/search?q=${encodeURIComponent(query)}`,
           openingHours: osmOpeningHours || "k.A.",
@@ -464,7 +472,8 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
         document.getElementById('new-poi-name').value = "";
         renderAdminPlaces();
         persistData();
-        alert(`Ort "${name}" erfolgreich angelegt!`);
+        statusEl.innerText = lat ? `✅ Ort angelegt mit Koordinaten: [${lat.toFixed(4)}, ${lon.toFixed(4)}]` : `⚠️ Ort angelegt, aber keine Koordinaten gefunden.`;
+        alert(`Ort "${name}" erfolgreich hinzugefügt!`);
       } catch(e) {
         alert("Fehler beim Anlegen: " + e.toString());
       } finally {
@@ -475,20 +484,14 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
 
     // --- RE-UPDATE MIT GEMINI ---
     async function updatePOIWithGemini(poiId) {
-      let targetPOI = null;
-      let targetRegion = null;
+      let targetPOI = null, targetRegion = null;
       for(let r of appData.regions) {
         let p = r.places.find(item => item.id === poiId);
-        if(p) {
-          targetPOI = p;
-          targetRegion = r;
-          break;
-        }
+        if(p) { targetPOI = p; targetRegion = r; break; }
       }
-
       if(!targetPOI || !targetRegion) return;
 
-      const ok = confirm(`Möchten Sie die Informationen zu "${targetPOI.name}" per Gemini KI neu recherchieren und aktualisieren?`);
+      const ok = confirm(`Informationen und Koordinaten zu "${targetPOI.name}" per Gemini KI neu recherchieren?`);
       if(!ok) return;
 
       const aiData = await researchWithGemini(targetPOI.name, targetRegion.name);
@@ -498,14 +501,15 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
         if(aiData.openingHours) targetPOI.openingHours = aiData.openingHours;
         if(aiData.fee) targetPOI.fee = aiData.fee;
         if(aiData.publicTransit) targetPOI.transit = aiData.publicTransit;
+        if(aiData.latitude) targetPOI.lat = parseFloat(aiData.latitude);
+        if(aiData.longitude) targetPOI.lon = parseFloat(aiData.longitude);
 
         persistData();
-        if(selectedPoi && selectedPoi.id === poiId) {
-          selectPOI(targetPOI);
-        }
+        if(selectedPoi && selectedPoi.id === poiId) selectPOI(targetPOI);
         renderAdminPlaces();
         renderDayPlanList();
-        alert(`Informationen zu "${targetPOI.name}" erfolgreich aktualisiert!`);
+        onRegionChange();
+        alert(`Ort "${targetPOI.name}" erfolgreich aktualisiert! (Koord: ${targetPOI.lat}, ${targetPOI.lon})`);
       }
     }
 
@@ -540,11 +544,11 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
           `;
         }
       } catch(err) {
-        document.getElementById('route-time-dist').innerText = "Routenabfrage derzeit nicht erreichbar.";
+        document.getElementById('route-time-dist').innerText = "Wegführung konnte nicht geladen werden.";
       }
     }
 
-    // --- RENDERING TAGESPLANUNG ---
+    // --- TAGESPLANUNG ---
     function onRegionChange() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -553,13 +557,15 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
       if(region && region.places.length > 0) {
         const bounds = [];
         region.places.forEach(p => {
-          if(p.lat && p.lon) {
+          if(p.lat && p.lon && p.lat !== 0) {
             const m = L.marker([p.lat, p.lon]).addTo(markersLayer).bindPopup(`<b>${p.name}</b>`);
             m.on('click', () => selectPOI(p));
             bounds.push([p.lat, p.lon]);
           }
         });
-        if(bounds.length) map.fitBounds(bounds, { padding: [30, 30] });
+        if(bounds.length > 0) {
+          map.fitBounds(bounds, { padding: [30, 30] });
+        }
       }
       renderDayPlanList();
     }
@@ -583,6 +589,7 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
             <strong>${poi.name}</strong>
             <input type="checkbox" ${poi.visited ? 'checked' : ''} title="Als besucht markieren" style="width:auto; margin:0;" onclick="event.stopPropagation(); toggleVisited('${poi.id}')">
           </div>
+          <small style="color: ${poi.lat ? '#666' : 'red'};">${poi.lat ? '📍 Koord vorhanden' : '⚠️ Keine Koordinaten'}</small>
         `;
         el.onclick = () => selectPOI(poi);
         container.appendChild(el);
@@ -598,37 +605,40 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
       document.getElementById('det-fee').innerText = `💵 ${poi.fee || 'k.A.'}`;
       document.getElementById('det-transit').innerText = `🚆 ${poi.transit || 'k.A.'}`;
       
+      const coordEl = document.getElementById('det-coords');
+      coordEl.innerText = poi.lat ? `📍 [${poi.lat.toFixed(4)}, ${poi.lon.toFixed(4)}]` : `⚠️ Keine Koordinaten`;
+      coordEl.style.color = poi.lat ? '#333' : 'red';
+
       const webEl = document.getElementById('det-web');
       webEl.innerHTML = poi.website ? `<a href="${poi.website}" target="_blank">🌐 Offizielle Webseite</a>` : "🌐 Keine Webseite";
 
       const updateBtn = document.getElementById('det-update-btn');
       updateBtn.onclick = () => updatePOIWithGemini(poi.id);
 
-      if(poi.lat && poi.lon) {
+      if(poi.lat && poi.lon && poi.lat !== 0) {
         map.setView([poi.lat, poi.lon], 15);
         if(currentPosition) {
           calculateRoute(poi.lat, poi.lon);
         } else {
           document.getElementById('route-panel').style.display = "block";
-          document.getElementById('route-time-dist').innerText = "Standort festlegen, um Wegzeit & Route anzuzeigen.";
+          document.getElementById('route-time-dist').innerText = "Eigenen Standort angeben, um Wegzeit zu berechnen.";
           document.getElementById('transit-link').innerHTML = "";
         }
+      } else {
+        document.getElementById('route-panel').style.display = "none";
       }
     }
 
     function toggleVisited(poiId) {
       for(let r of appData.regions) {
         let p = r.places.find(item => item.id === poiId);
-        if(p) {
-          p.visited = !p.visited;
-          break;
-        }
+        if(p) { p.visited = !p.visited; break; }
       }
       renderDayPlanList();
       persistData();
     }
 
-    // --- RENDERING ADMIN ---
+    // --- ADMIN BEREICH ---
     function updateRegionDropdowns() {
       const daySel = document.getElementById('day-region-select');
       const admSel = document.getElementById('admin-region-select');
@@ -660,7 +670,9 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
             <div style="flex:1;">
               <input type="checkbox" ${p.visited ? 'checked' : ''} onchange="toggleAdminVisited('${region.id}', ${idx})" style="width:auto; margin-right:8px;">
               <strong style="${p.visited ? 'text-decoration: line-through;' : ''}">${p.name}</strong>
-              <small style="color:#666; margin-left: 5px;">(${p.lat ? p.lat.toFixed(3) : 0}, ${p.lon ? p.lon.toFixed(3) : 0})</small>
+              <small style="color:${p.lat ? '#666' : 'red'}; margin-left: 5px;">
+                ${p.lat ? `(${p.lat.toFixed(3)},${p.lon.toFixed(3)})` : '⚠️ Keine Koord'}
+              </small>
             </div>
             <div style="display:flex; gap: 5px;">
               <button class="btn-ai" style="width:auto; margin:0; padding:4px 8px; font-size:0.8rem;" onclick="updatePOIWithGemini('${p.id}')">🔄 Update (KI)</button>
@@ -688,6 +700,7 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
         reg.places.splice(idx, 1);
         renderAdminPlaces();
         persistData();
+        onRegionChange();
       }
     }
 
@@ -701,7 +714,7 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
       persistData();
     }
 
-    // --- STORAGE & GITHUB SYNC ---
+    // --- SPEICHERUNG & SYNC ---
     function loadSettings() {
       const savedGh = localStorage.getItem('gh_config');
       if(savedGh) {
@@ -763,6 +776,7 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
             localStorage.setItem('travel_data', JSON.stringify(appData));
             updateRegionDropdowns();
             renderDayPlanList();
+            onRegionChange();
             document.getElementById('sync-text').innerText = "GitHub: Aktuell geladen ✅";
             return;
           }
@@ -775,11 +789,7 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
           sha: ghConfig.sha || undefined
         };
 
-        const putRes = await fetch(url, {
-          method: "PUT",
-          headers,
-          body: JSON.stringify(body)
-        });
+        const putRes = await fetch(url, { method: "PUT", headers, body: JSON.stringify(body) });
 
         if(putRes.ok) {
           const putData = await putRes.json();
