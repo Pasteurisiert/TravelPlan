@@ -319,6 +319,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790431506410",
+          "name": "Kreuzkirche",
+          "city": "Olden, Norwegen",
+          "lat": 51.0487258,
+          "lon": 13.7392255,
+          "description": "Kreuzkirche, 1, An der Kreuzkirche, Innere Altstadt, Altstadt, Dresden, Saxony, 01067, Germany",
+          "website": "https://www.kreuzkirche-dresden.de/",
+          "openingHours": "Mo 11:00-18:00; Tu-Fr 11:00-15:00; Sa,Su 11:00-15:00",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
