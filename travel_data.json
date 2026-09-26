@@ -55,6 +55,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Bradbenken\" (< 350m)",
           "visited": false
+        },
+        {
+          "id": "poi_1790430836093",
+          "name": "Bergen Domkirke",
+          "city": "Bergen, Norwegen",
+          "lat": 60.3938507,
+          "lon": 5.330955,
+          "description": "Der evangelisch-lutherische Dom zu Bergen (norw.: Bergen Domkirke, dt. auch Dom St. Olav, Domkirche Bergen) ist ein Sakralbau in Bergen, Provinz Vestland/Norwegen, gegründet im 12. Jahrhundert, erhaltene Teile ab 2. Hälfte des 13. Jahrhunderts. Er ist die Kathedrale des lutherischen Bistums Bjørgvin....",
+          "website": "http://bergendomkirke.no",
+          "openingHours": "Tu,Th-Fr 12:00-14:00",
+          "fee": "Siehe Google-Info",
+          "transit": "Haltestelle \"Torget (C)\" (< 350m)",
+          "visited": false
         }
       ]
     },
