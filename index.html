@@ -98,7 +98,7 @@
         <!-- Sidebar -->
         <div class="day-sidebar" id="day-sidebar">
           <div>
-            <label style="font-size:0.85rem; font-weight:bold;">Region wählen:</label>
+            <label style="font-size:0.85rem; font-weight:bold;">Region / Gebiet wählen:</label>
             <select id="day-region-select" onchange="onRegionChange()"></select>
           </div>
 
@@ -106,7 +106,6 @@
           <div class="card">
             <div style="font-weight:bold; font-size:0.9rem; margin-bottom:6px;">📍 Startpunkt / Standort</div>
             
-            <!-- NEU: Dropdown zur Auswahl eines beliebigen Ortes der Liste -->
             <label style="font-size:0.8rem; color:#444;">Aus Liste starten (auch besuchte):</label>
             <select id="start-poi-select" onchange="onStartPoiSelect(this.value)">
               <option value="">-- Ort als Start wählen --</option>
@@ -133,7 +132,10 @@
           <!-- Detailkarte -->
           <div id="detail-card" class="card" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-              <h3 id="det-name" style="font-size:1.1rem; margin:0;">-</h3>
+              <div>
+                <h3 id="det-name" style="font-size:1.1rem; margin:0;">-</h3>
+                <div id="det-city" style="font-size:0.85rem; color:#666; font-weight:500;">-</div>
+              </div>
               <div style="display:flex; gap:4px;">
                 <button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 8px;" id="det-update-btn">🔄 Auto-Update</button>
                 <button class="btn btn-primary" style="font-size:0.75rem; padding:4px 8px;" id="det-save-btn" onclick="saveDirectEdits()">💾 Sichern</button>
@@ -174,30 +176,32 @@
       <h3>Admin & Orte Verwalten</h3>
       
       <div class="card">
-        <h4>Neue Region anlegen</h4>
+        <h4>Neues Gebiet / Region anlegen</h4>
         <div style="display:flex; gap:6px;">
-          <input type="text" id="admin-new-region" placeholder="z.B. Bergen, Cornwall">
+          <input type="text" id="admin-new-region" placeholder="z.B. Cornwall, Bayern, Südnorwegen">
           <button class="btn btn-primary" onclick="addRegion()">Anlegen</button>
         </div>
       </div>
 
       <div class="card">
-        <h4>Neuen Ort anlegen (Multi-Source-Suche)</h4>
-        <label style="font-size:0.85rem;">Region:</label>
-        <select id="admin-region-select"></select>
+        <h4>Neuen Ort anlegen (Ziel & Stadt getrennt)</h4>
+        <label style="font-size:0.85rem;">Region / Gebiet:</label>
+        <select id="admin-region-select" onchange="syncAdminCityDefault()"></select>
 
-        <label style="font-size:0.85rem;">Ortsname / Attraktion:</label>
-        <div style="display:flex; gap:6px;">
-          <input type="text" id="admin-new-poi" placeholder="z.B. Bryggen, Floibanen">
-          <button class="btn btn-primary" id="btn-add-poi" onclick="searchAndAddPOI()">Recherche & Hinzufügen</button>
-        </div>
-        <div id="admin-search-status" style="font-size:0.8rem; color:#555; margin-top:3px;">
-          Kombiniert Wikivoyage, Wikipedia, Wikidata & OpenStreetMap.
+        <label style="font-size:0.85rem;">Ziel / Sehenswürdigkeit:</label>
+        <input type="text" id="admin-new-poi" placeholder="z.B. Schloss Neuschwanstein, Eden Project">
+
+        <label style="font-size:0.85rem;">Stadt / Ort des Ziels:</label>
+        <input type="text" id="admin-new-city" placeholder="z.B. Schwangau, Bodelva / St Austell">
+
+        <button class="btn btn-primary btn-block" id="btn-add-poi" style="margin-top:6px;" onclick="searchAndAddPOI()">Recherche & Hinzufügen</button>
+        <div id="admin-search-status" style="font-size:0.8rem; color:#555; margin-top:4px;">
+          Sucht gezielt mit Kombination aus Ziel & Stadt in Wikivoyage, Wikipedia & OpenStreetMap.
         </div>
       </div>
 
       <div class="card">
-        <h4>Orte in dieser Region</h4>
+        <h4>Orte in diesem Gebiet</h4>
         <div id="admin-poi-list"></div>
       </div>
     </div>
@@ -235,7 +239,7 @@
     // --- DATENMODELL ---
     let appData = {
       regions: [
-        { id: "bergen", name: "Bergen, Norwegen", places: [] }
+        { id: "cornwall", name: "Cornwall", places: [] }
       ]
     };
     let ghConfig = { owner: "", repo: "", token: "", path: "travel_data.json", sha: null };
@@ -252,7 +256,7 @@
     });
 
     function initMap() {
-      map = L.map('map', { zoomControl: false }).setView([60.3913, 5.3221], 12);
+      map = L.map('map', { zoomControl: false }).setView([50.2660, -5.0527], 10);
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -282,6 +286,7 @@
       } else if(tab === 'admin') {
         document.getElementById('view-admin').classList.add('active');
         document.getElementById('nav-admin').classList.add('active');
+        syncAdminCityDefault();
         renderAdminList();
       } else if(tab === 'settings') {
         document.getElementById('view-settings').classList.add('active');
@@ -306,6 +311,15 @@
       }
     }
 
+    function syncAdminCityDefault() {
+      const regId = document.getElementById('admin-region-select').value;
+      const reg = appData.regions.find(r => r.id === regId);
+      const cityInput = document.getElementById('admin-new-city');
+      if (reg && !cityInput.value) {
+        cityInput.placeholder = `z.B. Stadt in ${reg.name}`;
+      }
+    }
+
     // --- STANDORT & STARTPUNKT ---
     function setCustomPosition(lat, lng, label) {
       currentPosition = { lat, lng };
@@ -322,7 +336,6 @@
       }
     }
 
-    // NEU: Auswahl eines Ortes aus der Dropdown-Liste
     function onStartPoiSelect(poiId) {
       if(!poiId) return;
       const regId = document.getElementById('day-region-select').value;
@@ -343,7 +356,6 @@
       map.panTo([p.lat, p.lon]);
     }
 
-    // Dropdown mit allen Orten der aktuellen Region füllen
     function updateStartPoiDropdown() {
       const regId = document.getElementById('day-region-select').value;
       const selectEl = document.getElementById('start-poi-select');
@@ -355,7 +367,8 @@
       region.places.forEach(p => {
         const opt = document.createElement('option');
         opt.value = p.id;
-        opt.text = `${p.visited ? '✓ ' : ''}${p.name}${p.lat ? '' : ' (keine Koord)'}`;
+        const cityLabel = p.city ? ` (${p.city})` : '';
+        opt.text = `${p.visited ? '✓ ' : ''}${p.name}${cityLabel}${p.lat ? '' : ' [keine Koord]'}`;
         selectEl.appendChild(opt);
       });
     }
@@ -393,8 +406,8 @@
       } catch(e) { }
     }
 
-    // --- MULTI-SOURCE RECHERCHE ---
-    async function deepSearchPOI(poiName, regionName) {
+    // --- MULTI-SOURCE RECHERCHE (ZIEL + STADT) ---
+    async function deepSearchPOI(poiName, cityName, regionName) {
       const info = {
         lat: 0,
         lon: 0,
@@ -405,11 +418,12 @@
         transit: ""
       };
 
-      const cleanRegion = regionName.split(',')[0].trim();
+      const cityOrRegion = (cityName || regionName || "").split(',')[0].trim();
+      const combinedSearch = cityName ? `${poiName} ${cityName}` : `${poiName} ${regionName}`;
 
       // 1. Wikivoyage (Listing-Extraktion)
       try {
-        const wvUrl = `https://de.wikivoyage.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(poiName + ' ' + cleanRegion)}&format=json&origin=*`;
+        const wvUrl = `https://de.wikivoyage.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(combinedSearch)}&format=json&origin=*`;
         const wvRes = await fetch(wvUrl);
         const wvData = await wvRes.json();
         
@@ -447,9 +461,9 @@
         }
       } catch (e) { }
 
-      // 2. Wikipedia / Wikidata
+      // 2. Wikipedia & Wikidata
       try {
-        const wpSearchUrl = `https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(poiName + ' ' + cleanRegion)}&format=json&origin=*`;
+        const wpSearchUrl = `https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(combinedSearch)}&format=json&origin=*`;
         const wpRes = await fetch(wpSearchUrl);
         const wpData = await wpRes.json();
 
@@ -488,7 +502,11 @@
 
       // 3. OpenStreetMap Nominatim
       if (!info.lat || !info.lon || !info.openingHours) {
-        const queries = [`${poiName} ${cleanRegion}`, poiName];
+        const queries = [
+          `${poiName}, ${cityOrRegion}`,
+          `${poiName} ${cityOrRegion}`,
+          poiName
+        ];
         for (let q of queries) {
           try {
             const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&extratags=1&limit=1&q=${encodeURIComponent(q)}`);
@@ -510,7 +528,7 @@
         }
       }
 
-      // 4. ÖV Haltestelle in der Nähe (Overpass)
+      // 4. Nächste ÖV-Haltestelle im Umkreis von 450m
       if (info.lat && info.lon && !info.transit) {
         try {
           const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:450,${info.lat},${info.lon})[highway=bus_stop];out 1;`;
@@ -535,21 +553,24 @@
     async function searchAndAddPOI() {
       const regId = document.getElementById('admin-region-select').value;
       const name = document.getElementById('admin-new-poi').value.trim();
+      const city = document.getElementById('admin-new-city').value.trim();
       const statusEl = document.getElementById('admin-search-status');
-      if (!name || !regId) return alert("Region und Name erforderlich!");
+
+      if (!name || !regId) return alert("Region und Ziel/Sehenswürdigkeit sind erforderlich!");
 
       const region = appData.regions.find(r => r.id === regId);
       const btn = document.getElementById('btn-add-poi');
       btn.disabled = true;
       btn.innerText = "Recherchiere...";
-      statusEl.innerText = "Durchsuche Wikivoyage, Wikipedia & OpenStreetMap...";
+      statusEl.innerText = `Suche nach "${name}" in "${city || region.name}"...`;
 
       try {
-        const info = await deepSearchPOI(name, region.name);
+        const info = await deepSearchPOI(name, city, region.name);
 
         const newPOI = {
           id: "poi_" + Date.now(),
           name: name,
+          city: city || region.name,
           lat: info.lat,
           lon: info.lon,
           description: info.description,
@@ -562,11 +583,12 @@
 
         region.places.push(newPOI);
         document.getElementById('admin-new-poi').value = "";
+        document.getElementById('admin-new-city').value = "";
         renderAdminList();
         updateStartPoiDropdown();
         persistData();
         statusEl.innerText = info.lat ? `✅ Gefunden & eingetragen: [${info.lat.toFixed(4)}, ${info.lon.toFixed(4)}]` : `⚠️ Angelegt (Keine Geodaten gefunden).`;
-        alert(`Ort "${name}" erfolgreich hinzugefügt!`);
+        alert(`Ort "${name}" (${newPOI.city}) erfolgreich hinzugefügt!`);
       } catch(e) {
         alert("Fehler beim Abrufen: " + e.message);
       } finally {
@@ -587,7 +609,7 @@
       const btn = document.getElementById('det-update-btn');
       if (btn) btn.innerText = "Lade...";
 
-      const updated = await deepSearchPOI(targetPOI.name, targetRegion.name);
+      const updated = await deepSearchPOI(targetPOI.name, targetPOI.city, targetRegion.name);
 
       targetPOI.description = updated.description;
       if (updated.website) targetPOI.website = updated.website;
@@ -621,6 +643,8 @@
         selectedPoi[fieldKey] = newVal.trim();
         persistData();
         selectPoi(selectedPoi);
+        renderAdminList();
+        updateStartPoiDropdown();
       }
     }
 
@@ -664,7 +688,7 @@
         const bounds = [];
         region.places.forEach(p => {
           if(p.lat && p.lon && p.lat !== 0) {
-            const m = L.marker([p.lat, p.lon]).addTo(markersLayer).bindPopup(`<b>${p.name}</b>`);
+            const m = L.marker([p.lat, p.lon]).addTo(markersLayer).bindPopup(`<b>${p.name}</b><br><small>${p.city || ''}</small>`);
             m.on('click', () => selectPoi(p));
             bounds.push([p.lat, p.lon]);
           }
@@ -694,7 +718,10 @@
         el.className = `poi-card ${p.visited ? 'visited' : ''} ${selectedPoi && selectedPoi.id === p.id ? 'active' : ''}`;
         el.innerHTML = `
           <div class="poi-card-header">
-            <strong>${p.name}</strong>
+            <div>
+              <strong>${p.name}</strong>
+              <div style="font-size:0.75rem; color:#666;">📍 ${p.city || region.name}</div>
+            </div>
             <input type="checkbox" ${p.visited ? 'checked' : ''} style="width:auto; margin:0;" onclick="event.stopPropagation(); toggleVisited('${p.id}')">
           </div>
           <div style="font-size:0.75rem; color:${p.lat ? '#666' : 'red'}; margin-top:2px;">
@@ -711,20 +738,21 @@
       renderDayList();
 
       const reg = appData.regions.find(r => r.id === document.getElementById('day-region-select').value);
-      const query = `${poi.name} ${reg ? reg.name : ''}`;
+      const targetQuery = `${poi.name}, ${poi.city || reg.name}`;
 
       document.getElementById('detail-card').style.display = "block";
       document.getElementById('det-name').innerText = poi.name;
+      document.getElementById('det-city').innerText = `Stadt: ${poi.city || 'Nicht angegeben'}`;
       document.getElementById('det-desc-input').value = poi.description;
 
       document.getElementById('det-update-btn').onclick = () => autoUpdatePOI(poi.id);
 
-      // Google Links dynamisch generieren
-      document.getElementById('link-google').href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-      document.getElementById('link-hours').href = `https://www.google.com/search?q=${encodeURIComponent(query + ' öffnungszeiten eintritt')}`;
+      // Google Links dynamisch generieren mit Ziel & Stadt
+      document.getElementById('link-google').href = `https://www.google.com/search?q=${encodeURIComponent(targetQuery)}`;
+      document.getElementById('link-hours').href = `https://www.google.com/search?q=${encodeURIComponent(targetQuery + ' öffnungszeiten eintritt')}`;
       
       const originParam = currentPosition ? `${currentPosition.lat},${currentPosition.lng}` : '';
-      document.getElementById('link-transit').href = `https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${encodeURIComponent(query)}&travelmode=transit`;
+      document.getElementById('link-transit').href = `https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${encodeURIComponent(targetQuery)}&travelmode=transit`;
 
       const webA = document.getElementById('link-web');
       if(poi.website) {
@@ -734,9 +762,11 @@
         webA.style.display = "none";
       }
 
+      // Badges
       const badgesEl = document.getElementById('det-badges');
       badgesEl.innerHTML = `
         <span class="badge ${poi.lat ? 'ok' : 'warn'}">📍 ${poi.lat ? poi.lat.toFixed(4) + ', ' + poi.lon.toFixed(4) : 'Keine Koord'}</span>
+        <span class="badge" onclick="editBadgePrompt('city', 'Stadt / Ort')">🏙️ Stadt: ${poi.city || 'k.A.'} ✏️</span>
         <span class="badge" onclick="editBadgePrompt('openingHours', 'Öffnungszeiten')">🕒 ${poi.openingHours || 'k.A.'} ✏️</span>
         <span class="badge" onclick="editBadgePrompt('fee', 'Eintrittspreis')">💵 ${poi.fee || 'k.A.'} ✏️</span>
         <span class="badge" onclick="editBadgePrompt('transit', 'ÖV-Anbindung')">🚆 ${poi.transit || 'k.A.'} ✏️</span>
@@ -748,7 +778,7 @@
           calcRoute(poi.lat, poi.lon);
         } else {
           document.getElementById('route-box').style.display = "block";
-          document.getElementById('route-calc-text').innerText = "Standort setzen, um Wegzeit zu berechnen.";
+          document.getElementById('route-calc-text').innerText = "Startpunkt setzen, um Wegzeit zu berechnen.";
         }
       } else {
         document.getElementById('route-box').style.display = "none";
@@ -797,7 +827,8 @@
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
               <strong style="${p.visited ? 'text-decoration: line-through;' : ''}">${p.name}</strong>
-              <div style="font-size:0.75rem; color:${p.lat ? '#666' : 'red'};">${p.lat ? `[${p.lat.toFixed(3)},${p.lon.toFixed(3)}]` : '⚠️ Keine Koord'}</div>
+              <div style="font-size:0.75rem; color:#555;">🏙️ ${p.city || region.name}</div>
+              <div style="font-size:0.72rem; color:${p.lat ? '#666' : 'red'};">${p.lat ? `[${p.lat.toFixed(3)},${p.lon.toFixed(3)}]` : '⚠️ Keine Koord'}</div>
             </div>
             <div style="display:flex; gap:4px;">
               <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="autoUpdatePOI('${p.id}')">🔄 Update</button>
