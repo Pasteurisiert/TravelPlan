@@ -377,6 +377,19 @@
           "fee": "yes",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790432100441",
+          "name": "Raumabanen",
+          "city": "Åndalsnes",
+          "lat": 62.5673878,
+          "lon": 7.689129,
+          "description": "Die Raumabane (deutsch Raumabahn) ist eine eingleisige, nicht-elektrifizierte Bahnstrecke im Süden Norwegens. Die Strecke beginnt in 659 Meter Seehöhe in Dombås im Anschluss an die Dovrebane (Oslo–Trondheim) und endet nach 114 Kilometern direkt am Fjord in Åndalsnes....",
+          "website": "https://de.wikipedia.org/wiki/Raumabanen",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Haltestelle \"Parkvegen\" (< 350m)",
+          "visited": false
         }
       ]
     }
