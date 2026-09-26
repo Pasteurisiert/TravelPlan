@@ -36,13 +36,14 @@
         {
           "id": "poi_1790423303335",
           "name": "Christiansborg Slot",
-          "lat": 55.6756505,
-          "lon": 12.5800406,
-          "description": "Keine Kurzbeschreibung gefunden.",
-          "website": "https://denkongeligesamling.dk/christiansborg-slot/",
+          "lat": 55.67573,
+          "lon": 12.57907,
+          "description": "Das Schloss Christiansborg (dänisch Christiansborg Slot [kʰʁestjænsˈpɒˀ ˈslʌt]) ist ein Schloss-, Parlaments-, Regierungs- und Gerichtsgebäude auf der Insel Slotsholmen in der dänischen Hauptstadt Kopenhagen. Die neubarocke Dreiflügelanlage wurde 1907 bis 1928 im Auftrag von Friedrich VIII. nach Entwurf von Thorvald Jørgensen erbaut. Hervorzuheben ...",
+          "website": "http://christiansborg.dk",
           "openingHours": "k.A.",
           "fee": "k.A.",
-          "visited": false
+          "visited": false,
+          "transit": "Haltestelle \"Gammel Strand St., Christiansborg\" (< 450m)"
         },
         {
           "id": "poi_1790423318612",
