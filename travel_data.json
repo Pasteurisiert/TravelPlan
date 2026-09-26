@@ -306,7 +306,21 @@
     {
       "id": "olden--norwegen",
       "name": "Olden, Norwegen",
-      "places": []
+      "places": [
+        {
+          "id": "poi_1790431485664",
+          "name": "Singerheimen",
+          "city": "Olden, Norwegen",
+          "lat": 61.8324775,
+          "lon": 6.8130831,
+          "description": "Singerheimen, Singervegen, Oldeleirane, Muri, Olden, Stryn, Vestland, 6788, Norway",
+          "website": "https://www.singerheimen.no/",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
+        }
+      ]
     }
   ]
 }
