@@ -168,13 +168,14 @@
         {
           "id": "poi_1790423601059",
           "name": "Roskilde Domkirke",
-          "lat": 0,
-          "lon": 0,
-          "description": "Keine Kurzbeschreibung gefunden.",
-          "website": "https://google.com/search?q=Roskilde%20Domkirke%20Kopenhagen",
-          "openingHours": "k.A.",
-          "fee": "k.A.",
-          "visited": false
+          "lat": 55.6425,
+          "lon": 12.0803,
+          "description": "Die Roskilde Domkirke ist ein bedeutendes gotisches Meisterwerk aus Backstein und gehört seit 1995 zum UNESCO-Weltkulturerbe. Sie dient seit Jahrhunderten als traditionelle Begräbnisstätte der dänischen Monarchen und beherbergt fast 40 Königsgräber.",
+          "website": "https://roskildedomkirke.dk/",
+          "openingHours": "Mo–Sa 10:00 – 17:00, So 13:00 – 17:00 (saisonal abweichend)",
+          "fee": "ca. 10 € (75 DKK), Kinder unter 18 Jahren frei",
+          "visited": false,
+          "transit": "Regionalzug ab København H (Kopenhagen Hbf) nach Roskilde (ca. 20–25 Min.), danach etwa 10 Minuten Fußweg"
         },
         {
           "id": "poi_1790423618249",
