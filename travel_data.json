@@ -179,13 +179,14 @@
         {
           "id": "poi_1790423618249",
           "name": "Roskilde Vikingeskibsmuseet",
-          "lat": 0,
-          "lon": 0,
-          "description": "Keine Kurzbeschreibung gefunden.",
-          "website": "https://google.com/search?q=Roskilde%20Vikingeskibsmuseet%20Kopenhagen",
-          "openingHours": "k.A.",
-          "fee": "k.A.",
-          "visited": false
+          "lat": 55.6508,
+          "lon": 12.0808,
+          "description": "Das Wikingerschiffsmuseum in Roskilde präsentiert fünf originale Wikingerschiffe aus dem 11. Jahrhundert, die einst im Fjord versenkt und aufwendig geborgen wurden. Ergänzt wird die Ausstellung durch eine historische Museumswerft, in der Wikingerschiffe nach traditionellen Methoden originalgetreu nachgebaut werden. Im Sommer haben Besucher zudem die Möglichkeit, auf rekonstruierten Booten selbst auf dem Fjord zu segeln.",
+          "website": "https://www.vikingeskibsmuseet.dk/",
+          "openingHours": "10:00 - 17:00 (Mai bis Oktober) / 10:00 - 16:00 (November bis April)",
+          "fee": "ca. 17 - 21 € (saisonabhängig; Kinder unter 18 Jahren frei)",
+          "visited": false,
+          "transit": "Regionalzug ab København H nach Roskilde St. (ca. 25 Min.), von dort Bus 203 oder rund 20 Minuten Fußweg durch den Stadtpark"
         }
       ]
     }
