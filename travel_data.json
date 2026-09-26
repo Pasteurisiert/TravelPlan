@@ -30,6 +30,17 @@
           "openingHours": "Mo-Su 10:00-17:00",
           "fee": "k.A.",
           "visited": false
+        },
+        {
+          "id": "poi_1790423303335",
+          "name": "Christiansborg Slot",
+          "lat": 55.6756505,
+          "lon": 12.5800406,
+          "description": "Keine Kurzbeschreibung gefunden.",
+          "website": "https://denkongeligesamling.dk/christiansborg-slot/",
+          "openingHours": "k.A.",
+          "fee": "k.A.",
+          "visited": false
         }
       ]
     }
