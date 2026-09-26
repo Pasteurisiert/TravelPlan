@@ -24,14 +24,14 @@
         {
           "id": "poi_1790423289343",
           "name": "Rosenborg Slot",
-          "lat": 55.6856,
-          "lon": 12.5776,
-          "description": "Schloss Rosenborg (dänisch Rosenborg Slot) befindet sich am Rande des königlichen Gartens Kongens Have in der dänischen Hauptstadt Kopenhagen.\nDie Geschichte Rosenborgs reicht zurück bis in das Jahr 1606, als Christian IV. mehrere vor den nordöstlichen Wällen liegende Grundstücke kaufte und dort einen Lust- und Küchengarten anlegen ließ. In diesem ...",
+          "lat": 55.6856935,
+          "lon": 12.5774199,
+          "description": "Rosenborg Castle, Grønne Bro, Østervold, Indre By, Copenhagen, Copenhagen Municipality, Capital Region of Denmark, 1123, Denmark",
           "website": "https://www.kongernessamling.dk/rosenborg/",
           "openingHours": "Mo-Su 10:00-17:00",
           "fee": "k.A.",
           "visited": false,
-          "transit": "Haltestelle \"Nørreport\" (< 450m)"
+          "transit": "Mit ÖV erreichbar"
         },
         {
           "id": "poi_1790423303335",
