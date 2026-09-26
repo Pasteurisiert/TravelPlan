@@ -485,13 +485,13 @@
           "id": "poi_1790434212621",
           "name": "Wittgenstein Haus",
           "city": "Skjolden",
-          "lat": 50.9165437,
-          "lon": 8.0099405,
-          "description": "Johann-Hus-Straße, Geisweid, Niedersetzen, Siegen, Kreis Siegen-Wittgenstein, North Rhine-Westphalia, 57078, Germany",
-          "website": "",
+          "lat": 48.2034488,
+          "lon": 16.3942741,
+          "description": "Haus Wittgenstein, Kundmanngasse, Landstraße, Katastralgemeinde Landstraße, Landstraße, Vienna, 1030, Austria",
+          "website": "http://www.haus-wittgenstein.at",
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
-          "transit": "Haltestelle \"Geisweid Thymianweg\" (< 350m)",
+          "transit": "Mit ÖV erreichbar",
           "visited": false
         },
         {
