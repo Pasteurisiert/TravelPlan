@@ -48,13 +48,14 @@
         {
           "id": "poi_1790423318612",
           "name": "Amalienborg Slot",
-          "lat": 0,
-          "lon": 0,
-          "description": "Keine Kurzbeschreibung gefunden.",
-          "website": "https://google.com/search?q=Amalienborg%20Slot%20Kopenhagen",
-          "openingHours": "k.A.",
-          "fee": "k.A.",
-          "visited": false
+          "lat": 55.68398,
+          "lon": 12.59317,
+          "description": "Schloss Amalienborg (dänisch Amalienborg Slot [æˈmɛˀljn̩ˌpɒˀ ˈslʌt]) ist die Residenz der Könige von Dänemark in Kopenhagen. Das barocke Bauensemble aus vier Adelspalais wurde 1750 bis 1760 im Auftrag von Friedrich V. nach Entwurf von Nicolai Eigtved um einen achteckigen Platz erbaut, in dessen Mitte sich eine Reiterstatue Friedrichs V. erhebt. Es ...",
+          "website": "http://dkks.dk/amalienborg-palace/",
+          "openingHours": "1. Mai - 31. Okt. 10:00-16:00, 1. Nov. - 21. Dez. Di-So 10:00-16:00, 22. Dez. - 26. Dez. geschlossen, 27. Dez. - 30. Dez. 11:00-16:00, 31. Dez. geschlossen, 01. Jan. - 30. Apr. Di-So 10:00-16:00",
+          "fee": "Erwachsene: 90 DKK, Kinder unter 18: frei, Gruppen (mindesten 12 Personen): 70 DKK, Studenten: 60 DKK, 2 Tage Ticket für Amalienborg und Rosenborg: 125 DKK",
+          "visited": false,
+          "transit": "Christian VIII's Palæ"
         },
         {
           "id": "poi_1790423341958",
