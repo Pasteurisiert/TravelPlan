@@ -483,12 +483,12 @@
       "places": [
         {
           "id": "poi_1790434212621",
-          "name": "Wittgenstein Haus",
+          "name": "Østerrike",
           "city": "Skjolden",
           "lat": 48.2034488,
           "lon": 16.3942741,
-          "description": "Haus Wittgenstein, Kundmanngasse, Landstraße, Katastralgemeinde Landstraße, Landstraße, Vienna, 1030, Austria",
-          "website": "http://www.haus-wittgenstein.at",
+          "description": "",
+          "website": "",
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Rochusgasse\" (< 350m)",
