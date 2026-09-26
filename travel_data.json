@@ -668,6 +668,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790435074317",
+          "name": "Skudeneshavn",
+          "city": "Karmøy",
+          "lat": 59.1497472,
+          "lon": 5.2581715,
+          "description": "Skudeneshavn, Karmøy, Rogaland, 4280, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Haltestelle \"Skudeneshavn (A)\" (< 350m)",
+          "visited": false
         }
       ]
     }
