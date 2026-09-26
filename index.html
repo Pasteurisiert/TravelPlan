@@ -312,45 +312,34 @@
 
       statusEl.innerHTML = "Prüfe Schlüssel...";
 
-      // Liste von Modellbezeichnungen für maximale Kompatibilität
-      const testModels = ['gemini-2.5-flash', 'gemini-2.0-flash'];
-      let success = false;
-      let lastErrorMessage = "";
+      // Verwende das empfohlene Standardmodell gemini-3.8-flash
+      const model = 'gemini-3.8-flash';
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": key
+          },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: "Antworte kurz mit: OK" }] }]
+          })
+        });
 
-      for (let model of testModels) {
-        try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": key
-            },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: "Antworte kurz mit: OK" }] }]
-            })
-          });
-
-          const data = await res.json();
-          if (res.ok) {
-            statusEl.innerHTML = `<span style='color:green; font-weight:bold;'>✅ Key ist gültig & bereit (${model})!</span>`;
-            geminiApiKey = key;
-            localStorage.setItem('gemini_api_key', key);
-            success = true;
-            break;
-          } else {
-            lastErrorMessage = data.error?.message || res.statusText;
-          }
-        } catch (e) {
-          lastErrorMessage = e.message;
+        const data = await res.json();
+        if (res.ok) {
+          statusEl.innerHTML = `<span style='color:green; font-weight:bold;'>✅ Key ist gültig & bereit (${model})!</span>`;
+          geminiApiKey = key;
+          localStorage.setItem('gemini_api_key', key);
+        } else {
+          statusEl.innerHTML = `<span style='color:red; font-weight:bold;'>❌ Fehler (${res.status}): ${data.error?.message || res.statusText}</span>`;
         }
-      }
-
-      if (!success) {
-        statusEl.innerHTML = `<span style='color:red; font-weight:bold;'>❌ Fehler: ${lastErrorMessage}</span>`;
+      } catch (e) {
+        statusEl.innerHTML = `<span style='color:red; font-weight:bold;'>Netzwerkfehler: ${e.message}</span>`;
       }
     }
 
-    // --- ROBUSTER GEMINI RECHERCHE-AUFRUF ---
+    // --- GEMINI RECHERCHE-AUFRUF (gemini-3.8-flash) ---
     async function researchWithGemini(poiName, regionName) {
       const key = (geminiApiKey || "").trim();
       if(!key) {
@@ -368,42 +357,38 @@ Gib die Daten zwingend als valides JSON-Objekt mit exakt diesen Schlüsseln aus:
 - fee: Eintrittspreise (z.B. "Kostenlos" oder "Erwachsene ca. 15€")
 - publicTransit: Anbindung an den öffentlichen Verkehr (z.B. "Buslinie 4 bis Torget, 2 Min Fußweg")`;
 
-      const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+      const model = 'gemini-3.8-flash';
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
-      for (let model of candidateModels) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-
-        try {
-          const response = await fetch(url, {
-            method: "POST",
-            headers: { 
-              "Content-Type": "application/json",
-              "x-goog-api-key": key
-            },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: {
-                response_mime_type: "application/json"
-              }
-            })
-          });
-
-          if(response.ok) {
-            const resData = await response.json();
-            const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
-            if(rawText) {
-              return JSON.parse(rawText);
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "x-goog-api-key": key
+          },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              response_mime_type: "application/json"
             }
-          } else {
-            const errDetails = await response.json();
-            console.warn(`Modell ${model} meldete:`, errDetails);
-            if(model === candidateModels[candidateModels.length - 1]) {
-              alert(`Gemini Recherche-Fehler (${response.status}): ${errDetails.error?.message || response.statusText}`);
-            }
+          })
+        });
+
+        if(response.ok) {
+          const resData = await response.json();
+          const rawText = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+          if(rawText) {
+            return JSON.parse(rawText);
           }
-        } catch(err) {
-          console.error(`Fehler bei Anfrage an ${model}:`, err);
+        } else {
+          const errDetails = await response.json();
+          console.error(`Gemini Fehler:`, errDetails);
+          alert(`Gemini Recherche-Fehler (${response.status}): ${errDetails.error?.message || response.statusText}`);
         }
+      } catch(err) {
+        console.error(`Fehler bei Anfrage an ${model}:`, err);
+        alert(`Netzwerkfehler: ${err.message}`);
       }
       return null;
     }
