@@ -345,6 +345,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"North Clinton Ave at North Olden Ave\" (< 350m)",
           "visited": false
+        },
+        {
+          "id": "poi_1790431594036",
+          "name": "Briksdalsbreen",
+          "city": "Olden, Norwegen",
+          "lat": 61.6640458,
+          "lon": 6.8915259,
+          "description": "Briksdalsbreen, Stryn, Vestland, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
