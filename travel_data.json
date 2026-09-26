@@ -153,6 +153,19 @@
           "transit": "Mit ÖV erreichbar",
           "visited": false,
           "city": "Helsingør"
+        },
+        {
+          "id": "poi_1790429753530",
+          "name": "Henriks Hotel",
+          "city": "Kopenhagen",
+          "lat": 59.2082842,
+          "lon": 9.6063551,
+          "description": "Die Brücke – Transit in den Tod (dänischer Originaltitel Broen, schwedischer Originaltitel Bron), auch Bron – Die Brücke, ist eine dänisch-schwedisch-deutsche Krimiserie, die von 2011 bis 2018 in vier Staffeln mit 38 Episoden entstand, und dabei eine bedeutende Vertreterin des Genres Nordic Noir. Namensgebend für den Titel ist die Öresundbrücke, we...",
+          "website": "https://www.dr.dk/nyheder/kultur/film/tema/broen",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
