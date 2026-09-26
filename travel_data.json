@@ -745,7 +745,21 @@
     {
       "id": "hamburg",
       "name": "Hamburg",
-      "places": []
+      "places": [
+        {
+          "id": "poi_1790436187229",
+          "name": "Cruise Center Altona",
+          "city": "Hamburg",
+          "lat": 53.5436585,
+          "lon": 9.9370696,
+          "description": "Das Hamburg Cruise Center Altona, auch Hamburg Cruise Center 2 (CC 2) oder Kreuzfahrtterminal Altona genannt, ist eine der Anlegestellen in Hamburg, an denen Passagiere von Kreuzfahrtschiffen abgefertigt werden können; es gehört organisatorisch zum Hanseatic Cruise Center und bietet einen Liegeplatz für Schiffe bis 326 m Länge bei einer Wassertiefe...",
+          "website": "https://de.wikipedia.org/wiki/Hamburg_Cruise_Center_Altona",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Haltestelle \"Kreuzfahrtterminal Altona\" (< 350m)",
+          "visited": false
+        }
+      ]
     }
   ]
 }
