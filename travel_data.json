@@ -142,18 +142,6 @@
           "transit": "Mit ÖV erreichbar"
         },
         {
-          "id": "poi_1790428525327",
-          "name": "57 Studiestræde",
-          "lat": 55.67606,
-          "lon": 12.568826,
-          "description": "Rådhusplads(en) (deutsch (der) Rathausplatz) ist ein Platz im Zentrum der dänischen Hauptstadt Kopenhagen. Er liegt im Stadtbezirk Indre By (Innenstadt) zwischen den Straßen Vester Voldgade und Hans Christian Andersens Boulevard. Auch die Vesterbrogade und der Strøg, eine der längsten Fußgängerzonen Europas, münden auf den Platz. Er wurde 1893 nach...",
-          "website": "",
-          "openingHours": "Siehe Google-Info",
-          "fee": "Siehe Google-Info",
-          "transit": "Haltestelle \"Rådhuspladsen St.\" (< 450m)",
-          "visited": false
-        },
-        {
           "id": "poi_1790428973362",
           "name": "Maritimes Museum",
           "lat": 56.03916667,
