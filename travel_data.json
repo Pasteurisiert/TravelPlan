@@ -629,6 +629,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790435021530",
+          "name": "Rådhusplassen",
+          "city": "Haugesund",
+          "lat": 59.4100441,
+          "lon": 5.274803,
+          "description": "Rådhusplassen, Hollenderhaugen, Rossabø, Haugesund, Rogaland, 5528, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
