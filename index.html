@@ -102,14 +102,22 @@
             <select id="day-region-select" onchange="onRegionChange()"></select>
           </div>
 
-          <!-- Standort -->
+          <!-- Standort & Startpunkt -->
           <div class="card">
-            <div style="font-weight:bold; font-size:0.9rem; margin-bottom:6px;">📍 Mein Standort</div>
+            <div style="font-weight:bold; font-size:0.9rem; margin-bottom:6px;">📍 Startpunkt / Standort</div>
+            
+            <!-- NEU: Dropdown zur Auswahl eines beliebigen Ortes der Liste -->
+            <label style="font-size:0.8rem; color:#444;">Aus Liste starten (auch besuchte):</label>
+            <select id="start-poi-select" onchange="onStartPoiSelect(this.value)">
+              <option value="">-- Ort als Start wählen --</option>
+            </select>
+
+            <div style="font-size:0.8rem; color:#444; margin-top:4px;">Oder frei festlegen:</div>
             <div style="display:flex; gap:6px;">
               <button class="btn btn-secondary" style="flex:1;" onclick="getGPSLocation()">📡 GPS</button>
               <button class="btn btn-secondary" style="flex:1;" id="btn-pick" onclick="toggleMapPick()">🗺️ Klick</button>
             </div>
-            <input type="text" placeholder="Adresse eingeben..." style="margin-top:6px;" onchange="geocodeAddress(this.value)">
+            <input type="text" id="manual-loc-input" placeholder="Adresse eingeben..." style="margin-top:6px;" onchange="geocodeAddress(this.value)">
             <div id="loc-status" style="font-size:0.75rem; color:#666;">Standort nicht gesetzt</div>
           </div>
 
@@ -132,7 +140,6 @@
               </div>
             </div>
 
-            <!-- Direkt editierbare Kurzbeschreibung -->
             <div style="font-size:0.8rem; color:#666; margin-top:6px;">Beschreibung (direkt editierbar):</div>
             <textarea id="det-desc-input" rows="3" class="editable-field" style="margin:0;"></textarea>
 
@@ -149,7 +156,7 @@
 
             <!-- Route -->
             <div id="route-box" style="margin-top:10px; background:#e8f5e9; border:1px solid #c8e6c9; border-radius:6px; padding:8px; font-size:0.85rem; display:none;">
-              <strong>Weg vom Standort:</strong>
+              <strong>Weg vom Startpunkt:</strong>
               <div id="route-calc-text">Berechnung...</div>
             </div>
           </div>
@@ -256,6 +263,7 @@
 
       map.on('click', (e) => {
         if(pickMode) {
+          document.getElementById('start-poi-select').value = "";
           setCustomPosition(e.latlng.lat, e.latlng.lng, "Karten-Punkt");
           toggleMapPick();
         }
@@ -298,21 +306,63 @@
       }
     }
 
-    // --- STANDORT ---
+    // --- STANDORT & STARTPUNKT ---
     function setCustomPosition(lat, lng, label) {
       currentPosition = { lat, lng };
       document.getElementById('loc-status').innerText = `${label} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
 
       if(window.posMarker) map.removeLayer(window.posMarker);
-      window.posMarker = L.circleMarker([lat, lng], { color: 'blue', fillColor: '#2196f3', fillOpacity: 0.8, radius: 8 }).addTo(map);
+      window.posMarker = L.circleMarker([lat, lng], { color: 'blue', fillColor: '#2196f3', fillOpacity: 0.85, radius: 9 })
+        .addTo(map)
+        .bindPopup(`<b>Start:</b> ${label}`)
+        .openPopup();
 
       if(selectedPoi && selectedPoi.lat && selectedPoi.lon) {
         calcRoute(selectedPoi.lat, selectedPoi.lon);
       }
     }
 
+    // NEU: Auswahl eines Ortes aus der Dropdown-Liste
+    function onStartPoiSelect(poiId) {
+      if(!poiId) return;
+      const regId = document.getElementById('day-region-select').value;
+      const region = appData.regions.find(r => r.id === regId);
+      if(!region) return;
+
+      const p = region.places.find(item => item.id === poiId);
+      if(!p) return;
+
+      if(!p.lat || !p.lon) {
+        alert(`Für den Ort "${p.name}" sind keine Koordinaten hinterlegt.`);
+        document.getElementById('start-poi-select').value = "";
+        return;
+      }
+
+      document.getElementById('manual-loc-input').value = "";
+      setCustomPosition(p.lat, p.lon, `[Start] ${p.name}`);
+      map.panTo([p.lat, p.lon]);
+    }
+
+    // Dropdown mit allen Orten der aktuellen Region füllen
+    function updateStartPoiDropdown() {
+      const regId = document.getElementById('day-region-select').value;
+      const selectEl = document.getElementById('start-poi-select');
+      selectEl.innerHTML = '<option value="">-- Ort als Start wählen --</option>';
+
+      const region = appData.regions.find(r => r.id === regId);
+      if(!region || !region.places.length) return;
+
+      region.places.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.text = `${p.visited ? '✓ ' : ''}${p.name}${p.lat ? '' : ' (keine Koord)'}`;
+        selectEl.appendChild(opt);
+      });
+    }
+
     function getGPSLocation() {
       if(!navigator.geolocation) return alert("GPS nicht verfügbar");
+      document.getElementById('start-poi-select').value = "";
       document.getElementById('loc-status').innerText = "Suche GPS Signal...";
       navigator.geolocation.getCurrentPosition(
         (pos) => setCustomPosition(pos.coords.latitude, pos.coords.longitude, "GPS Position"),
@@ -333,6 +383,7 @@
 
     async function geocodeAddress(query) {
       if(!query) return;
+      document.getElementById('start-poi-select').value = "";
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
         const data = await res.json();
@@ -342,7 +393,7 @@
       } catch(e) { }
     }
 
-    // --- TIEFGEHENDE MULTI-SOURCE RECHERCHE ---
+    // --- MULTI-SOURCE RECHERCHE ---
     async function deepSearchPOI(poiName, regionName) {
       const info = {
         lat: 0,
@@ -356,7 +407,7 @@
 
       const cleanRegion = regionName.split(',')[0].trim();
 
-      // 1. SCHRITT: WIKIVOYAGE (Spezialisiert auf Öffnungszeiten, Preise und ÖV)
+      // 1. Wikivoyage (Listing-Extraktion)
       try {
         const wvUrl = `https://de.wikivoyage.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(poiName + ' ' + cleanRegion)}&format=json&origin=*`;
         const wvRes = await fetch(wvUrl);
@@ -364,13 +415,11 @@
         
         if (wvData.query?.search?.length > 0) {
           const pageTitle = wvData.query.search[0].title;
-          // Roh-Wikitext des Reiseführers abfragen
           const parseUrl = `https://de.wikivoyage.org/w/api.php?action=parse&page=${encodeURIComponent(pageTitle)}&prop=wikitext&format=json&origin=*`;
           const parseRes = await fetch(parseUrl);
           const parseData = await parseRes.json();
           const wikitext = parseData.parse?.wikitext?.['*'] || '';
 
-          // Nach Listing-Tags wie {{vCard | name=... | hours=... | price=...}} suchen
           const lines = wikitext.split('\n');
           for (let line of lines) {
             if (line.toLowerCase().includes(poiName.toLowerCase())) {
@@ -398,7 +447,7 @@
         }
       } catch (e) { }
 
-      // 2. SCHRITT: WIKIPEDIA / WIKIDATA (Für Beschreibung, Geodaten & offizielle Homepage)
+      // 2. Wikipedia / Wikidata
       try {
         const wpSearchUrl = `https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(poiName + ' ' + cleanRegion)}&format=json&origin=*`;
         const wpRes = await fetch(wpSearchUrl);
@@ -422,7 +471,6 @@
               info.lon = p.coordinates[0].lon;
             }
 
-            // Aus Wikidata die offizielle Homepage Property (P856) ziehen
             const wikibaseItem = p.pageprops?.wikibase_item;
             if (wikibaseItem && !info.website) {
               try {
@@ -438,14 +486,9 @@
         }
       } catch (e) { }
 
-      // 3. SCHRITT: OPENSTREETMAP (Fallback für Öffnungszeiten, Gebühren & Geodaten)
+      // 3. OpenStreetMap Nominatim
       if (!info.lat || !info.lon || !info.openingHours) {
-        // Erst gezielt nur mit POI Name + Stadt suchen
-        const queries = [
-          `${poiName} ${cleanRegion}`,
-          poiName
-        ];
-
+        const queries = [`${poiName} ${cleanRegion}`, poiName];
         for (let q of queries) {
           try {
             const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&extratags=1&limit=1&q=${encodeURIComponent(q)}`);
@@ -467,7 +510,7 @@
         }
       }
 
-      // 4. SCHRITT: ÖV-HALTESTELLE IM UMKREIS (Overpass)
+      // 4. ÖV Haltestelle in der Nähe (Overpass)
       if (info.lat && info.lon && !info.transit) {
         try {
           const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:450,${info.lat},${info.lon})[highway=bus_stop];out 1;`;
@@ -480,7 +523,6 @@
         } catch(e) {}
       }
 
-      // Defaults falls noch leer
       if (!info.description) info.description = "Keine Kurzbeschreibung gefunden. Nutzen Sie die Google-Links.";
       if (!info.openingHours) info.openingHours = "Siehe Google-Info";
       if (!info.fee) info.fee = "Siehe Google-Info";
@@ -521,6 +563,7 @@
         region.places.push(newPOI);
         document.getElementById('admin-new-poi').value = "";
         renderAdminList();
+        updateStartPoiDropdown();
         persistData();
         statusEl.innerText = info.lat ? `✅ Gefunden & eingetragen: [${info.lat.toFixed(4)}, ${info.lon.toFixed(4)}]` : `⚠️ Angelegt (Keine Geodaten gefunden).`;
         alert(`Ort "${name}" erfolgreich hinzugefügt!`);
@@ -532,7 +575,7 @@
       }
     }
 
-    // --- AUTO-UPDATE EINES BESTEHENDEN ORTES ---
+    // --- AUTO-UPDATE EINES ORTES ---
     async function autoUpdatePOI(poiId) {
       let targetPOI = null, targetRegion = null;
       for (let r of appData.regions) {
@@ -563,7 +606,6 @@
       alert(`Daten zu "${targetPOI.name}" aktualisiert!`);
     }
 
-    // --- DIREKTES SCHNELL-SPEICHERN IN DER DETAILANSICHT ---
     function saveDirectEdits() {
       if (!selectedPoi) return;
       selectedPoi.description = document.getElementById('det-desc-input').value.trim();
@@ -630,6 +672,7 @@
         if(bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
       }
       renderDayList();
+      updateStartPoiDropdown();
     }
 
     function renderDayList() {
@@ -691,7 +734,6 @@
         webA.style.display = "none";
       }
 
-      // Interaktive Klick-Badges zur Schnellbearbeitung
       const badgesEl = document.getElementById('det-badges');
       badgesEl.innerHTML = `
         <span class="badge ${poi.lat ? 'ok' : 'warn'}">📍 ${poi.lat ? poi.lat.toFixed(4) + ', ' + poi.lon.toFixed(4) : 'Keine Koord'}</span>
@@ -719,6 +761,7 @@
         if(p) { p.visited = !p.visited; break; }
       }
       renderDayList();
+      updateStartPoiDropdown();
       persistData();
     }
 
