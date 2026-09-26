@@ -31,7 +31,8 @@
           "openingHours": "Mo-Su 10:00-17:00",
           "fee": "k.A.",
           "visited": false,
-          "transit": "Mit ÖV erreichbar"
+          "transit": "Mit ÖV erreichbar",
+          "city": ""
         },
         {
           "id": "poi_1790423303335",
