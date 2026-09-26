@@ -195,6 +195,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Sankt Peders Stræde\" (< 350m)",
           "visited": false
+        },
+        {
+          "id": "poi_1790430497179",
+          "name": "Vikingeskibsmuseet",
+          "city": "Roskilde",
+          "lat": 55.6508696,
+          "lon": 12.0814717,
+          "description": "Viking Ship Museum, Strandengen, Sankt Agnes Huse, Roskilde, Roskilde Municipality, Region Zealand, 4000, Denmark",
+          "website": "https://www.vikingeskibsmuseet.dk/",
+          "openingHours": "Mo-Su 10:00-16:00+",
+          "fee": "yes",
+          "transit": "Haltestelle \"Sankt Clara Vej\" (< 350m)",
+          "visited": false
         }
       ]
     }
