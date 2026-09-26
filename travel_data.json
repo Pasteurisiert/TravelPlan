@@ -480,7 +480,21 @@
     {
       "id": "skjolden",
       "name": "Skjolden",
-      "places": []
+      "places": [
+        {
+          "id": "poi_1790434212621",
+          "name": "Wittgenstein's Hut",
+          "city": "Skjolden",
+          "lat": 50.943319,
+          "lon": 8.0553942,
+          "description": "De Hut, 28, Hüttentaler Straße, Unglinghausen, Netphen, Kreis Siegen-Wittgenstein, North Rhine-Westphalia, 57250, Germany",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
+        }
+      ]
     }
   ]
 }
