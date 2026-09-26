@@ -84,13 +84,14 @@
         {
           "id": "poi_1790423383588",
           "name": "Ny Carlsberg Glyptothek",
-          "lat": 0,
-          "lon": 0,
-          "description": "Keine Kurzbeschreibung gefunden.",
-          "website": "https://google.com/search?q=Ny%20Carlsberg%20Glyptothek%20Kopenhagen",
-          "openingHours": "k.A.",
-          "fee": "k.A.",
-          "visited": false
+          "lat": 55.67233,
+          "lon": 12.57182,
+          "description": "Ny Carlsberg Glyptotek ist ein Museum in Kopenhagen. Es zeigt sowohl antike Skulpturen des Mittelmeerraums aus Ägypten, Rom und Griechenland als auch moderne Skulpturen von Auguste Rodin und Edgar Degas. Dänische und französische Gemälde aus dem 19. und 20. Jahrhundert des Impressionismus und Post-Impressionismus ergänzen die Sammlung....",
+          "website": "https://www.glyptoteket.com/",
+          "openingHours": "Di + Mi 10.00 – 17.00 Uhr, Do 10.00 – 21.00 Uhr, Fr – So 10.00 – 17.00 Uhr, Mo geschlossen",
+          "fee": "150 DKK, 135 DKK online",
+          "visited": false,
+          "transit": "Haltestelle \"Hovedbanegården, Tivoli (Bernstorffsgade)\" (< 450m)"
         },
         {
           "id": "poi_1790423394158",
