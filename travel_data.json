@@ -474,6 +474,19 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false
+        },
+        {
+          "id": "poi_1790432805401",
+          "name": "Gate 1 93, 6700 Måløy, Norwegen",
+          "city": "Måløy",
+          "lat": 61.934011,
+          "lon": 5.112011,
+          "description": "93, Gate 1, Seternes, Måløy, Kinn, Vestland, 6700, Norway",
+          "website": "",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
         }
       ]
     }
