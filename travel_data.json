@@ -162,7 +162,7 @@
           "notes": "Direkt über Karte hinzugefügt",
           "selectedForDay": true,
           "visited": false,
-          "modeIn": "transit",
+          "modeIn": "foot",
           "modeOut": "transit"
         }
       ]
