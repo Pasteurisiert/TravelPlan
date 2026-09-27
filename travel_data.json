@@ -135,7 +135,7 @@
           "name": "Anleger",
           "city": "Bergen",
           "category": "oev",
-          "mode": "foot",
+          "mode": "transit",
           "lat": 60.39010178814275,
           "lon": 5.3093791007995605,
           "description": "Ad-hoc auf der Karte erstelltes Ziel bei [60.39010, 5.30938]",
