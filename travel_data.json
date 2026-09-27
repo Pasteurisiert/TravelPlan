@@ -72,7 +72,7 @@
           "visited": false,
           "category": "kultur",
           "mode": "foot",
-          "selectedForDay": false,
+          "selectedForDay": true,
           "duration": 60,
           "cost": 0
         },
@@ -90,7 +90,7 @@
           "visited": false,
           "category": "kultur",
           "mode": "foot",
-          "selectedForDay": false,
+          "selectedForDay": true,
           "duration": 60,
           "cost": 0
         },
