@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#1976d2">
-  <title>TravelPlan Pro v2.9 - Fixed Dropdowns</title>
+  <title>TravelPlan Pro v3.0 - Offline First</title>
   
   <link rel="manifest" href="manifest.json">
 
@@ -157,7 +157,7 @@
 <body>
 
   <header>
-    <div>🌍 TravelPlan Pro v2.9</div>
+    <div>🌍 TravelPlan Pro v3.0</div>
     <div id="sync-pill" onclick="syncWithGitHub()">GitHub: Offline</div>
   </header>
 
@@ -177,6 +177,7 @@
             <select id="day-region-select" onchange="onRegionChange()"></select>
           </div>
 
+          <!-- START- UND ENDPUNKT -->
           <div class="card" style="padding: 10px;">
             <div style="font-weight:bold; font-size:0.88rem; margin-bottom:4px;">📍 Tour-Eckpunkte</div>
             
@@ -203,6 +204,7 @@
             <div id="loc-status" style="font-size:0.75rem; color:#666; font-weight: 500;">Start & Ende bereit</div>
           </div>
 
+          <!-- Aktionen -->
           <div class="card" style="padding: 10px;">
             <div style="display:flex; gap:6px; margin-bottom:6px;">
               <button class="btn btn-primary" style="flex:1.2;" onclick="optimizeDayRoute()">⚡ Optimieren</button>
@@ -217,6 +219,7 @@
 
           <div id="tour-summary-box" class="route-summary" style="display:none;"></div>
 
+          <!-- Orte-Liste -->
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div style="font-weight:bold; font-size:0.9rem;">Geplante Tour-Reihenfolge</div>
             <label style="font-size:0.8rem; cursor:pointer;">
@@ -225,6 +228,7 @@
           </div>
           <div id="day-poi-list"></div>
 
+          <!-- Detailkarte -->
           <div id="detail-card" class="card" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
               <span style="font-weight:bold; font-size:0.95rem; color:var(--primary);">Detail & Infos</span>
@@ -240,6 +244,7 @@
             <label style="font-size:0.78rem; color:#666;">Stadt / Ort:</label>
             <input type="text" id="det-city-input" style="margin-bottom:4px;">
 
+            <!-- Transportmittel getrennt: Anreise & Weiterreise -->
             <div class="route-direction-box" style="margin-bottom:8px;">
               <div class="route-direction-row">
                 <span style="font-weight:bold;">Hinweg zum Ziel:</span>
@@ -366,6 +371,7 @@
       <h3>GitHub & PWA-Download Manager</h3>
       <div class="card">
         <h4>☁️ GitHub Synchronisation</h4>
+        <p style="font-size:0.8rem; color:#666;">Status "Offline" bedeutet lediglich, dass keine Synchronisation mit GitHub eingerichtet ist. Alle Daten werden lokal auf Ihrem Gerät gespeichert!</p>
         <label style="font-size:0.8rem;">GitHub Username:</label>
         <input type="text" id="gh-owner" placeholder="z.B. benutzername">
         <label style="font-size:0.8rem;">Repository Name:</label>
@@ -377,9 +383,9 @@
       </div>
 
       <div class="card">
-        <h4>🧹 Cache & Version</h4>
-        <p style="font-size:0.82rem; color:#555;">Falls Ihr Browser noch eine alte Version anzeigt, klicken Sie hier:</p>
-        <button class="btn btn-danger btn-block" onclick="forceClearAppCache()">Cache komplett leeren & neu laden</button>
+        <h4>🧹 Reset & Reparatur</h4>
+        <p style="font-size:0.82rem; color:#555;">Falls Daten fehlen oder hängen geblieben sind, setzt dieser Button die App sicher auf die Standardregion zurück:</p>
+        <button class="btn btn-danger btn-block" onclick="forceResetApp()">Standard-Daten wiederherstellen & Cache leeren</button>
       </div>
     </div>
   </main>
@@ -505,17 +511,8 @@
   </div>
 
   <script>
-    function forceClearAppCache() {
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          for (let name of names) caches.delete(name);
-        });
-      }
-      localStorage.removeItem('travel_data');
-      location.reload(true);
-    }
-
-    let appData = {
+    // STANDARD-DATEN (Werden immer garantiert geladen, selbst wenn alles offline ist)
+    const DEFAULT_DATA = {
       regions: [
         {
           id: "copenhagen",
@@ -546,12 +543,17 @@
       ]
     };
 
+    let appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
     let ghConfig = { owner: "", repo: "", token: "", path: "travel_data.json", sha: null };
+
     let startPoint = null;
     let endPoint = null;
     let selectedPoi = null;
 
-    let map, markersLayer, routeLayer, fullTourLayer;
+    let map = null;
+    let markersLayer = null;
+    let routeLayer = null;
+    let fullTourLayer = null;
     let startMarker = null;
     let endMarker = null;
 
@@ -577,14 +579,22 @@
       oev: '🚆 ÖV'
     };
 
+    function forceResetApp() {
+      localStorage.removeItem('travel_data');
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          for (let name of names) caches.delete(name);
+        });
+      }
+      location.reload(true);
+    }
+
     function sanitizeAppData() {
-      if (!appData || !appData.regions || !Array.isArray(appData.regions) || appData.regions.length === 0) {
-        appData = {
-          regions: [{ id: "copenhagen", name: "Kopenhagen", places: [] }]
-        };
+      if (!appData || typeof appData !== 'object' || !Array.isArray(appData.regions) || appData.regions.length === 0) {
+        appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
       }
       appData.regions.forEach(r => {
-        if (!r.places) r.places = [];
+        if (!r.places || !Array.isArray(r.places)) r.places = [];
         r.places.forEach(p => {
           if (!p.category) p.category = 'kultur';
           if (!p.modeIn) p.modeIn = p.mode || (p.category === 'oev' ? 'transit' : 'foot');
@@ -600,36 +610,46 @@
     }
 
     window.addEventListener("DOMContentLoaded", () => {
-      initMap();
       loadSettings();
       sanitizeAppData();
+      initMap();
       initRegionDropdowns();
-      if(ghConfig.token) syncWithGitHub();
+      
+      // Nur synchronisieren, wenn GitHub-Zugangsdaten vorliegen
+      if (ghConfig.token && ghConfig.owner && ghConfig.repo) {
+        syncWithGitHub();
+      } else {
+        document.getElementById('sync-pill').innerText = "GitHub: Offline";
+      }
     });
 
     function initMap() {
-      map = L.map('map', { zoomControl: false }).setView([55.6761, 12.5683], 13);
-      L.control.zoom({ position: 'bottomright' }).addTo(map);
+      try {
+        map = L.map('map', { zoomControl: false }).setView([55.6761, 12.5683], 13);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
 
-      markersLayer = L.layerGroup().addTo(map);
+        markersLayer = L.layerGroup().addTo(map);
 
-      map.on('click', (e) => {
-        if (pickMode === 'start') {
-          stopLiveGPS();
-          setStartPoint(e.latlng.lat, e.latlng.lng, "Karten-Startpunkt", "__CUSTOM__");
-          toggleMapPick(null);
-        } else if (pickMode === 'end') {
-          setEndPoint(e.latlng.lat, e.latlng.lng, "Karten-Endpunkt", "__CUSTOM__");
-          toggleMapPick(null);
-        } else if (pickMode === 'target') {
-          openAdhocModal(e.latlng.lat, e.latlng.lng);
-          toggleMapPick(null);
-        }
-      });
+        map.on('click', (e) => {
+          if (pickMode === 'start') {
+            stopLiveGPS();
+            setStartPoint(e.latlng.lat, e.latlng.lng, "Karten-Startpunkt", "__CUSTOM__");
+            toggleMapPick(null);
+          } else if (pickMode === 'end') {
+            setEndPoint(e.latlng.lat, e.latlng.lng, "Karten-Endpunkt", "__CUSTOM__");
+            toggleMapPick(null);
+          } else if (pickMode === 'target') {
+            openAdhocModal(e.latlng.lat, e.latlng.lng);
+            toggleMapPick(null);
+          }
+        });
+      } catch(e) {
+        console.error("Leaflet Init Error:", e);
+      }
     }
 
     function switchNav(tab) {
@@ -639,7 +659,7 @@
       if(tab === 'day') {
         document.getElementById('view-day').classList.add('active');
         document.getElementById('nav-day').classList.add('active');
-        setTimeout(() => map.invalidateSize(), 200);
+        if(map) setTimeout(() => map.invalidateSize(), 200);
       } else if(tab === 'admin') {
         document.getElementById('view-admin').classList.add('active');
         document.getElementById('nav-admin').classList.add('active');
@@ -662,7 +682,7 @@
       } else {
         side.classList.add('hide-mobile');
         mapWrap.classList.remove('hide-mobile');
-        setTimeout(() => map.invalidateSize(), 200);
+        if(map) setTimeout(() => map.invalidateSize(), 200);
       }
     }
 
@@ -713,17 +733,19 @@
 
       if (dropdownVal) {
         const startSel = document.getElementById('start-poi-select');
-        startSel.value = dropdownVal;
+        if (startSel) startSel.value = dropdownVal;
       }
 
-      if (startMarker) map.removeLayer(startMarker);
-      startMarker = L.circleMarker([startPoint.lat, startPoint.lng], {
-        color: '#0d47a1',
-        fillColor: '#2196f3',
-        fillOpacity: 0.95,
-        radius: 10,
-        weight: 3
-      }).addTo(map).bindPopup(`<b>Startpunkt:</b><br>${label}`).openPopup();
+      if (startMarker && map) map.removeLayer(startMarker);
+      if (map) {
+        startMarker = L.circleMarker([startPoint.lat, startPoint.lng], {
+          color: '#0d47a1',
+          fillColor: '#2196f3',
+          fillOpacity: 0.95,
+          radius: 10,
+          weight: 3
+        }).addTo(map).bindPopup(`<b>Startpunkt:</b><br>${label}`).openPopup();
+      }
 
       const endVal = document.getElementById('end-poi-select').value;
       if (endVal === '__SAME_AS_START__') {
@@ -737,14 +759,16 @@
 
     function setEndPoint(lat, lng, label, dropdownVal = null) {
       endPoint = { lat: parseFloat(lat), lng: parseFloat(lng), label: label };
-      if (endMarker) map.removeLayer(endMarker);
-      endMarker = L.circleMarker([endPoint.lat, endPoint.lng], {
-        color: '#b71c1c',
-        fillColor: '#f44336',
-        fillOpacity: 0.95,
-        radius: 10,
-        weight: 3
-      }).addTo(map).bindPopup(`<b>Endpunkt:</b><br>${label}`);
+      if (endMarker && map) map.removeLayer(endMarker);
+      if (map) {
+        endMarker = L.circleMarker([endPoint.lat, endPoint.lng], {
+          color: '#b71c1c',
+          fillColor: '#f44336',
+          fillOpacity: 0.95,
+          radius: 10,
+          weight: 3
+        }).addTo(map).bindPopup(`<b>Endpunkt:</b><br>${label}`);
+      }
 
       if (dropdownVal) {
         document.getElementById('end-poi-select').value = dropdownVal;
@@ -756,7 +780,7 @@
       if (val === '__GPS__') {
         startLiveGPS();
       } else if (val === '__CUSTOM__') {
-        // Belassen
+        // Manuelle Wahl beibehalten
       } else {
         stopLiveGPS();
         const regId = document.getElementById('day-region-select').value;
@@ -765,7 +789,7 @@
         const p = region.places.find(item => item.id === val);
         if (p && p.lat && p.lon) {
           setStartPoint(p.lat, p.lon, p.name, p.id);
-          map.panTo([p.lat, p.lon]);
+          if (map) map.panTo([p.lat, p.lon]);
         } else {
           alert("Dieser Ort besitzt keine gültigen Koordinaten.");
         }
@@ -774,7 +798,7 @@
 
     function onEndPointChange(val) {
       if (val === '__SAME_AS_START__') {
-        if (endMarker) map.removeLayer(endMarker);
+        if (endMarker && map) map.removeLayer(endMarker);
         endMarker = null;
         if (startPoint) {
           endPoint = { ...startPoint, label: `Ziel (Rundtour)` };
@@ -857,11 +881,13 @@
           setStartPoint(lat, lng, "Live GPS", "__GPS__");
           document.getElementById('loc-status').innerHTML = `🔵 <b>Live:</b> ${lat.toFixed(4)}, ${lng.toFixed(4)} (±${acc}m)`;
 
-          if (accuracyCircle) {
-            accuracyCircle.setLatLng([lat, lng]);
-            accuracyCircle.setRadius(acc);
-          } else {
-            accuracyCircle = L.circle([lat, lng], { radius: acc, color: '#2196f3', weight: 1, fillColor: '#90caf9', fillOpacity: 0.2 }).addTo(map);
+          if (map) {
+            if (accuracyCircle) {
+              accuracyCircle.setLatLng([lat, lng]);
+              accuracyCircle.setRadius(acc);
+            } else {
+              accuracyCircle = L.circle([lat, lng], { radius: acc, color: '#2196f3', weight: 1, fillColor: '#90caf9', fillOpacity: 0.2 }).addTo(map);
+            }
           }
 
           const now = Date.now();
@@ -886,7 +912,7 @@
       const btn = document.getElementById('btn-live-gps');
       btn.classList.remove('active');
       btn.innerText = "🔴 Live GPS";
-      if (accuracyCircle) {
+      if (accuracyCircle && map) {
         map.removeLayer(accuracyCircle);
         accuracyCircle = null;
       }
@@ -900,7 +926,7 @@
         const data = await res.json();
         if(data && data.length > 0) {
           setStartPoint(parseFloat(data[0].lat), parseFloat(data[0].lon), query, "__CUSTOM__");
-          map.panTo([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
+          if (map) map.panTo([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
         }
       } catch(e) { }
     }
@@ -1336,8 +1362,8 @@
       summaryBox.style.display = "block";
       summaryBox.innerHTML = `Berechne Tour (Kürzeste Fußwege & ÖV-Trassen)...`;
 
-      if (fullTourLayer) map.removeLayer(fullTourLayer);
-      fullTourLayer = L.featureGroup().addTo(map);
+      if (fullTourLayer && map) map.removeLayer(fullTourLayer);
+      if (map) fullTourLayer = L.featureGroup().addTo(map);
 
       let totalWalkMeters = 0;
       let totalWalkSeconds = 0;
@@ -1361,42 +1387,44 @@
 
         const routeData = await fetchRealRouteGeometry(currentLegStart.lng, currentLegStart.lat, nextStop.lon, nextStop.lat, isTransit);
 
-        if (isTransit) {
-          transitLegs++;
-          totalTransitMeters += routeData.distance;
+        if (fullTourLayer) {
+          if (isTransit) {
+            transitLegs++;
+            totalTransitMeters += routeData.distance;
 
-          const transitLine = L.geoJSON(routeData.geometry, {
-            style: {
-              color: '#8e24aa',
-              weight: 6,
-              opacity: 0.85,
-              dashArray: '8, 8'
-            }
-          });
+            const transitLine = L.geoJSON(routeData.geometry, {
+              style: {
+                color: '#8e24aa',
+                weight: 6,
+                opacity: 0.85,
+                dashArray: '8, 8'
+              }
+            });
 
-          const gTransitUrl = `https://www.google.com/maps/dir/?api=1&origin=${currentLegStart.lat},${currentLegStart.lng}&destination=${nextStop.lat},${nextStop.lon}&travelmode=transit`;
-          transitLine.bindPopup(`
-            <b>Etappe ${i + 1}: 🚆 ÖV-Streckenverlauf</b><br>
-            Von: ${currentLegStart.label}<br>
-            Nach: ${nextStop.name}<br>
-            Distanz: ~${(routeData.distance/1000).toFixed(2)} km<br>
-            👉 <a href="${gTransitUrl}" target="_blank" style="color:#8e24aa; font-weight:bold;">Live-Abfahrten & Linien öffnen</a>
-          `);
-          fullTourLayer.addLayer(transitLine);
-        } else {
-          footLegs++;
-          totalWalkMeters += routeData.distance;
-          totalWalkSeconds += routeData.duration;
+            const gTransitUrl = `https://www.google.com/maps/dir/?api=1&origin=${currentLegStart.lat},${currentLegStart.lng}&destination=${nextStop.lat},${nextStop.lon}&travelmode=transit`;
+            transitLine.bindPopup(`
+              <b>Etappe ${i + 1}: 🚆 ÖV-Streckenverlauf</b><br>
+              Von: ${currentLegStart.label}<br>
+              Nach: ${nextStop.name}<br>
+              Distanz: ~${(routeData.distance/1000).toFixed(2)} km<br>
+              👉 <a href="${gTransitUrl}" target="_blank" style="color:#8e24aa; font-weight:bold;">Live-Abfahrten & Linien öffnen</a>
+            `);
+            fullTourLayer.addLayer(transitLine);
+          } else {
+            footLegs++;
+            totalWalkMeters += routeData.distance;
+            totalWalkSeconds += routeData.duration;
 
-          const footLine = L.geoJSON(routeData.geometry, {
-            style: {
-              color: '#2e7d32',
-              weight: 5,
-              opacity: 0.95
-            }
-          });
-          footLine.bindPopup(`<b>Etappe ${i + 1}: 🚶 Kürzester Fußweg</b><br>Nach ${nextStop.name} (~${Math.round(routeData.duration/60)} Min. • ${(routeData.distance/1000).toFixed(2)} km)`);
-          fullTourLayer.addLayer(footLine);
+            const footLine = L.geoJSON(routeData.geometry, {
+              style: {
+                color: '#2e7d32',
+                weight: 5,
+                opacity: 0.95
+              }
+            });
+            footLine.bindPopup(`<b>Etappe ${i + 1}: 🚶 Kürzester Fußweg</b><br>Nach ${nextStop.name} (~${Math.round(routeData.duration/60)} Min. • ${(routeData.distance/1000).toFixed(2)} km)`);
+            fullTourLayer.addLayer(footLine);
+          }
         }
 
         currentLegStart = { lat: nextStop.lat, lng: nextStop.lon, label: nextStop.name };
@@ -1419,7 +1447,7 @@
         ⏱️ Gesamtzeit der Tour: <b>ca. ${totalHours}h ${remMinutes}min</b>
       `;
 
-      map.fitBounds(fullTourLayer.getBounds(), { padding: [40, 40] });
+      if (map && fullTourLayer) map.fitBounds(fullTourLayer.getBounds(), { padding: [40, 40] });
       if (window.innerWidth <= 768) setMobileSubTab('map');
     }
 
@@ -1562,7 +1590,6 @@
       }
     }
 
-    // --- ROUTING EINZEL-STRECKE ---
     async function calcRoute(destPoi, autoZoom = true) {
       if(!startPoint || !destPoi || !destPoi.lat || !destPoi.lon) return;
       const rBox = document.getElementById('route-box');
@@ -1585,46 +1612,44 @@
           👉 <a href="${transitUrl}" target="_blank" style="color:#8e24aa; font-weight:bold;">Hier Live-Abfahrten, Linien & Umstiege öffnen</a>
         `;
 
-        if(routeLayer) map.removeLayer(routeLayer);
-        routeLayer = L.geoJSON(routeData.geometry, {
-          style: { color: '#8e24aa', weight: 6, opacity: 0.85, dashArray: '8, 8' }
-        }).addTo(map);
+        if(routeLayer && map) map.removeLayer(routeLayer);
+        if(map) {
+          routeLayer = L.geoJSON(routeData.geometry, {
+            style: { color: '#8e24aa', weight: 6, opacity: 0.85, dashArray: '8, 8' }
+          }).addTo(map);
 
-        if (autoZoom) map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
+          if (autoZoom) map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
+        }
       } else {
         document.getElementById('route-calc-text').innerHTML = `
           🚶 <strong>Kürzester Fußweg (Fußpfade/Gassen):</strong> ${distKm} km (~${durMin} Min. Gehzeit)
         `;
 
-        if(routeLayer) map.removeLayer(routeLayer);
-        routeLayer = L.geoJSON(routeData.geometry, {
-          style: { color: '#2e7d32', weight: 5 }
-        }).addTo(map);
+        if(routeLayer && map) map.removeLayer(routeLayer);
+        if(map) {
+          routeLayer = L.geoJSON(routeData.geometry, {
+            style: { color: '#2e7d32', weight: 5 }
+          }).addTo(map);
 
-        if (autoZoom) map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
+          if (autoZoom) map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
+        }
       }
     }
 
-    // --- INITIALISIERUNG DER REGION-DROPDOWNS (OHNE REKURSION) ---
     function initRegionDropdowns() {
       const daySel = document.getElementById('day-region-select');
       const admSel = document.getElementById('admin-region-select');
 
       if (!appData.regions || appData.regions.length === 0) {
-        appData.regions = [{ id: "copenhagen", name: "Kopenhagen", places: [] }];
+        appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
       }
 
       const opts = appData.regions.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
       daySel.innerHTML = opts;
       admSel.innerHTML = opts;
 
-      // Ersten Wert auswählen falls leer
-      if (!daySel.value && appData.regions.length > 0) {
-        daySel.value = appData.regions[0].id;
-      }
-      if (!admSel.value && appData.regions.length > 0) {
-        admSel.value = appData.regions[0].id;
-      }
+      daySel.value = appData.regions[0].id;
+      admSel.value = appData.regions[0].id;
 
       admSel.onchange = renderAdminList;
       onRegionChange();
@@ -1648,7 +1673,6 @@
       else if (appData.regions.length > 0) admSel.value = appData.regions[0].id;
     }
 
-    // --- RENDERING TAGESPLANUNG ---
     function onRegionChange() {
       const daySel = document.getElementById('day-region-select');
       const regId = daySel ? daySel.value : null;
@@ -1687,10 +1711,12 @@
               });
             }
 
-            const m = L.marker([p.lat, p.lon], { icon: markerIcon }).addTo(markersLayer)
-              .bindPopup(`<b>${p.name}</b><br><small>${p.city || ''} (Hin:${p.modeIn === 'transit' ? '🚆 ÖV' : '🚶 Fuß'})</small>`);
-            
-            m.on('click', () => selectPoi(p));
+            if (markersLayer) {
+              const m = L.marker([p.lat, p.lon], { icon: markerIcon }).addTo(markersLayer)
+                .bindPopup(`<b>${p.name}</b><br><small>${p.city || ''} (Hin:${p.modeIn === 'transit' ? '🚆 ÖV' : '🚶 Fuß'})</small>`);
+              
+              m.on('click', () => selectPoi(p));
+            }
             bounds.push([p.lat, p.lon]);
           }
         });
@@ -1826,7 +1852,7 @@
         <span class="badge info" onclick="editBadgePrompt('duration', 'Aufenthaltsdauer (Min.)', true)">⏱️ ${poi.duration || 60} Min. ✏️</span>
       `;
 
-      if(poi.lat && poi.lon && poi.lat !== 0) {
+      if(poi.lat && poi.lon && poi.lat !== 0 && map) {
         map.setView([poi.lat, poi.lon], 16);
         if(startPoint) calcRoute(poi, true);
       }
@@ -1897,16 +1923,20 @@
     function loadSettings() {
       const savedGh = localStorage.getItem('gh_config');
       if(savedGh) {
-        ghConfig = JSON.parse(savedGh);
-        document.getElementById('gh-owner').value = ghConfig.owner || '';
-        document.getElementById('gh-repo').value = ghConfig.repo || '';
-        document.getElementById('gh-token').value = ghConfig.token || '';
+        try {
+          ghConfig = JSON.parse(savedGh);
+          document.getElementById('gh-owner').value = ghConfig.owner || '';
+          document.getElementById('gh-repo').value = ghConfig.repo || '';
+          document.getElementById('gh-token').value = ghConfig.token || '';
+        } catch(e) {}
       }
       const localData = localStorage.getItem('travel_data');
       if(localData) {
         try {
-          appData = JSON.parse(localData);
-          sanitizeAppData();
+          const parsed = JSON.parse(localData);
+          if (parsed && Array.isArray(parsed.regions) && parsed.regions.length > 0) {
+            appData = parsed;
+          }
         } catch(e){}
       }
     }
@@ -1917,12 +1947,14 @@
       ghConfig.token = document.getElementById('gh-token').value.trim();
       localStorage.setItem('gh_config', JSON.stringify(ghConfig));
       alert("Einstellungen gespeichert!");
-      syncWithGitHub();
+      if(ghConfig.token) syncWithGitHub();
     }
 
     function persistData() {
       localStorage.setItem('travel_data', JSON.stringify(appData));
-      syncWithGitHub(true);
+      if(ghConfig.token && ghConfig.owner && ghConfig.repo) {
+        syncWithGitHub(true);
+      }
     }
 
     async function syncWithGitHub(pushOnly = false) {
@@ -1943,11 +1975,14 @@
           ghConfig.sha = fileData.sha;
           if(!pushOnly) {
             const content = decodeURIComponent(escape(atob(fileData.content)));
-            appData = JSON.parse(content);
-            sanitizeAppData();
-            localStorage.setItem('travel_data', JSON.stringify(appData));
-            updateRegionDropdowns();
-            onRegionChange();
+            const parsed = JSON.parse(content);
+            if (parsed && Array.isArray(parsed.regions) && parsed.regions.length > 0) {
+              appData = parsed;
+              sanitizeAppData();
+              localStorage.setItem('travel_data', JSON.stringify(appData));
+              updateRegionDropdowns();
+              onRegionChange();
+            }
             pill.innerText = "GitHub: Synced ✅";
             return;
           }
