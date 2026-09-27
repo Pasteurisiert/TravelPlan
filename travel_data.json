@@ -520,7 +520,7 @@
           "cost": 0,
           "duration": 45,
           "notes": "Direkt über Karte hinzugefügt",
-          "selectedForDay": true,
+          "selectedForDay": false,
           "visited": false
         },
         {
