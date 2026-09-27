@@ -242,7 +242,7 @@
           "transit": "Christian VIII's Palæ",
           "category": "kultur",
           "mode": "foot",
-          "selectedForDay": false,
+          "selectedForDay": true,
           "duration": 60,
           "cost": 0,
           "modeIn": "foot",
@@ -540,7 +540,7 @@
           "cost": 0,
           "duration": 45,
           "notes": "Direkt über Karte hinzugefügt",
-          "selectedForDay": false,
+          "selectedForDay": true,
           "visited": false
         }
       ]
