@@ -1203,7 +1203,7 @@
           "notes": "",
           "visited": false,
           "mode": "foot",
-          "selectedForDay": false
+          "selectedForDay": true
         },
         {
           "id": "poi_1790492319170",
@@ -1222,7 +1222,7 @@
           "notes": "",
           "visited": false,
           "mode": "foot",
-          "selectedForDay": false
+          "selectedForDay": true
         }
       ]
     }
