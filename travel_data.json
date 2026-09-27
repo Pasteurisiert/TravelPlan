@@ -1202,7 +1202,7 @@
           "duration": 60,
           "notes": "",
           "visited": false,
-          "mode": "foot",
+          "mode": "transit",
           "selectedForDay": true
         },
         {
