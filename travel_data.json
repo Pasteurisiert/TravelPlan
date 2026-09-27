@@ -487,27 +487,6 @@
           "modeOut": "foot"
         },
         {
-          "id": "poi_1790437280468",
-          "name": "Lufthavn",
-          "city": "Kopenhagen",
-          "lat": 55.6091282,
-          "lon": 12.6509822,
-          "description": "Flughafen Kopenhagen-Kastrup, Jernkåsvej, Tårnbylund, Taarnby, Tårnby Kommune, Hauptstadtregion, 2770, Dänemark",
-          "website": "https://www.cph.dk/",
-          "openingHours": "Siehe Google-Info",
-          "fee": "Siehe Google-Info",
-          "transit": "Mit ÖV erreichbar",
-          "visited": false,
-          "category": "oev",
-          "mode": "foot",
-          "selectedForDay": false,
-          "duration": 60,
-          "cost": 0,
-          "modeIn": "foot",
-          "modeOut": "foot",
-          "notes": ""
-        },
-        {
           "id": "poi_1790527229549",
           "name": "Hauptbahnhof",
           "city": "Copenhagen",
