@@ -1309,7 +1309,7 @@
           "visited": false,
           "mode": "transit",
           "selectedForDay": true,
-          "modeIn": "transit",
+          "modeIn": "foot",
           "modeOut": "foot"
         },
         {
