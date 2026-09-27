@@ -1221,7 +1221,7 @@
           "duration": 5,
           "notes": "",
           "visited": false,
-          "mode": "foot",
+          "mode": "transit",
           "selectedForDay": true
         }
       ]
