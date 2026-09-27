@@ -522,6 +522,26 @@
           "notes": "Direkt über Karte hinzugefügt",
           "selectedForDay": true,
           "visited": false
+        },
+        {
+          "id": "poi_1790527274532",
+          "name": "Flughafen",
+          "city": "Kastrup",
+          "category": "oev",
+          "modeIn": "transit",
+          "modeOut": "transit",
+          "lat": 55.62953443054422,
+          "lon": 12.649415731430054,
+          "description": "Ad-hoc Ziel bei [55.62953, 12.64942]",
+          "website": "",
+          "openingHours": "Frei zugänglich",
+          "fee": "Kostenlos",
+          "transit": "Haltestelle in der Nähe prüfen",
+          "cost": 0,
+          "duration": 45,
+          "notes": "Direkt über Karte hinzugefügt",
+          "selectedForDay": true,
+          "visited": false
         }
       ]
     },
