@@ -1351,7 +1351,7 @@
           "visited": false,
           "mode": "foot",
           "selectedForDay": true,
-          "modeIn": "transit",
+          "modeIn": "foot",
           "modeOut": "foot"
         }
       ]
