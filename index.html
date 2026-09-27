@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#1976d2">
-  <title>TravelPlan Pro v2.1</title>
+  <title>TravelPlan Pro v2.2 - Ad-Hoc Map Targets</title>
   
   <link rel="manifest" href="manifest.json">
 
@@ -66,8 +66,9 @@
     .btn-live { background: #ffebee; color: var(--live); border: 1px solid var(--live); }
     .btn-live.active { background: var(--live); color: white; animation: pulse 1.5s infinite; }
     .btn-danger { background: #dc3545; color: white; }
-    
-    /* Eindeutige Buttons für Tour & Modus */
+    .btn-adhoc { background: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
+    .btn-adhoc.active { background: #ffb300; color: #fff; font-weight: bold; animation: pulse 1.5s infinite; }
+
     .btn-tour-select { padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: bold; border: 1px solid #1976d2; background: #e3f2fd; color: #1976d2; cursor: pointer; }
     .btn-tour-select.selected { background: #1976d2; color: #ffffff; }
 
@@ -117,7 +118,7 @@
 <body>
 
   <header>
-    <div>🌍 TravelPlan Pro v2.1</div>
+    <div>🌍 TravelPlan Pro v2.2</div>
     <div id="sync-pill" onclick="syncWithGitHub()">GitHub: Offline</div>
   </header>
 
@@ -138,17 +139,19 @@
             <select id="day-region-select" onchange="onRegionChange()"></select>
           </div>
 
-          <!-- Standort / Live GPS -->
+          <!-- Standort / Live GPS / Ad-Hoc Klick -->
           <div class="card" style="padding: 10px;">
-            <div style="font-weight:bold; font-size:0.88rem; margin-bottom:4px;">📍 Standort / Startpunkt</div>
+            <div style="font-weight:bold; font-size:0.88rem; margin-bottom:4px;">📍 Standort / Steuerung</div>
             <select id="start-poi-select" onchange="onStartPoiSelect(this.value)">
               <option value="">-- Ort als Start wählen --</option>
             </select>
-            <div style="display:flex; gap:6px; margin-top:4px;">
-              <button class="btn btn-live" id="btn-live-gps" style="flex:1;" onclick="toggleLiveGPS()">🔴 Live GPS AN</button>
-              <button class="btn btn-secondary" style="flex:1;" id="btn-pick" onclick="toggleMapPick()">🗺️ Klick</button>
+            <div style="display:flex; gap:4px; margin-top:4px;">
+              <button class="btn btn-live" id="btn-live-gps" style="flex:1;" onclick="toggleLiveGPS()">🔴 Live GPS</button>
+              <button class="btn btn-secondary" style="flex:1;" id="btn-pick" onclick="toggleMapPick('start')">🗺️ Klick Start</button>
+              <!-- NEUER BUTTON: AD-HOC ZIEL AUF KARTE -->
+              <button class="btn btn-adhoc" style="flex:1.2;" id="btn-adhoc-target" onclick="toggleMapPick('target')">📍 + Ziel auf Karte</button>
             </div>
-            <input type="text" id="manual-loc-input" placeholder="Adresse eingeben..." style="margin-top:4px;" onchange="geocodeAddress(this.value)">
+            <input type="text" id="manual-loc-input" placeholder="Adresse für Startpunkt..." style="margin-top:4px;" onchange="geocodeAddress(this.value)">
             <div id="loc-status" style="font-size:0.75rem; color:#666;">Standort nicht gesetzt</div>
           </div>
 
@@ -329,6 +332,40 @@
     </button>
   </nav>
 
+  <!-- MODAL: Neues Ad-Hoc Ziel auf Karte erstellen -->
+  <div id="adhoc-create-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h4 style="color:var(--primary);">📍 Neues Ad-hoc Ziel erstellen</h4>
+      <p style="font-size:0.8rem; color:#666; margin-top:-4px;">Klick-Position: <span id="adhoc-pos-display">-</span></p>
+
+      <label style="font-size:0.8rem;">Name des Ziels:</label>
+      <input type="text" id="adhoc-name" placeholder="z.B. Toller Fotospot, Bäcker, Treffpunkt">
+
+      <label style="font-size:0.8rem;">Stadt / Stadtteil:</label>
+      <input type="text" id="adhoc-city" placeholder="Wird automatisch ermittelt...">
+
+      <label style="font-size:0.8rem;">Anreise:</label>
+      <select id="adhoc-mode">
+        <option value="foot" selected>🚶 Zu Fuß (Voreinstellung)</option>
+        <option value="transit">🚆 Mit ÖV</option>
+      </select>
+
+      <label style="font-size:0.8rem;">Kategorie:</label>
+      <select id="adhoc-cat">
+        <option value="kultur">🏛️ Kultur & Sehenswürdigkeit</option>
+        <option value="natur">🌳 Natur & Aussicht</option>
+        <option value="gastro">☕ Café / Restaurant / Pause</option>
+        <option value="hotel">🏨 Unterkunft / Hotel</option>
+        <option value="oev">🚆 ÖV / Bahnhof / Haltestelle</option>
+      </select>
+
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="saveAdhocPOI()">Hinzufügen</button>
+        <button class="btn btn-secondary" style="flex:1;" onclick="closeAdhocModal()">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: Ort im Admin bearbeiten -->
   <div id="admin-edit-modal" class="modal-overlay">
     <div class="modal-content">
@@ -382,12 +419,9 @@
   </div>
 
   <script>
-    // CACHE-KILLER SERVICE WORKER
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (let reg of registrations) {
-          reg.update();
-        }
+        for (let reg of registrations) reg.update();
       });
     }
 
@@ -435,10 +469,11 @@
     let currentPosition = null;
     let selectedPoi = null;
     let map, markersLayer, routeLayer, fullTourLayer;
-    let pickMode = false;
+    let pickMode = null; // null | 'start' | 'target'
     let gpsWatchId = null;
     let accuracyCircle = null;
     let lastRouteCalcTime = 0;
+    let adhocTempCoords = null;
 
     const CAT_COLORS = {
       kultur: '#5e35b1',
@@ -456,7 +491,6 @@
       oev: '🚆 ÖV'
     };
 
-    // Daten bereinigen: stellt sicher, dass category, mode und selectedForDay immer existieren
     function sanitizeAppData() {
       if (!appData || !appData.regions) return;
       appData.regions.forEach(r => {
@@ -492,12 +526,16 @@
 
       markersLayer = L.layerGroup().addTo(map);
 
+      // KARTENKLICK LOGIK (Startpunkt ODER Ad-Hoc Ziel)
       map.on('click', (e) => {
-        if(pickMode) {
+        if (pickMode === 'start') {
           stopLiveGPS();
           document.getElementById('start-poi-select').value = "";
           setCustomPosition(e.latlng.lat, e.latlng.lng, "Karten-Punkt");
-          toggleMapPick();
+          toggleMapPick(null);
+        } else if (pickMode === 'target') {
+          openAdhocModal(e.latlng.lat, e.latlng.lng);
+          toggleMapPick(null);
         }
       });
     }
@@ -549,6 +587,123 @@
       }
     }
 
+    // --- KLICK-MODUS STEUERUNG ---
+    function toggleMapPick(mode) {
+      const btnPick = document.getElementById('btn-pick');
+      const btnAdhoc = document.getElementById('btn-adhoc-target');
+
+      if (pickMode === mode || mode === null) {
+        pickMode = null;
+        btnPick.style.background = '#e9ecef';
+        btnPick.innerText = "🗺️ Klick Start";
+        btnAdhoc.classList.remove('active');
+        btnAdhoc.innerText = "📍 + Ziel auf Karte";
+      } else {
+        pickMode = mode;
+        if (mode === 'start') {
+          btnPick.style.background = '#ffc107';
+          btnPick.innerText = "Klick auf Karte...";
+          btnAdhoc.classList.remove('active');
+          btnAdhoc.innerText = "📍 + Ziel auf Karte";
+          alert("Tippen Sie auf die Karte, um den STARTPUNKT festzulegen.");
+        } else if (mode === 'target') {
+          btnAdhoc.classList.add('active');
+          btnAdhoc.innerText = "Tippe auf Karte...";
+          btnPick.style.background = '#e9ecef';
+          btnPick.innerText = "🗺️ Klick Start";
+          alert("Tippen Sie auf die Karte, wo Sie ein NEUES ZIEL anlegen möchten.");
+        }
+        if (window.innerWidth <= 768) setMobileSubTab('map');
+      }
+    }
+
+    // --- AD-HOC ZIEL MODAL & LOGIK ---
+    async function openAdhocModal(lat, lon) {
+      adhocTempCoords = { lat, lon };
+      document.getElementById('adhoc-pos-display').innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+      document.getElementById('adhoc-name').value = "Neues Ziel";
+      document.getElementById('adhoc-city').value = "";
+      document.getElementById('adhoc-create-modal').style.display = 'flex';
+
+      // Automatisches Reverse-Geocoding für Adresse/Stadt
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+        const data = await res.json();
+        if (data && data.address) {
+          const city = data.address.city || data.address.town || data.address.village || data.address.municipality || "";
+          const road = data.address.road || data.address.pedestrian || "";
+          const houseNumber = data.address.house_number || "";
+          if (road) {
+            document.getElementById('adhoc-name').value = `${road} ${houseNumber}`.trim();
+          }
+          if (city) {
+            document.getElementById('adhoc-city').value = city;
+          }
+        }
+      } catch(e) {}
+    }
+
+    function closeAdhocModal() {
+      document.getElementById('adhoc-create-modal').style.display = 'none';
+      adhocTempCoords = null;
+    }
+
+    async function saveAdhocPOI() {
+      if (!adhocTempCoords) return;
+      const regId = document.getElementById('day-region-select').value;
+      const region = appData.regions.find(r => r.id === regId);
+      if (!region) return alert("Keine Region aktiv.");
+
+      const name = document.getElementById('adhoc-name').value.trim() || "Karten-Ziel";
+      const city = document.getElementById('adhoc-city').value.trim() || region.name;
+      const mode = document.getElementById('adhoc-mode').value;
+      const cat = document.getElementById('adhoc-cat').value;
+
+      const newPOI = {
+        id: "poi_" + Date.now(),
+        name: name,
+        city: city,
+        category: cat,
+        mode: mode,
+        lat: adhocTempCoords.lat,
+        lon: adhocTempCoords.lon,
+        description: `Ad-hoc auf der Karte erstelltes Ziel bei [${adhocTempCoords.lat.toFixed(5)}, ${adhocTempCoords.lon.toFixed(5)}]`,
+        website: "",
+        openingHours: "Frei zugänglich",
+        fee: "Kostenlos",
+        transit: "Haltestellen in der Nähe prüfen",
+        cost: 0,
+        duration: 45,
+        notes: "Direkt über Karte hinzugefügt",
+        selectedForDay: true, // Direkt aktiv für die Tour
+        visited: false
+      };
+
+      region.places.push(newPOI);
+      closeAdhocModal();
+      persistData();
+      renderDayList();
+      renderAdminList();
+      updateStartPoiDropdown();
+      onRegionChange();
+      selectPoi(newPOI);
+
+      // Nahegelegene Haltestellen im Hintergrund ermitteln
+      try {
+        const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:400,${newPOI.lat},${newPOI.lon})[highway=bus_stop];out 1;`;
+        const opRes = await fetch(overpassUrl);
+        const opData = await opRes.json();
+        if (opData.elements?.length > 0) {
+          const stopName = opData.elements[0].tags?.name || "ÖV-Haltestelle";
+          newPOI.transit = `Haltestelle "${stopName}" (< 400m)`;
+          persistData();
+          if (selectedPoi && selectedPoi.id === newPOI.id) selectPoi(newPOI);
+        }
+      } catch(e) {}
+
+      alert(`✅ Ad-hoc Ziel "${name}" wurde zur Tour hinzugefügt!`);
+    }
+
     // --- LIVE GPS ---
     function toggleLiveGPS() {
       if (gpsWatchId !== null) stopLiveGPS();
@@ -560,7 +715,7 @@
       document.getElementById('start-poi-select').value = "";
       const btn = document.getElementById('btn-live-gps');
       btn.classList.add('active');
-      btn.innerText = "⏹️ Live GPS AUS";
+      btn.innerText = "⏹️ Live AUS";
       document.getElementById('loc-status').innerText = "Suche Satelliten...";
 
       gpsWatchId = navigator.geolocation.watchPosition(
@@ -606,7 +761,7 @@
       }
       const btn = document.getElementById('btn-live-gps');
       btn.classList.remove('active');
-      btn.innerText = "🔴 Live GPS AN";
+      btn.innerText = "🔴 Live GPS";
       if (accuracyCircle) {
         map.removeLayer(accuracyCircle);
         accuracyCircle = null;
@@ -658,16 +813,6 @@
       });
     }
 
-    function toggleMapPick() {
-      pickMode = !pickMode;
-      const btn = document.getElementById('btn-pick');
-      btn.style.background = pickMode ? '#ffc107' : '#e9ecef';
-      if(pickMode) {
-        alert("Tippen Sie auf die Karte für den Startpunkt.");
-        if(window.innerWidth <= 768) setMobileSubTab('map');
-      }
-    }
-
     async function geocodeAddress(query) {
       if(!query) return;
       stopLiveGPS();
@@ -684,21 +829,13 @@
     // --- RECHERCHE ---
     async function deepSearchPOI(poiName, cityName, regionName) {
       const info = {
-        lat: 0,
-        lon: 0,
-        description: "",
-        website: "",
-        openingHours: "Nicht erfasst (siehe Google)",
-        fee: "Nicht erfasst (siehe Google)",
-        transit: "Mit ÖV / Nahverkehr erreichbar",
-        cost: 0,
-        duration: 60
+        lat: 0, lon: 0, description: "", website: "", openingHours: "Nicht erfasst (siehe Google)", fee: "Nicht erfasst (siehe Google)", transit: "Mit ÖV / Nahverkehr erreichbar", cost: 0, duration: 60
       };
 
       const cityClean = (cityName || regionName || "").trim();
       const combined = `${poiName}, ${cityClean}`;
 
-      // 1. Wikivoyage
+      // Wikivoyage
       try {
         const wvRes = await fetch(`https://de.wikivoyage.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(combined)}&format=json&origin=*`);
         const wvData = await wvRes.json();
@@ -712,13 +849,10 @@
             if (line.toLowerCase().includes(poiName.toLowerCase())) {
               const h = line.match(/\|\s*hours\s*=\s*([^\|\}]+)/i);
               if (h) info.openingHours = h[1].trim();
-
               const pr = line.match(/\|\s*price\s*=\s*([^\|\}]+)/i);
               if (pr) info.fee = pr[1].trim();
-
               const u = line.match(/\|\s*url\s*=\s*([^\|\}]+)/i);
               if (u && !info.website) info.website = u[1].trim();
-
               const dir = line.match(/\|\s*directions\s*=\s*([^\|\}]+)/i);
               if (dir) info.transit = dir[1].trim();
               break;
@@ -727,7 +861,7 @@
         }
       } catch (e) { }
 
-      // 2. OpenStreetMap
+      // OSM
       const queries = [combined, `${poiName} ${cityClean}`, poiName];
       for (let q of queries) {
         try {
@@ -738,24 +872,17 @@
             info.lat = parseFloat(item.lat);
             info.lon = parseFloat(item.lon);
             if (item.display_name && !info.description) info.description = item.display_name;
-
             if (item.extratags) {
-              if (item.extratags.opening_hours && info.openingHours.includes("Nicht erfasst")) {
-                info.openingHours = item.extratags.opening_hours;
-              }
-              if (item.extratags.fee && info.fee.includes("Nicht erfasst")) {
-                info.fee = item.extratags.fee;
-              }
-              if (item.extratags.website && !info.website) {
-                info.website = item.extratags.website;
-              }
+              if (item.extratags.opening_hours && info.openingHours.includes("Nicht erfasst")) info.openingHours = item.extratags.opening_hours;
+              if (item.extratags.fee && info.fee.includes("Nicht erfasst")) info.fee = item.extratags.fee;
+              if (item.extratags.website && !info.website) info.website = item.extratags.website;
             }
             break;
           }
         } catch(e) {}
       }
 
-      // 3. Wikipedia & Wikidata
+      // Wikipedia
       try {
         const wpRes = await fetch(`https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(poiName + ' ' + cityClean)}&format=json&origin=*`);
         const wpData = await wpRes.json();
@@ -773,16 +900,13 @@
               const p = pages[firstKey];
               if (p.extract) info.description = p.extract.slice(0, 350) + "...";
               if (!info.website && p.fullurl) info.website = p.fullurl;
-
               const wikibaseItem = p.pageprops?.wikibase_item;
               if (wikibaseItem && !info.website) {
                 try {
                   const wdRes = await fetch(`https://www.wikidata.org/wiki/Special:EntityData/${wikibaseItem}.json`);
                   const wdData = await wdRes.json();
                   const claims = wdData.entities?.[wikibaseItem]?.claims;
-                  if (claims?.P856?.length > 0) {
-                    info.website = claims.P856[0].mainsnak?.datavalue?.value;
-                  }
+                  if (claims?.P856?.length > 0) info.website = claims.P856[0].mainsnak?.datavalue?.value;
                 } catch(e) {}
               }
             }
@@ -790,7 +914,7 @@
         }
       } catch (e) { }
 
-      // 4. Haltestelle im Umkreis
+      // Overpass
       if (info.lat && info.lon) {
         try {
           const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:400,${info.lat},${info.lon})[highway=bus_stop];out 1;`;
@@ -804,7 +928,6 @@
       }
 
       if (!info.description) info.description = "Keine Kurzbeschreibung gefunden. Nutzen Sie die Google-Links für Details.";
-
       return info;
     }
 
@@ -821,7 +944,7 @@
       const btn = document.getElementById('btn-add-poi');
       btn.disabled = true;
       btn.innerText = "Recherchiere...";
-      statusEl.innerText = `Recherchiere automatisch Daten für "${name}" in "${city || region.name}"...`;
+      statusEl.innerText = `Recherchiere Daten für "${name}" in "${city || region.name}"...`;
 
       try {
         const info = await deepSearchPOI(name, city, region.name);
@@ -862,7 +985,6 @@
       }
     }
 
-    // --- AUTO-UPDATE EINES ORTES ---
     async function autoUpdatePOI(poiId) {
       let targetPOI = null, targetRegion = null;
       for (let r of appData.regions) {
@@ -893,7 +1015,6 @@
       alert(`Daten zu "${targetPOI.name}" erfolgreich aktualisiert!`);
     }
 
-    // --- MODUS JE ZIEL UMSCHALTEN (Fuß vs ÖV) ---
     function togglePoiMode(poiId) {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -904,9 +1025,7 @@
         p.mode = (p.mode === 'transit') ? 'foot' : 'transit';
         persistData();
         renderDayList();
-        if(selectedPoi && selectedPoi.id === p.id) {
-          selectPoi(p);
-        }
+        if(selectedPoi && selectedPoi.id === p.id) selectPoi(p);
       }
     }
 
@@ -915,7 +1034,6 @@
       togglePoiMode(selectedPoi.id);
     }
 
-    // --- IN DIE TAGESTOUR AUFNEHMEN / ABWÄHLEN ---
     function toggleDayTourSelection(poiId) {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -926,9 +1044,7 @@
         p.selectedForDay = !p.selectedForDay;
         persistData();
         renderDayList();
-        if(selectedPoi && selectedPoi.id === p.id) {
-          updateDetailTourBtn(p);
-        }
+        if(selectedPoi && selectedPoi.id === p.id) updateDetailTourBtn(p);
       }
     }
 
@@ -1541,6 +1657,46 @@
       a.click();
       document.body.removeChild(a);
     }
+
+    const manifestFileContent = JSON.stringify({
+      "name": "TravelPlan Pro",
+      "short_name": "TravelPlan",
+      "start_url": "index.html",
+      "display": "standalone",
+      "background_color": "#ffffff",
+      "theme_color": "#1976d2",
+      "icons": [
+        { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+        { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+      ]
+    }, null, 2);
+
+    const swFileContent = `const CACHE_NAME = 'travelplan-cache-v2-force';
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+];
+
+self.addEventListener('install', (e) => {
+  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
+});
+
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => Promise.all(keys.map((k) => k !== CACHE_NAME && caches.delete(k))))
+  );
+  return self.clients.claim();
+});
+
+self.addEventListener('fetch', (e) => {
+  e.respondWith(
+    caches.match(e.request).then((res) => res || fetch(e.request).catch(() => caches.match('./index.html')))
+  );
+});`;
   </script>
 </body>
 </html>
