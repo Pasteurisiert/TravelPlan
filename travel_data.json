@@ -498,13 +498,14 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false,
-          "category": "kultur",
+          "category": "oev",
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
           "cost": 0,
           "modeIn": "foot",
-          "modeOut": "foot"
+          "modeOut": "foot",
+          "notes": ""
         },
         {
           "id": "poi_1790527229549",
