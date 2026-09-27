@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#1976d2">
-  <title>TravelPlan Pro v3.2</title>
+  <title>TravelPlan Pro v3.3</title>
+  
+  <link rel="icon" href="data:,">
 
   <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -155,7 +157,7 @@
 <body>
 
   <header>
-    <div>🌍 TravelPlan Pro v3.2</div>
+    <div>🌍 TravelPlan Pro v3.3</div>
     <div id="sync-pill" onclick="syncWithGitHub()">GitHub: Offline</div>
   </header>
 
@@ -364,7 +366,7 @@
       <h3>GitHub & PWA-Download Manager</h3>
       <div class="card">
         <h4>☁️ GitHub Synchronisation</h4>
-        <p style="font-size:0.8rem; color:#666;">Status "Offline" bedeutet lediglich, dass keine Verbindung zu GitHub eingerichtet ist. Alle Daten werden lokal im Gerät gesichert!</p>
+        <p style="font-size:0.8rem; color:#666;">Status "Offline" bedeutet, dass keine Verbindung zu GitHub eingerichtet ist. Alle Daten werden lokal im Gerät gesichert!</p>
         <label style="font-size:0.8rem;">GitHub Username:</label>
         <input type="text" id="gh-owner" placeholder="z.B. benutzername">
         <label style="font-size:0.8rem;">Repository Name:</label>
@@ -504,7 +506,6 @@
   </div>
 
   <script>
-    // Standard-Datensatz
     const DEFAULT_DATA = {
       regions: [
         {
@@ -599,55 +600,6 @@
       });
     }
 
-    window.addEventListener("DOMContentLoaded", () => {
-      loadSettings();
-      sanitizeAppData();
-      initRegionDropdowns();
-      initMap();
-
-      if (ghConfig.token && ghConfig.owner && ghConfig.repo) {
-        syncWithGitHub();
-      } else {
-        const pill = document.getElementById('sync-pill');
-        if (pill) pill.innerText = "GitHub: Offline";
-      }
-    });
-
-    function initMap() {
-      try {
-        const mapContainer = document.getElementById('map');
-        if (!mapContainer || map) return;
-
-        map = L.map('map', { zoomControl: false }).setView([55.6761, 12.5683], 13);
-        L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
-
-        markersLayer = L.layerGroup().addTo(map);
-
-        map.on('click', (e) => {
-          if (pickMode === 'start') {
-            stopLiveGPS();
-            setStartPoint(e.latlng.lat, e.latlng.lng, "Karten-Startpunkt", "__CUSTOM__");
-            toggleMapPick(null);
-          } else if (pickMode === 'end') {
-            setEndPoint(e.latlng.lat, e.latlng.lng, "Karten-Endpunkt", "__CUSTOM__");
-            toggleMapPick(null);
-          } else if (pickMode === 'target') {
-            openAdhocModal(e.latlng.lat, e.latlng.lng);
-            toggleMapPick(null);
-          }
-        });
-
-        // Sofort Marker für die aktive Region zeichnen
-        renderMapMarkers();
-      } catch(e) {
-        console.error("Leaflet Init Error:", e);
-      }
-    }
-
     function switchNav(tab) {
       document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
@@ -686,7 +638,7 @@
       const regId = document.getElementById('admin-region-select').value;
       const reg = appData.regions.find(r => r.id === regId);
       const cityInput = document.getElementById('admin-new-city');
-      if (reg && !cityInput.value) cityInput.placeholder = `z.B. ${reg.name}`;
+      if (reg && !cityInput.value) cityInput.placeholder = 'z.B. ' + reg.name;
     }
 
     function handleAdminCatChange(cat) {
@@ -726,7 +678,7 @@
     function setStartPoint(lat, lng, label, dropdownVal = null) {
       startPoint = { lat: parseFloat(lat), lng: parseFloat(lng), label: label };
       const statusEl = document.getElementById('loc-status');
-      if (statusEl) statusEl.innerText = `Start: ${label} (${startPoint.lat.toFixed(4)}, ${startPoint.lng.toFixed(4)})`;
+      if (statusEl) statusEl.innerText = 'Start: ' + label + ' (' + startPoint.lat.toFixed(4) + ', ' + startPoint.lng.toFixed(4) + ')';
 
       if (dropdownVal) {
         const startSel = document.getElementById('start-poi-select');
@@ -741,13 +693,13 @@
           fillOpacity: 0.95,
           radius: 10,
           weight: 3
-        }).addTo(map).bindPopup(`<b>Startpunkt:</b><br>${label}`).openPopup();
+        }).addTo(map).bindPopup('<b>Startpunkt:</b><br>' + label).openPopup();
       }
 
       const endSel = document.getElementById('end-poi-select');
       const endVal = endSel ? endSel.value : '__SAME_AS_START__';
       if (endVal === '__SAME_AS_START__') {
-        endPoint = { ...startPoint, label: `Ziel (Rundtour: ${label})` };
+        endPoint = { ...startPoint, label: 'Ziel (Rundtour: ' + label + ')' };
       }
 
       if (selectedPoi && selectedPoi.lat && selectedPoi.lon) {
@@ -765,7 +717,7 @@
           fillOpacity: 0.95,
           radius: 10,
           weight: 3
-        }).addTo(map).bindPopup(`<b>Endpunkt:</b><br>${label}`);
+        }).addTo(map).bindPopup('<b>Endpunkt:</b><br>' + label);
       }
 
       if (dropdownVal) {
@@ -773,14 +725,14 @@
         if (endSel) endSel.value = dropdownVal;
       }
       const statusEl = document.getElementById('loc-status');
-      if (statusEl) statusEl.innerText += ` | Ziel: ${label}`;
+      if (statusEl) statusEl.innerText += ' | Ziel: ' + label;
     }
 
     function onStartPointChange(val) {
       if (val === '__GPS__') {
         startLiveGPS();
       } else if (val === '__CUSTOM__') {
-        // Manuelle Wahl
+        // Manuelle Wahl beibehalten
       } else {
         stopLiveGPS();
         const regId = document.getElementById('day-region-select').value;
@@ -799,8 +751,8 @@
         if (endMarker && map) map.removeLayer(endMarker);
         endMarker = null;
         if (startPoint) {
-          endPoint = { ...startPoint, label: `Ziel (Rundtour)` };
-          document.getElementById('loc-status').innerText = `Rundtour: Start & Ende bei ${startPoint.label}`;
+          endPoint = { ...startPoint, label: 'Ziel (Rundtour)' };
+          document.getElementById('loc-status').innerText = 'Rundtour: Start & Ende bei ' + startPoint.label;
         }
       } else if (val === '__GPS__') {
         if (navigator.geolocation) {
@@ -829,28 +781,20 @@
       const curStartVal = startSel.value;
       const curEndVal = endSel.value;
 
-      startSel.innerHTML = `
-        <option value="__GPS__">📡 Aktueller GPS Standort</option>
-        <option value="__CUSTOM__">🗺️ Manuell / Klick / Adresse</option>
-      `;
-
-      endSel.innerHTML = `
-        <option value="__SAME_AS_START__">🔄 Rundtour (zurück zum Startpunkt)</option>
-        <option value="__GPS__">📡 GPS Standort als Ziel</option>
-        <option value="__CUSTOM__">🗺️ Manuell / Klick auf Karte</option>
-      `;
+      startSel.innerHTML = '<option value="__GPS__">📡 Aktueller GPS Standort</option><option value="__CUSTOM__">🗺️ Manuell / Klick / Adresse</option>';
+      endSel.innerHTML = '<option value="__SAME_AS_START__">🔄 Rundtour (zurück zum Startpunkt)</option><option value="__GPS__">📡 GPS Standort als Ziel</option><option value="__CUSTOM__">🗺️ Manuell / Klick auf Karte</option>';
 
       const region = appData.regions.find(r => r.id === regId);
       if (region && region.places && region.places.length > 0) {
         region.places.forEach(p => {
           const opt1 = document.createElement('option');
           opt1.value = p.id;
-          opt1.text = `${p.visited ? '✓ ' : ''}${p.name}${p.city ? ' ('+p.city+')' : ''}`;
+          opt1.text = (p.visited ? '✓ ' : '') + p.name + (p.city ? ' (' + p.city + ')' : '');
           startSel.appendChild(opt1);
 
           const opt2 = document.createElement('option');
           opt2.value = p.id;
-          opt2.text = `${p.name}${p.city ? ' ('+p.city+')' : ''}`;
+          opt2.text = p.name + (p.city ? ' (' + p.city + ')' : '');
           endSel.appendChild(opt2);
         });
       }
@@ -878,7 +822,7 @@
           const acc = Math.round(pos.coords.accuracy);
 
           setStartPoint(lat, lng, "Live GPS", "__GPS__");
-          document.getElementById('loc-status').innerHTML = `🔵 <b>Live:</b> ${lat.toFixed(4)}, ${lng.toFixed(4)} (±${acc}m)`;
+          document.getElementById('loc-status').innerHTML = '🔵 <b>Live:</b> ' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ' (±' + acc + 'm)';
 
           if (map) {
             if (accuracyCircle) {
@@ -923,7 +867,7 @@
       if(!query) return;
       stopLiveGPS();
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
+        const res = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(query));
         const data = await res.json();
         if(data && data.length > 0) {
           setStartPoint(parseFloat(data[0].lat), parseFloat(data[0].lon), query, "__CUSTOM__");
@@ -934,19 +878,19 @@
 
     async function openAdhocModal(lat, lon) {
       adhocTempCoords = { lat, lon };
-      document.getElementById('adhoc-pos-display').innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+      document.getElementById('adhoc-pos-display').innerText = lat.toFixed(5) + ', ' + lon.toFixed(5);
       document.getElementById('adhoc-name').value = "Neues Ziel";
       document.getElementById('adhoc-city').value = "";
       document.getElementById('adhoc-create-modal').style.display = 'flex';
 
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+        const res = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon);
         const data = await res.json();
         if (data && data.address) {
           const city = data.address.city || data.address.town || data.address.village || data.address.municipality || "";
           const road = data.address.road || data.address.pedestrian || "";
           const houseNumber = data.address.house_number || "";
-          if (road) document.getElementById('adhoc-name').value = `${road} ${houseNumber}`.trim();
+          if (road) document.getElementById('adhoc-name').value = (road + ' ' + houseNumber).trim();
           if (city) document.getElementById('adhoc-city').value = city;
         }
       } catch(e) {}
@@ -978,7 +922,7 @@
         modeOut: modeOut,
         lat: adhocTempCoords.lat,
         lon: adhocTempCoords.lon,
-        description: `Ad-hoc Ziel bei [${adhocTempCoords.lat.toFixed(5)}, ${adhocTempCoords.lon.toFixed(5)}]`,
+        description: 'Ad-hoc Ziel bei [' + adhocTempCoords.lat.toFixed(5) + ', ' + adhocTempCoords.lon.toFixed(5) + ']',
         website: "",
         openingHours: "Frei zugänglich",
         fee: "Kostenlos",
@@ -999,7 +943,7 @@
       renderMapMarkers();
       selectPoi(newPOI);
 
-      alert(`✅ Ziel "${name}" wurde zur Tour hinzugefügt!`);
+      alert('✅ Ziel "' + name + '" wurde zur Tour hinzugefügt!');
     }
 
     async function deepSearchPOI(poiName, cityName, regionName) {
@@ -1008,14 +952,14 @@
       };
 
       const cityClean = (cityName || regionName || "").trim();
-      const combined = `${poiName}, ${cityClean}`;
+      const combined = poiName + ', ' + cityClean;
 
       try {
-        const wvRes = await fetch(`https://de.wikivoyage.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(combined)}&format=json&origin=*`);
+        const wvRes = await fetch('https://de.wikivoyage.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(combined) + '&format=json&origin=*');
         const wvData = await wvRes.json();
         if (wvData.query?.search?.length > 0) {
           const pageTitle = wvData.query.search[0].title;
-          const parseRes = await fetch(`https://de.wikivoyage.org/w/api.php?action=parse&page=${encodeURIComponent(pageTitle)}&prop=wikitext&format=json&origin=*`);
+          const parseRes = await fetch('https://de.wikivoyage.org/w/api.php?action=parse&page=' + encodeURIComponent(pageTitle) + '&prop=wikitext&format=json&origin=*');
           const parseData = await parseRes.json();
           const wikitext = parseData.parse?.wikitext?.['*'] || '';
           const lines = wikitext.split('\n');
@@ -1035,10 +979,10 @@
         }
       } catch (e) { }
 
-      const queries = [combined, `${poiName} ${cityClean}`, poiName];
+      const queries = [combined, poiName + ' ' + cityClean, poiName];
       for (let q of queries) {
         try {
-          const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&extratags=1&limit=1&q=${encodeURIComponent(q)}`);
+          const nomRes = await fetch('https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&extratags=1&limit=1&q=' + encodeURIComponent(q));
           const nomData = await nomRes.json();
           if (nomData && nomData.length > 0) {
             const item = nomData[0];
@@ -1056,7 +1000,7 @@
       }
 
       try {
-        const wpRes = await fetch(`https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(poiName + ' ' + cityClean)}&format=json&origin=*`);
+        const wpRes = await fetch('https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + encodeURIComponent(poiName + ' ' + cityClean) + '&format=json&origin=*');
         const wpData = await wpRes.json();
         if (wpData.query?.search?.length > 0) {
           const topResult = wpData.query.search[0];
@@ -1064,7 +1008,7 @@
           const cleanTitle = topResult.title.toLowerCase().replace(/[^a-z0-9]/g, '');
 
           if (cleanTitle.includes(cleanSearch) || cleanSearch.includes(cleanTitle)) {
-            const dRes = await fetch(`https://de.wikipedia.org/w/api.php?action=query&prop=extracts|info|pageprops&inprop=url&exintro=1&explaintext=1&titles=${encodeURIComponent(topResult.title)}&format=json&origin=*`);
+            const dRes = await fetch('https://de.wikipedia.org/w/api.php?action=query&prop=extracts|info|pageprops&inprop=url&exintro=1&explaintext=1&titles=' + encodeURIComponent(topResult.title) + '&format=json&origin=*');
             const dData = await dRes.json();
             const pages = dData.query?.pages || {};
             const firstKey = Object.keys(pages)[0];
@@ -1075,7 +1019,7 @@
               const wikibaseItem = p.pageprops?.wikibase_item;
               if (wikibaseItem && !info.website) {
                 try {
-                  const wdRes = await fetch(`https://www.wikidata.org/wiki/Special:EntityData/${wikibaseItem}.json`);
+                  const wdRes = await fetch('https://www.wikidata.org/wiki/Special:EntityData/' + wikibaseItem + '.json');
                   const wdData = await wdRes.json();
                   const claims = wdData.entities?.[wikibaseItem]?.claims;
                   if (claims?.P856?.length > 0) info.website = claims.P856[0].mainsnak?.datavalue?.value;
@@ -1088,12 +1032,12 @@
 
       if (info.lat && info.lon) {
         try {
-          const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:400,${info.lat},${info.lon})[highway=bus_stop];out 1;`;
+          const overpassUrl = 'https://overpass-api.de/api/interpreter?data=[out:json];node(around:400,' + info.lat + ',' + info.lon + ')[highway=bus_stop];out 1;';
           const opRes = await fetch(overpassUrl);
           const opData = await opRes.json();
           if (opData.elements?.length > 0) {
             const stopName = opData.elements[0].tags?.name || "ÖV-Haltestelle";
-            info.transit = `Haltestelle "${stopName}" (< 400m Fußweg)`;
+            info.transit = 'Haltestelle "' + stopName + '" (< 400m Fußweg)';
           }
         } catch(e) {}
       }
@@ -1116,7 +1060,7 @@
       const btn = document.getElementById('btn-add-poi');
       btn.disabled = true;
       btn.innerText = "Recherchiere...";
-      statusEl.innerText = `Recherchiere Daten für "${name}" in "${city || region.name}"...`;
+      statusEl.innerText = 'Recherchiere Daten für "' + name + '" in "' + (city || region.name) + '"...';
 
       try {
         const info = await deepSearchPOI(name, city, region.name);
@@ -1148,8 +1092,8 @@
         renderAdminList();
         updatePointDropdowns();
         persistData();
-        statusEl.innerText = info.lat ? `✅ Platziert: [${info.lat.toFixed(5)}, ${info.lon.toFixed(5)}]` : `⚠️ Angelegt (Keine Geodaten gefunden).`;
-        alert(`Ort "${name}" erfolgreich angelegt!`);
+        statusEl.innerText = info.lat ? '✅ Platziert: [' + info.lat.toFixed(5) + ', ' + info.lon.toFixed(5) + ']' : '⚠️ Angelegt (Keine Geodaten gefunden).';
+        alert('Ort "' + name + '" erfolgreich angelegt!');
       } catch(e) {
         alert("Fehler: " + e.message);
       } finally {
@@ -1185,7 +1129,7 @@
       renderMapMarkers();
 
       if (btn) btn.innerText = "🔄 Auto-Update";
-      alert(`Daten zu "${targetPOI.name}" erfolgreich aktualisiert!`);
+      alert('Daten zu "' + targetPOI.name + '" erfolgreich aktualisiert!');
     }
 
     function setDetailedMode(field, mode) {
@@ -1279,7 +1223,7 @@
       renderDayList();
       renderMapMarkers();
       calculateFullDayTour();
-      alert(`✅ Tour optimiert: Die Tour wurde in kürzeste Reihenfolge sortiert!`);
+      alert("✅ Tour optimiert: Die Tour wurde in kürzeste Reihenfolge sortiert!");
     }
 
     function reverseDayRoute() {
@@ -1304,7 +1248,7 @@
     async function fetchRealRouteGeometry(fromLng, fromLat, toLng, toLat, isTransit) {
       if (isTransit) {
         try {
-          const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
+          const url = 'https://router.project-osrm.org/route/v1/driving/' + fromLng + ',' + fromLat + ';' + toLng + ',' + toLat + '?overview=full&geometries=geojson';
           const res = await fetch(url);
           const data = await res.json();
           if (data.routes && data.routes.length > 0) {
@@ -1317,8 +1261,8 @@
         } catch(e) {}
       } else {
         const footUrls = [
-          `https://routing.openstreetmap.de/routed-foot/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`,
-          `https://router.project-osrm.org/route/v1/foot/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`
+          'https://routing.openstreetmap.de/routed-foot/route/v1/driving/' + fromLng + ',' + fromLat + ';' + toLng + ',' + toLat + '?overview=full&geometries=geojson',
+          'https://router.project-osrm.org/route/v1/foot/' + fromLng + ',' + fromLat + ';' + toLng + ',' + toLat + '?overview=full&geometries=geojson'
         ];
 
         for (let u of footUrls) {
@@ -1360,7 +1304,7 @@
 
       const summaryBox = document.getElementById('tour-summary-box');
       summaryBox.style.display = "block";
-      summaryBox.innerHTML = `Berechne Tour (Kürzeste Fußwege & ÖV-Trassen)...`;
+      summaryBox.innerHTML = "Berechne Tour (Kürzeste Fußwege & ÖV-Trassen)...";
 
       if (fullTourLayer && map) map.removeLayer(fullTourLayer);
       if (map) fullTourLayer = L.featureGroup().addTo(map);
@@ -1401,14 +1345,8 @@
               }
             });
 
-            const gTransitUrl = `https://www.google.com/maps/dir/?api=1&origin=${currentLegStart.lat},${currentLegStart.lng}&destination=${nextStop.lat},${nextStop.lon}&travelmode=transit`;
-            transitLine.bindPopup(`
-              <b>Etappe ${i + 1}: 🚆 ÖV-Streckenverlauf</b><br>
-              Von: ${currentLegStart.label}<br>
-              Nach: ${nextStop.name}<br>
-              Distanz: ~${(routeData.distance/1000).toFixed(2)} km<br>
-              👉 <a href="${gTransitUrl}" target="_blank" style="color:#8e24aa; font-weight:bold;">Live-Abfahrten & Linien öffnen</a>
-            `);
+            const gTransitUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + currentLegStart.lat + ',' + currentLegStart.lng + '&destination=' + nextStop.lat + ',' + nextStop.lon + '&travelmode=transit';
+            transitLine.bindPopup('<b>Etappe ' + (i + 1) + ': 🚆 ÖV-Streckenverlauf</b><br>Von: ' + currentLegStart.label + '<br>Nach: ' + nextStop.name + '<br>Distanz: ~' + (routeData.distance/1000).toFixed(2) + ' km<br>👉 <a href="' + gTransitUrl + '" target="_blank" style="color:#8e24aa; font-weight:bold;">Live-Abfahrten & Linien öffnen</a>');
             fullTourLayer.addLayer(transitLine);
           } else {
             footLegs++;
@@ -1422,7 +1360,7 @@
                 opacity: 0.95
               }
             });
-            footLine.bindPopup(`<b>Etappe ${i + 1}: 🚶 Kürzester Fußweg</b><br>Nach ${nextStop.name} (~${Math.round(routeData.duration/60)} Min. • ${(routeData.distance/1000).toFixed(2)} km)`);
+            footLine.bindPopup('<b>Etappe ' + (i + 1) + ': 🚶 Kürzester Fußweg</b><br>Nach ' + nextStop.name + ' (~' + Math.round(routeData.duration/60) + ' Min. • ' + (routeData.distance/1000).toFixed(2) + ' km)');
             fullTourLayer.addLayer(footLine);
           }
         }
@@ -1439,13 +1377,11 @@
       let totalHours = Math.floor(totalDayMin / 60);
       let remMinutes = totalDayMin % 60;
 
-      summaryBox.innerHTML = `
-        <strong>🏁 Tour (${isRoundTrip ? 'Rundtour' : 'Streckentour'} • ${activePlaces.length} Zwischenziele):</strong><br>
-        🚶 <b>${footLegs} Abschnitte zu Fuß:</b> ca. ${walkKm} km (~${walkMin} Min. Gehzeit via Fußpfade)<br>
-        🚆 <b>${transitLegs} Abschnitte mit ÖV:</b> ca. ${transitKm} km ÖV-Trassen<br>
-        ⏳ Geplante Verweildauer: <b>~${Math.round(totalStayMin/60)} Std.</b><br>
-        ⏱️ Gesamtzeit der Tour: <b>ca. ${totalHours}h ${remMinutes}min</b>
-      `;
+      summaryBox.innerHTML = '<strong>🏁 Tour (' + (isRoundTrip ? 'Rundtour' : 'Streckentour') + ' • ' + activePlaces.length + ' Zwischenziele):</strong><br>' +
+        '🚶 <b>' + footLegs + ' Abschnitte zu Fuß:</b> ca. ' + walkKm + ' km (~' + walkMin + ' Min. Gehzeit via Fußpfade)<br>' +
+        '🚆 <b>' + transitLegs + ' Abschnitte mit ÖV:</b> ca. ' + transitKm + ' km ÖV-Trassen<br>' +
+        '⏳ Geplante Verweildauer: <b>~' + Math.round(totalStayMin/60) + ' Std.</b><br>' +
+        '⏱️ Gesamtzeit der Tour: <b>ca. ' + totalHours + 'h ' + remMinutes + 'min</b>';
 
       if (map && fullTourLayer) map.fitBounds(fullTourLayer.getBounds(), { padding: [40, 40] });
       if (window.innerWidth <= 768) setMobileSubTab('map');
@@ -1459,29 +1395,22 @@
       const activePlaces = region.places.filter(p => p.selectedForDay && !p.visited && p.lat && p.lon);
       if (activePlaces.length === 0) return alert("Keine Orte für die Tour ausgewählt.");
 
-      let gpx = `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="TravelPlan Mobile Pro" xmlns="http://www.topografix.com/GPX/1/1">
-  <metadata><name>Tour ${region.name}</name></metadata>
-  <rte>
-    <name>Tagesroute ${region.name}</name>`;
+      let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="TravelPlan Mobile Pro" xmlns="http://www.topografix.com/GPX/1/1">\n  <metadata><name>Tour ' + region.name + '</name></metadata>\n  <rte>\n    <name>Tagesroute ' + region.name + '</name>';
 
       if (startPoint) {
-        gpx += `\n    <rtept lat="${startPoint.lat}" lon="${startPoint.lng}"><name>Start: ${startPoint.label}</name></rtept>`;
+        gpx += '\n    <rtept lat="' + startPoint.lat + '" lon="' + startPoint.lng + '"><name>Start: ' + startPoint.label + '</name></rtept>';
       }
 
       activePlaces.forEach((p, idx) => {
-        gpx += `\n    <rtept lat="${p.lat}" lon="${p.lon}">
-      <name>${idx + 1}. [Hin:${p.modeIn === 'transit' ? 'ÖV' : 'Fuß'}|Weiter:${p.modeOut === 'transit' ? 'ÖV' : 'Fuß'}] ${p.name}</name>
-      <desc>${p.description || ''}</desc>
-    </rtept>`;
+        gpx += '\n    <rtept lat="' + p.lat + '" lon="' + p.lon + '"><name>' + (idx + 1) + '. [Hin:' + (p.modeIn === 'transit' ? 'ÖV' : 'Fuß') + '|Weiter:' + (p.modeOut === 'transit' ? 'ÖV' : 'Fuß') + '] ' + p.name + '</name><desc>' + (p.description || '') + '</desc></rtept>';
       });
 
       if (endPoint) {
-        gpx += `\n    <rtept lat="${endPoint.lat}" lon="${endPoint.lng}"><name>Ende: ${endPoint.label}</name></rtept>`;
+        gpx += '\n    <rtept lat="' + endPoint.lat + '" lon="' + endPoint.lng + '"><name>Ende: ' + endPoint.label + '</name></rtept>';
       }
 
-      gpx += `\n  </rte>\n</gpx>`;
-      downloadFile(`Tour_${region.id}.gpx`, gpx);
+      gpx += '\n  </rte>\n</gpx>';
+      downloadFile('Tour_' + region.id + '.gpx', gpx);
     }
 
     function showBudgetSummary() {
@@ -1491,7 +1420,7 @@
 
       const activePlaces = region.places.filter(p => p.selectedForDay);
       const total = activePlaces.reduce((sum, p) => sum + (parseFloat(p.cost) || 0), 0);
-      alert(`💰 Budget für die heutigen ${activePlaces.length} ausgewählten Ziele in ${region.name}:\nGesamtsumme: ${total.toFixed(2)} € / Währungseinheiten`);
+      alert('💰 Budget für die heutigen ' + activePlaces.length + ' ausgewählten Ziele in ' + region.name + ':\nGesamtsumme: ' + total.toFixed(2) + ' € / Währungseinheiten');
     }
 
     function launchExternalNavigation() {
@@ -1502,9 +1431,9 @@
       const isApple = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
       if (isApple) {
-        window.open(`maps://maps.apple.com/?daddr=${lat},${lon}&dirflg=${isTransit ? 'r' : 'w'}`, '_blank');
+        window.open('maps://maps.apple.com/?daddr=' + lat + ',' + lon + '&dirflg=' + (isTransit ? 'r' : 'w'), '_blank');
       } else {
-        window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=${isTransit ? 'transit' : 'walking'}`, '_blank');
+        window.open('https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lon + '&travelmode=' + (isTransit ? 'transit' : 'walking'), '_blank');
       }
     }
 
@@ -1526,7 +1455,7 @@
     function editBadgePrompt(fieldKey, label, isNum = false) {
       if (!selectedPoi) return;
       const currentVal = selectedPoi[fieldKey] || '';
-      const newVal = prompt(`${label} anpassen:`, currentVal);
+      const newVal = prompt(label + ' anpassen:', currentVal);
       if (newVal !== null) {
         selectedPoi[fieldKey] = isNum ? (parseFloat(newVal) || 0) : newVal.trim();
         persistData();
@@ -1606,12 +1535,9 @@
       const durMin = Math.round(routeData.duration / 60);
 
       if (isTransit) {
-        const transitUrl = `https://www.google.com/maps/dir/?api=1&origin=${startPoint.lat},${startPoint.lng}&destination=${destLat},${destLon}&travelmode=transit`;
+        const transitUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + startPoint.lat + ',' + startPoint.lng + '&destination=' + destLat + ',' + destLon + '&travelmode=transit';
         if (calcText) {
-          calcText.innerHTML = `
-            🚆 <strong>Reale ÖV-Trasse:</strong> ca. ${distKm} km Streckenführung<br>
-            👉 <a href="${transitUrl}" target="_blank" style="color:#8e24aa; font-weight:bold;">Hier Live-Abfahrten, Linien & Umstiege öffnen</a>
-          `;
+          calcText.innerHTML = '🚆 <strong>Reale ÖV-Trasse:</strong> ca. ' + distKm + ' km Streckenführung<br>👉 <a href="' + transitUrl + '" target="_blank" style="color:#8e24aa; font-weight:bold;">Hier Live-Abfahrten, Linien & Umstiege öffnen</a>';
         }
 
         if(routeLayer && map) map.removeLayer(routeLayer);
@@ -1624,9 +1550,7 @@
         }
       } else {
         if (calcText) {
-          calcText.innerHTML = `
-            🚶 <strong>Kürzester Fußweg (Fußpfade/Gassen):</strong> ${distKm} km (~${durMin} Min. Gehzeit)
-          `;
+          calcText.innerHTML = '🚶 <strong>Kürzester Fußweg (Fußpfade/Gassen):</strong> ' + distKm + ' km (~' + durMin + ' Min. Gehzeit)';
         }
 
         if(routeLayer && map) map.removeLayer(routeLayer);
@@ -1646,9 +1570,12 @@
 
       if (!daySel || !admSel) return;
 
-      const opts = appData.regions.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
-      daySel.innerHTML = opts;
-      admSel.innerHTML = opts;
+      let html = '';
+      for (let i = 0; i < appData.regions.length; i++) {
+        html += '<option value="' + appData.regions[i].id + '">' + appData.regions[i].name + '</option>';
+      }
+      daySel.innerHTML = html;
+      admSel.innerHTML = html;
 
       daySel.value = appData.regions[0].id;
       admSel.value = appData.regions[0].id;
@@ -1665,9 +1592,12 @@
       const savedDayVal = daySel.value;
       const savedAdmVal = admSel.value;
 
-      const opts = appData.regions.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
-      daySel.innerHTML = opts;
-      admSel.innerHTML = opts;
+      let html = '';
+      for (let i = 0; i < appData.regions.length; i++) {
+        html += '<option value="' + appData.regions[i].id + '">' + appData.regions[i].name + '</option>';
+      }
+      daySel.innerHTML = html;
+      admSel.innerHTML = html;
 
       if ([...daySel.options].some(o => o.value === savedDayVal)) daySel.value = savedDayVal;
       else if (appData.regions.length > 0) daySel.value = appData.regions[0].id;
@@ -1722,23 +1652,25 @@
             const currentNum = tourNumber++;
             markerIcon = L.divIcon({
               className: 'custom-pin',
-              html: `<div class="numbered-map-marker" style="background-color: ${catColor};">${currentNum}</div>`,
+              html: '<div class="numbered-map-marker" style="background-color: ' + catColor + ';">' + currentNum + '</div>',
               iconSize: [26, 26],
               iconAnchor: [13, 13]
             });
           } else {
             markerIcon = L.divIcon({
               className: 'custom-pin-inactive',
-              html: `<div class="numbered-map-marker inactive"></div>`,
+              html: '<div class="numbered-map-marker inactive"></div>',
               iconSize: [14, 14],
               iconAnchor: [7, 7]
             });
           }
 
-          const m = L.marker([p.lat, p.lon], { icon: markerIcon }).addTo(markersLayer)
-            .bindPopup(`<b>${p.name}</b><br><small>${p.city || ''} (Hin:${p.modeIn === 'transit' ? '🚆 ÖV' : '🚶 Fuß'})</small>`);
-          
-          m.on('click', () => selectPoi(p));
+          if (markersLayer) {
+            const m = L.marker([p.lat, p.lon], { icon: markerIcon }).addTo(markersLayer)
+              .bindPopup('<b>' + p.name + '</b><br><small>' + (p.city || '') + ' (Hin:' + (p.modeIn === 'transit' ? '🚆 ÖV' : '🚶 Fuß') + ')</small>');
+            
+            m.on('click', () => selectPoi(p));
+          }
           bounds.push([p.lat, p.lon]);
         }
       });
@@ -1771,44 +1703,35 @@
         const currentTourNumber = isSelected ? tourIdx++ : null;
 
         const el = document.createElement('div');
-        el.className = `poi-card cat-${p.category || 'kultur'} ${isSelected ? 'in-tour' : ''} ${p.visited ? 'visited' : ''} ${selectedPoi && selectedPoi.id === p.id ? 'active' : ''}`;
+        el.className = 'poi-card cat-' + (p.category || 'kultur') + (isSelected ? ' in-tour' : '') + (p.visited ? ' visited' : '') + ((selectedPoi && selectedPoi.id === p.id) ? ' active' : '');
         
-        el.innerHTML = `
-          <div class="poi-card-header">
-            <div style="display:flex; align-items:center;">
-              ${isSelected ? `<span class="tour-number-badge" style="background:${CAT_COLORS[p.category] \vert{}\vert{} 'var(--primary)'};">${currentTourNumber}</span>` : ''}
-              <div>
-                <strong>${p.name}</strong>
-                <div style="font-size:0.75rem; color:#666;">📍 ${p.city || region.name} • ${CAT_LABELS[p.category] || '🏛️'} • ⏱️ ~${p.duration || 60} Min.</div>
-              </div>
-            </div>
-            <div style="display:flex; align-items:center; gap:6px;">
-              <button class="btn-tour-select ${isSelected ? 'selected' : ''}" 
-                      title="Ziel in die Tagestour aufnehmen"
-                      onclick="event.stopPropagation(); toggleDayTourSelection('${p.id}')">
-                ${isSelected ? '⭐ Im Tag' : '➕ Tag'}
-              </button>
-              <input type="checkbox" ${p.visited ? 'checked' : ''} title="Besucht" style="width:auto; margin:0;" onclick="event.stopPropagation(); toggleVisited('${p.id}')">
-            </div>
-          </div>
+        let cardHtml = '<div class="poi-card-header">';
+        cardHtml += '<div style="display:flex; align-items:center;">';
+        if (isSelected) {
+          cardHtml += '<span class="tour-number-badge" style="background:' + (CAT_COLORS[p.category] || 'var(--primary)') + ';">' + currentTourNumber + '</span>';
+        }
+        cardHtml += '<div><strong>' + p.name + '</strong>';
+        cardHtml += '<div style="font-size:0.75rem; color:#666;">📍 ' + (p.city || region.name) + ' • ' + (CAT_LABELS[p.category] || '🏛️') + ' • ⏱️ ~' + (p.duration || 60) + ' Min.</div>';
+        cardHtml += '</div></div>';
+        cardHtml += '<div style="display:flex; align-items:center; gap:6px;">';
+        cardHtml += '<button class="btn-tour-select ' + (isSelected ? 'selected' : '') + '" title="Ziel in die Tagestour aufnehmen" onclick="event.stopPropagation(); toggleDayTourSelection(\'' + p.id + '\')">' + (isSelected ? '⭐ Im Tag' : '➕ Tag') + '</button>';
+        cardHtml += '<input type="checkbox" ' + (p.visited ? 'checked' : '') + ' title="Besucht" style="width:auto; margin:0;" onclick="event.stopPropagation(); toggleVisited(\'' + p.id + '\')">';
+        cardHtml += '</div></div>';
 
-          <div class="route-direction-box" onclick="event.stopPropagation();">
-            <div class="route-direction-row">
-              <span style="color:#444;">Hinweg:</span>
-              <div class="transport-toggle-group">
-                <button class="${p.modeIn === 'foot' ? 'active-foot' : ''}" onclick="togglePoiLegMode('${p.id}', 'modeIn')">🚶 Zu Fuß</button>
-                <button class="${p.modeIn === 'transit' ? 'active-transit' : ''}" onclick="togglePoiLegMode('${p.id}', 'modeIn')">🚆 Mit ÖV</button>
-              </div>
-            </div>
-            <div class="route-direction-row" style="margin-top:4px;">
-              <span style="color:#444;">Weiterweg:</span>
-              <div class="transport-toggle-group">
-                <button class="${p.modeOut === 'foot' ? 'active-foot' : ''}" onclick="togglePoiLegMode('${p.id}', 'modeOut')">🚶 Zu Fuß</button>
-                <button class="${p.modeOut === 'transit' ? 'active-transit' : ''}" onclick="togglePoiLegMode('${p.id}', 'modeOut')">🚆 Mit ÖV</button>
-              </div>
-            </div>
-          </div>
-        `;
+        cardHtml += '<div class="route-direction-box" onclick="event.stopPropagation();">';
+        cardHtml += '<div class="route-direction-row"><span style="color:#444;">Hinweg:</span>';
+        cardHtml += '<div class="transport-toggle-group">';
+        cardHtml += '<button class="' + (p.modeIn === 'foot' ? 'active-foot' : '') + '" onclick="togglePoiLegMode(\'' + p.id + '\', \'modeIn\')">🚶 Zu Fuß</button>';
+        cardHtml += '<button class="' + (p.modeIn === 'transit' ? 'active-transit' : '') + '" onclick="togglePoiLegMode(\'' + p.id + '\', \'modeIn\')">🚆 Mit ÖV</button>';
+        cardHtml += '</div></div>';
+
+        cardHtml += '<div class="route-direction-row" style="margin-top:4px;"><span style="color:#444;">Weiterweg:</span>';
+        cardHtml += '<div class="transport-toggle-group">';
+        cardHtml += '<button class="' + (p.modeOut === 'foot' ? 'active-foot' : '') + '" onclick="togglePoiLegMode(\'' + p.id + '\', \'modeOut\')">🚶 Zu Fuß</button>';
+        cardHtml += '<button class="' + (p.modeOut === 'transit' ? 'active-transit' : '') + '" onclick="togglePoiLegMode(\'' + p.id + '\', \'modeOut\')">🚆 Mit ÖV</button>';
+        cardHtml += '</div></div></div>';
+
+        el.innerHTML = cardHtml;
         el.onclick = () => selectPoi(p);
         listEl.appendChild(el);
       });
@@ -1821,7 +1744,7 @@
       renderDayList();
 
       const reg = appData.regions.find(r => r.id === document.getElementById('day-region-select').value);
-      const targetQuery = `${poi.name}, ${poi.city || (reg ? reg.name : '')}`;
+      const targetQuery = poi.name + ', ' + (poi.city || (reg ? reg.name : ''));
 
       document.getElementById('detail-card').style.display = "block";
       document.getElementById('det-name-input').value = poi.name;
@@ -1839,11 +1762,11 @@
 
       document.getElementById('det-update-btn').onclick = () => autoUpdatePOI(poi.id);
 
-      document.getElementById('link-google').href = `https://www.google.com/search?q=${encodeURIComponent(targetQuery)}`;
-      document.getElementById('link-hours').href = `https://www.google.com/search?q=${encodeURIComponent(targetQuery + ' öffnungszeiten')}`;
+      document.getElementById('link-google').href = 'https://www.google.com/search?q=' + encodeURIComponent(targetQuery);
+      document.getElementById('link-hours').href = 'https://www.google.com/search?q=' + encodeURIComponent(targetQuery + ' öffnungszeiten');
       
-      const originParam = startPoint ? `${startPoint.lat},${startPoint.lng}` : '';
-      document.getElementById('link-transit').href = `https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${encodeURIComponent(targetQuery)}&travelmode=transit`;
+      const originParam = startPoint ? (startPoint.lat + ',' + startPoint.lng) : '';
+      document.getElementById('link-transit').href = 'https://www.google.com/maps/dir/?api=1&origin=' + originParam + '&destination=' + encodeURIComponent(targetQuery) + '&travelmode=transit';
 
       const webA = document.getElementById('link-web');
       if(poi.website) {
@@ -1854,14 +1777,12 @@
       }
 
       const badgesEl = document.getElementById('det-badges');
-      badgesEl.innerHTML = `
-        <span class="badge ${poi.lat ? 'ok' : 'warn'}">📍 ${poi.lat ? poi.lat.toFixed(4) + ', ' + poi.lon.toFixed(4) : 'Keine Koord'}</span>
-        <span class="badge info cat-badge">${CAT_LABELS[poi.category] || '🏛️ Kultur'}</span>
-        <span class="badge info" onclick="editBadgePrompt('openingHours', 'Öffnungszeiten')">🕒 ${poi.openingHours || 'k.A.'} ✏️</span>
-        <span class="badge info" onclick="editBadgePrompt('fee', 'Eintrittspreis')">💵 ${poi.fee || 'k.A.'} ✏️</span>
-        <span class="badge info" onclick="editBadgePrompt('cost', 'Budget / Kosten (€)', true)">💰 ${poi.cost || 0} € ✏️</span>
-        <span class="badge info" onclick="editBadgePrompt('duration', 'Aufenthaltsdauer (Min.)', true)">⏱️ ${poi.duration || 60} Min. ✏️</span>
-      `;
+      badgesEl.innerHTML = '<span class="badge ' + (poi.lat ? 'ok' : 'warn') + '">📍 ' + (poi.lat ? (poi.lat.toFixed(4) + ', ' + poi.lon.toFixed(4)) : 'Keine Koord') + '</span>' +
+        '<span class="badge info cat-badge">' + (CAT_LABELS[poi.category] || '🏛️ Kultur') + '</span>' +
+        '<span class="badge info" onclick="editBadgePrompt(\'openingHours\', \'Öffnungszeiten\')">🕒 ' + (poi.openingHours || 'k.A.') + ' ✏️</span>' +
+        '<span class="badge info" onclick="editBadgePrompt(\'fee\', \'Eintrittspreis\')">💵 ' + (poi.fee || 'k.A.') + ' ✏️</span>' +
+        '<span class="badge info" onclick="editBadgePrompt(\'cost\', \'Budget / Kosten (€)\', true)">💰 ' + (poi.cost || 0) + ' € ✏️</span>' +
+        '<span class="badge info" onclick="editBadgePrompt(\'duration\', \'Aufenthaltsdauer (Min.)\', true)">⏱️ ' + (poi.duration || 60) + ' Min. ✏️</span>';
 
       if(poi.lat && poi.lon && poi.lat !== 0 && map) {
         map.setView([poi.lat, poi.lon], 16);
@@ -1895,18 +1816,13 @@
         const item = document.createElement('div');
         item.className = "card";
         item.style.padding = "8px";
-        item.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <strong style="${p.visited ? 'text-decoration: line-through;' : ''}">${p.name}</strong>
-              <div style="font-size:0.75rem; color:#555;">🏙️ ${p.city || region.name} • Hin:${p.modeIn === 'transit' ? '🚆 ÖV' : '🚶 Fuß'} • Weiter:${p.modeOut === 'transit' ? '🚆 ÖV' : '🚶 Fuß'} • ${CAT_LABELS[p.category] || '🏛️'}</div>
-            </div>
-            <div style="display:flex; gap:4px;">
-              <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="openAdminEditModal('${p.id}')">✏️ Edit</button>
-              <button class="btn btn-danger" style="padding:4px 8px; font-size:0.75rem;" onclick="deletePOI('${region.id}', ${idx})">🗑️</button>
-            </div>
-          </div>
-        `;
+        item.innerHTML = '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+          '<div><strong style="' + (p.visited ? 'text-decoration: line-through;' : '') + '">' + p.name + '</strong>' +
+          '<div style="font-size:0.75rem; color:#555;">🏙️ ' + (p.city || region.name) + ' • Hin:' + (p.modeIn === 'transit' ? '🚆 ÖV' : '🚶 Fuß') + ' • Weiter:' + (p.modeOut === 'transit' ? '🚆 ÖV' : '🚶 Fuß') + ' • ' + (CAT_LABELS[p.category] || '🏛️') + '</div></div>' +
+          '<div style="display:flex; gap:4px;">' +
+          '<button class="btn btn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="openAdminEditModal(\'' + p.id + '\')">✏️ Edit</button>' +
+          '<button class="btn btn-danger" style="padding:4px 8px; font-size:0.75rem;" onclick="deletePOI(\'' + region.id + '\', ' + idx + ')">🗑️</button>' +
+          '</div></div>';
         listEl.appendChild(item);
       });
     }
@@ -1930,7 +1846,7 @@
       document.getElementById('admin-new-region').value = "";
       updateRegionDropdowns();
       persistData();
-      alert(`Region "${name}" angelegt!`);
+      alert('Region "' + name + '" angelegt!');
     }
 
     function loadSettings() {
@@ -1967,7 +1883,9 @@
     }
 
     function persistData() {
-      localStorage.setItem('travel_data', JSON.stringify(appData));
+      try {
+        localStorage.setItem('travel_data', JSON.stringify(appData));
+      } catch(e) {}
       if(ghConfig.token && ghConfig.owner && ghConfig.repo) {
         syncWithGitHub(true);
       }
@@ -1980,8 +1898,8 @@
         return;
       }
 
-      const url = `https://api.github.com/repos/${ghConfig.owner}/${ghConfig.repo}/contents/${ghConfig.path}`;
-      const headers = { "Authorization": `token ${ghConfig.token}`, "Accept": "application/vnd.github.v3+json" };
+      const url = 'https://api.github.com/repos/' + ghConfig.owner + '/' + ghConfig.repo + '/contents/' + ghConfig.path;
+      const headers = { "Authorization": 'token ' + ghConfig.token, "Accept": "application/vnd.github.v3+json" };
 
       try {
         if (pill) pill.innerText = "Sync...";
@@ -1995,7 +1913,7 @@
             if (parsed && Array.isArray(parsed.regions) && parsed.regions.length > 0) {
               appData = parsed;
               sanitizeAppData();
-              localStorage.setItem('travel_data', JSON.stringify(appData));
+              try { localStorage.setItem('travel_data', JSON.stringify(appData)); } catch(e) {}
               updateRegionDropdowns();
               renderMapMarkers();
               renderDayList();
