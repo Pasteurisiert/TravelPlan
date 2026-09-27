@@ -859,6 +859,23 @@
           "duration": 60,
           "notes": "",
           "visited": false
+        },
+        {
+          "id": "poi_1790492278947",
+          "name": "Botanischer Garten",
+          "city": "Zürich",
+          "category": "natur",
+          "lat": 47.3597854,
+          "lon": 8.5574887,
+          "description": "Der Botanische Garten Zürich ist ein der Universität Zürich zugehörender Botanischer Garten in Zürich, Schweiz....",
+          "website": "https://de.wikipedia.org/wiki/Botanischer_Garten_Z%C3%BCrich",
+          "openingHours": "k.A.",
+          "fee": "k.A.",
+          "transit": "ÖV vorhanden",
+          "cost": 0,
+          "duration": 60,
+          "notes": "",
+          "visited": false
         }
       ]
     }
