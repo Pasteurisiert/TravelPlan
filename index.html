@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#1976d2">
-  <title>TravelPlan Pro v2.5 - Reale ÖV-Trassen</title>
+  <title>TravelPlan Pro v2.6 - Fix Startpunkt</title>
   
   <link rel="manifest" href="manifest.json">
 
@@ -120,7 +120,7 @@
 <body>
 
   <header>
-    <div>🌍 TravelPlan Pro v2.5</div>
+    <div>🌍 TravelPlan Pro v2.6</div>
     <div id="sync-pill" onclick="syncWithGitHub()">GitHub: Offline</div>
   </header>
 
@@ -165,7 +165,7 @@
               <button class="btn btn-adhoc" style="flex:1.2;" id="btn-adhoc-target" onclick="toggleMapPick('target')">📍 + Ziel</button>
             </div>
             <input type="text" id="manual-loc-input" placeholder="Adresse für Startpunkt eingeben..." style="margin-top:4px;" onchange="geocodeAddress(this.value)">
-            <div id="loc-status" style="font-size:0.75rem; color:#666;">Start & Ende bereit</div>
+            <div id="loc-status" style="font-size:0.75rem; color:#666; font-weight: 500;">Start & Ende bereit</div>
           </div>
 
           <!-- Aktionen -->
@@ -256,7 +256,7 @@
             </div>
 
             <div id="route-box" style="margin-top:8px; background:#e8f5e9; border:1px solid #c8e6c9; border-radius:6px; padding:8px; font-size:0.82rem; display:none;">
-              <strong>Weg vom Standort:</strong>
+              <strong>Weg vom aktuellen Startpunkt:</strong>
               <div id="route-calc-text">Berechnung...</div>
             </div>
           </div>
@@ -584,10 +584,10 @@
       map.on('click', (e) => {
         if (pickMode === 'start') {
           stopLiveGPS();
-          setStartPoint(e.latlng.lat, e.latlng.lng, "Karten-Startpunkt");
+          setStartPoint(e.latlng.lat, e.latlng.lng, "Karten-Startpunkt", "__CUSTOM__");
           toggleMapPick(null);
         } else if (pickMode === 'end') {
-          setEndPoint(e.latlng.lat, e.latlng.lng, "Karten-Endpunkt");
+          setEndPoint(e.latlng.lat, e.latlng.lng, "Karten-Endpunkt", "__CUSTOM__");
           toggleMapPick(null);
         } else if (pickMode === 'target') {
           openAdhocModal(e.latlng.lat, e.latlng.lng);
@@ -671,13 +671,24 @@
       }
     }
 
-    function setStartPoint(lat, lng, label) {
-      startPoint = { lat, lng, label };
-      document.getElementById('loc-status').innerText = `Start: ${label} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+    // --- START- UND ENDPUNKT VERWALTUNG (ROBUST & PERSISTENT) ---
+    function setStartPoint(lat, lng, label, dropdownVal = null) {
+      startPoint = { lat: parseFloat(lat), lng: parseFloat(lng), label: label };
+      document.getElementById('loc-status').innerText = `Start: ${label} (${startPoint.lat.toFixed(4)}, ${startPoint.lng.toFixed(4)})`;
+
+      if (dropdownVal) {
+        const startSel = document.getElementById('start-poi-select');
+        startSel.value = dropdownVal;
+      }
 
       if (startMarker) map.removeLayer(startMarker);
-      startMarker = L.circleMarker([lat, lng], { color: 'blue', fillColor: '#2196f3', fillOpacity: 0.9, radius: 9, weight: 3 })
-        .addTo(map).bindPopup(`<b>Start:</b> ${label}`).openPopup();
+      startMarker = L.circleMarker([startPoint.lat, startPoint.lng], {
+        color: '#0d47a1',
+        fillColor: '#2196f3',
+        fillOpacity: 0.95,
+        radius: 10,
+        weight: 3
+      }).addTo(map).bindPopup(`<b>Startpunkt:</b><br>${label}`).openPopup();
 
       const endVal = document.getElementById('end-poi-select').value;
       if (endVal === '__SAME_AS_START__') {
@@ -685,17 +696,24 @@
       }
 
       if (selectedPoi && selectedPoi.lat && selectedPoi.lon) {
-        calcRoute(selectedPoi, true);
+        calcRoute(selectedPoi, false);
       }
     }
 
-    function setEndPoint(lat, lng, label) {
-      endPoint = { lat, lng, label };
+    function setEndPoint(lat, lng, label, dropdownVal = null) {
+      endPoint = { lat: parseFloat(lat), lng: parseFloat(lng), label: label };
       if (endMarker) map.removeLayer(endMarker);
-      endMarker = L.circleMarker([lat, lng], { color: '#b71c1c', fillColor: '#f44336', fillOpacity: 0.9, radius: 9, weight: 3 })
-        .addTo(map).bindPopup(`<b>Ziel/Ende:</b> ${label}`);
+      endMarker = L.circleMarker([endPoint.lat, endPoint.lng], {
+        color: '#b71c1c',
+        fillColor: '#f44336',
+        fillOpacity: 0.95,
+        radius: 10,
+        weight: 3
+      }).addTo(map).bindPopup(`<b>Endpunkt:</b><br>${label}`);
 
-      document.getElementById('end-poi-select').value = "__CUSTOM__";
+      if (dropdownVal) {
+        document.getElementById('end-poi-select').value = dropdownVal;
+      }
       document.getElementById('loc-status').innerText += ` | Ziel: ${label}`;
     }
 
@@ -703,7 +721,7 @@
       if (val === '__GPS__') {
         startLiveGPS();
       } else if (val === '__CUSTOM__') {
-        // Manuell
+        // Manuelle Wahl beibehalten
       } else {
         stopLiveGPS();
         const regId = document.getElementById('day-region-select').value;
@@ -711,7 +729,7 @@
         if (!region) return;
         const p = region.places.find(item => item.id === val);
         if (p && p.lat && p.lon) {
-          setStartPoint(p.lat, p.lon, p.name);
+          setStartPoint(p.lat, p.lon, p.name, p.id);
           map.panTo([p.lat, p.lon]);
         } else {
           alert("Dieser Ort besitzt keine gültigen Koordinaten.");
@@ -730,7 +748,7 @@
       } else if (val === '__GPS__') {
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(pos => {
-            setEndPoint(pos.coords.latitude, pos.coords.longitude, "GPS Ziel");
+            setEndPoint(pos.coords.latitude, pos.coords.longitude, "GPS Ziel", "__GPS__");
           });
         }
       } else if (val !== '__CUSTOM__') {
@@ -739,7 +757,7 @@
         if (!region) return;
         const p = region.places.find(item => item.id === val);
         if (p && p.lat && p.lon) {
-          setEndPoint(p.lat, p.lon, p.name);
+          setEndPoint(p.lat, p.lon, p.name, p.id);
         }
       }
     }
@@ -749,8 +767,8 @@
       const startSel = document.getElementById('start-poi-select');
       const endSel = document.getElementById('end-poi-select');
 
-      const savedStartVal = startSel.value;
-      const savedEndVal = endSel.value;
+      const curStartVal = startSel.value;
+      const curEndVal = endSel.value;
 
       startSel.innerHTML = `
         <option value="__GPS__">📡 Aktueller GPS Standort</option>
@@ -778,8 +796,8 @@
         });
       }
 
-      if ([...startSel.options].some(o => o.value === savedStartVal)) startSel.value = savedStartVal;
-      if ([...endSel.options].some(o => o.value === savedEndVal)) endSel.value = savedEndVal;
+      if ([...startSel.options].some(o => o.value === curStartVal)) startSel.value = curStartVal;
+      if ([...endSel.options].some(o => o.value === curEndVal)) endSel.value = curEndVal;
     }
 
     // --- LIVE GPS ---
@@ -790,7 +808,6 @@
 
     function startLiveGPS() {
       if (!navigator.geolocation) return alert("GPS nicht unterstützt");
-      document.getElementById('start-poi-select').value = "__GPS__";
       const btn = document.getElementById('btn-live-gps');
       btn.classList.add('active');
       btn.innerText = "⏹️ Live AUS";
@@ -802,7 +819,7 @@
           const lng = pos.coords.longitude;
           const acc = Math.round(pos.coords.accuracy);
 
-          setStartPoint(lat, lng, "Live GPS");
+          setStartPoint(lat, lng, "Live GPS", "__GPS__");
           document.getElementById('loc-status').innerHTML = `🔵 <b>Live:</b> ${lat.toFixed(4)}, ${lng.toFixed(4)} (±${acc}m)`;
 
           if (accuracyCircle) {
@@ -843,12 +860,11 @@
     async function geocodeAddress(query) {
       if(!query) return;
       stopLiveGPS();
-      document.getElementById('start-poi-select').value = "__CUSTOM__";
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
         const data = await res.json();
         if(data && data.length > 0) {
-          setStartPoint(parseFloat(data[0].lat), parseFloat(data[0].lon), query);
+          setStartPoint(parseFloat(data[0].lat), parseFloat(data[0].lon), query, "__CUSTOM__");
           map.panTo([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
         }
       } catch(e) { }
@@ -1112,7 +1128,6 @@
       alert(`Daten zu "${targetPOI.name}" erfolgreich aktualisiert!`);
     }
 
-    // --- MODUS JE ZIEL (HINWEG & WEITERWEG) ---
     function setDetailedMode(field, mode) {
       if (!selectedPoi) return;
       selectedPoi[field] = mode;
@@ -1206,9 +1221,7 @@
       alert(`✅ Tour optimiert: ${isRoundTrip ? 'Rundtour zum Startpunkt' : 'Strecke zum Zielpunkt'} wurde in kürzeste Reihenfolge sortiert!`);
     }
 
-    // --- HILFSFUNKTION: ECHTE ROUTENGEOMETRIE ABRUFEN (FUSS ODER ÖV-TRASSE) ---
     async function fetchRealRouteGeometry(fromLng, fromLat, toLng, toLat, isTransit) {
-      // Bei ÖV fragen wir das Straßen-/Schienenprofil ab (driving), bei Fuß das Fußprofil (foot)
       const profile = isTransit ? 'driving' : 'foot';
       const url = `https://router.project-osrm.org/route/v1/${profile}/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
       
@@ -1224,7 +1237,6 @@
         }
       } catch(e) {}
 
-      // Fallback: Direkte Linie falls Offline
       return {
         geometry: {
           type: "LineString",
@@ -1235,7 +1247,7 @@
       };
     }
 
-    // --- 2. GANZTAGESROUTE MIT REALEM ÖV-TRASSENVERLAUF ---
+    // --- 2. GANZTAGESROUTE ---
     async function calculateFullDayTour() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -1274,14 +1286,12 @@
           isTransit = lastPlace.modeOut === 'transit';
         }
 
-        // Reale Geometrie abrufen
         const routeData = await fetchRealRouteGeometry(currentLegStart.lng, currentLegStart.lat, nextStop.lon, nextStop.lat, isTransit);
 
         if (isTransit) {
           transitLegs++;
           totalTransitMeters += routeData.distance;
 
-          // REALE ÖV-TRASSE: Dicke, markante violette Linie entlang des echten Streckenverlaufs
           const transitLine = L.geoJSON(routeData.geometry, {
             style: {
               color: '#8e24aa',
@@ -1374,7 +1384,6 @@
       downloadFile(`Tour_${region.id}.gpx`, gpx);
     }
 
-    // --- BUDGET-TRACKER ---
     function showBudgetSummary() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -1385,7 +1394,6 @@
       alert(`💰 Budget für die heutigen ${activePlaces.length} ausgewählten Ziele in ${region.name}:\nGesamtsumme: ${total.toFixed(2)} € / Währungseinheiten`);
     }
 
-    // --- NAVIGATION EXTERN ---
     function launchExternalNavigation() {
       if (!selectedPoi || !selectedPoi.lat || !selectedPoi.lon) return alert("Kein Ort mit Koordinaten ausgewählt.");
       const lat = selectedPoi.lat;
@@ -1400,7 +1408,6 @@
       }
     }
 
-    // --- DETAIL-EDITS SPEICHERN ---
     function saveDirectEdits() {
       if (!selectedPoi) return;
       selectedPoi.name = document.getElementById('det-name-input').value.trim() || selectedPoi.name;
@@ -1428,7 +1435,6 @@
       }
     }
 
-    // --- ADMIN MODAL ---
     function openAdminEditModal(poiId) {
       for (let r of appData.regions) {
         let p = r.places.find(item => item.id === poiId);
@@ -1483,9 +1489,9 @@
       }
     }
 
-    // --- ROUTING EINZEL-STRECKE MIT REALEM VERLAUF ---
+    // --- ROUTING EINZEL-STRECKE (Start -> Klick-Ort) ---
     async function calcRoute(destPoi, autoZoom = true) {
-      if(!startPoint || !destPoi) return;
+      if(!startPoint || !destPoi || !destPoi.lat || !destPoi.lon) return;
       const rBox = document.getElementById('route-box');
       rBox.style.display = "block";
 
@@ -1493,7 +1499,7 @@
       const destLat = destPoi.lat;
       const destLon = destPoi.lon;
 
-      document.getElementById('route-calc-text').innerText = "Berechne realen Streckenverlauf...";
+      document.getElementById('route-calc-text').innerText = "Berechne Route...";
 
       const routeData = await fetchRealRouteGeometry(startPoint.lng, startPoint.lat, destLon, destLat, isTransit);
       const distKm = (routeData.distance / 1000).toFixed(2);
@@ -1526,7 +1532,7 @@
       }
     }
 
-    // --- RENDERING TAGESPLANUNG ---
+    // --- RENDERING TAGESPLANUNG (Startpunkt bleibt sauber fixiert) ---
     function onRegionChange() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -1553,16 +1559,16 @@
         });
         if(bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
 
-        if (!startPoint || !region.places.some(p => p.name === startPoint.label)) {
+        // Startpunkt NUR initialisieren, falls noch überhaupt gar keiner gesetzt wurde
+        if (!startPoint) {
           const firstValid = region.places.find(p => p.lat && p.lon);
           if (firstValid) {
-            setStartPoint(firstValid.lat, firstValid.lon, firstValid.name);
-            document.getElementById('start-poi-select').value = firstValid.id;
+            setStartPoint(firstValid.lat, firstValid.lon, firstValid.name, firstValid.id);
           }
+        } else {
+          // Den bereits bestehenden Startpunkt erneut zeichnen
+          setStartPoint(startPoint.lat, startPoint.lng, startPoint.label);
         }
-      } else {
-        startPoint = null;
-        if (startMarker) map.removeLayer(startMarker);
       }
 
       renderDayList();
@@ -1606,7 +1612,6 @@
             </div>
           </div>
 
-          <!-- AUSWAHL FÜR HIN- UND WEITERWEG -->
           <div class="route-direction-box" onclick="event.stopPropagation();">
             <div class="route-direction-row">
               <span style="color:#444;">Hinweg:</span>
