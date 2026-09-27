@@ -218,7 +218,7 @@
           "website": "https://www.kongernessamling.dk/rosenborg/",
           "openingHours": "Mo-Su 10:00-17:00",
           "fee": "k.A.",
-          "visited": true,
+          "visited": false,
           "transit": "Mit ÖV erreichbar",
           "city": "",
           "category": "kultur",
