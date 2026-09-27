@@ -163,7 +163,7 @@
           "selectedForDay": true,
           "visited": false,
           "modeIn": "foot",
-          "modeOut": "transit"
+          "modeOut": "foot"
         }
       ]
     },
