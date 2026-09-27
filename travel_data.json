@@ -1183,7 +1183,7 @@
           "duration": 5,
           "notes": "",
           "visited": false,
-          "mode": "transit",
+          "mode": "foot",
           "selectedForDay": true
         },
         {
