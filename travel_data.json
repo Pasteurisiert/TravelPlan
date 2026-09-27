@@ -859,7 +859,25 @@
     {
       "id": "z-rich",
       "name": "Zürich",
-      "places": []
+      "places": [
+        {
+          "id": "poi_1790491713267",
+          "name": "China Garten",
+          "city": "Zürich",
+          "category": "kultur",
+          "lat": 48.1232174,
+          "lon": 11.5135283,
+          "description": "China-Garten, Sendling-Westpark, Munich, Bavaria, Germany",
+          "website": "",
+          "openingHours": "k.A.",
+          "fee": "k.A.",
+          "transit": "ÖV vorhanden",
+          "cost": 0,
+          "duration": 60,
+          "notes": "",
+          "visited": false
+        }
+      ]
     }
   ]
 }
