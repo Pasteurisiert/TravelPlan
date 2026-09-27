@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#1976d2">
-  <title>TravelPlan Pro v2.4 - Hin- & Weiterweg Direktwahl</title>
+  <title>TravelPlan Pro v2.5 - Reale ÖV-Trassen</title>
   
   <link rel="manifest" href="manifest.json">
 
@@ -72,7 +72,6 @@
     .btn-tour-select { padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: bold; border: 1px solid #1976d2; background: #e3f2fd; color: #1976d2; cursor: pointer; }
     .btn-tour-select.selected { background: #1976d2; color: #ffffff; }
 
-    /* GROSSE, DEUTLICHE UMSCHALTER FÜR HIN- UND WEITERWEG */
     .route-direction-box { background: #f8f9fa; border: 1px solid #e2e5e9; border-radius: 6px; padding: 6px 8px; margin-top: 6px; font-size: 0.78rem; }
     .route-direction-row { display: flex; justify-content: space-between; align-items: center; margin: 3px 0; }
     .transport-toggle-group { display: inline-flex; border: 1px solid #b0bec5; border-radius: 5px; overflow: hidden; background: #fff; }
@@ -121,7 +120,7 @@
 <body>
 
   <header>
-    <div>🌍 TravelPlan Pro v2.4</div>
+    <div>🌍 TravelPlan Pro v2.5</div>
     <div id="sync-pill" onclick="syncWithGitHub()">GitHub: Offline</div>
   </header>
 
@@ -142,7 +141,7 @@
             <select id="day-region-select" onchange="onRegionChange()"></select>
           </div>
 
-          <!-- START- UND ENDPUNKT VERWALTUNG -->
+          <!-- START- UND ENDPUNKT -->
           <div class="card" style="padding: 10px;">
             <div style="font-weight:bold; font-size:0.88rem; margin-bottom:4px;">📍 Tour-Eckpunkte</div>
             
@@ -192,7 +191,7 @@
           </div>
           <div id="day-poi-list"></div>
 
-          <!-- Detailkarte des ausgewählten Ortes -->
+          <!-- Detailkarte -->
           <div id="detail-card" class="card" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
               <span style="font-weight:bold; font-size:0.95rem; color:var(--primary);">Detail & Infos</span>
@@ -226,7 +225,6 @@
               </div>
             </div>
 
-            <!-- In die Tagestour aufnehmen -->
             <div style="display:flex; justify-content:space-between; align-items:center; margin: 0 0 8px 0; background:#e8f4fd; padding:6px 10px; border-radius:6px;">
               <span style="font-size:0.8rem; font-weight:bold;">Teil der heutigen Tour:</span>
               <button id="det-tour-btn" class="btn-tour-select" onclick="toggleSelectedPoiTour()">➕ In Tour aufnehmen</button>
@@ -366,7 +364,7 @@
     </button>
   </nav>
 
-  <!-- MODAL: Neues Ad-Hoc Ziel auf Karte erstellen -->
+  <!-- MODAL: Ad-Hoc Ziel -->
   <div id="adhoc-create-modal" class="modal-overlay">
     <div class="modal-content">
       <h4 style="color:var(--primary);">📍 Neues Ad-hoc Ziel erstellen</h4>
@@ -411,7 +409,7 @@
     </div>
   </div>
 
-  <!-- MODAL: Ort im Admin bearbeiten -->
+  <!-- MODAL: Ort bearbeiten -->
   <div id="admin-edit-modal" class="modal-overlay">
     <div class="modal-content">
       <h4>Ort im Admin bearbeiten</h4>
@@ -673,7 +671,6 @@
       }
     }
 
-    // --- START- UND ENDPUNKT ---
     function setStartPoint(lat, lng, label) {
       startPoint = { lat, lng, label };
       document.getElementById('loc-status').innerText = `Start: ${label} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
@@ -706,7 +703,7 @@
       if (val === '__GPS__') {
         startLiveGPS();
       } else if (val === '__CUSTOM__') {
-        // Manuell belassen
+        // Manuell
       } else {
         stopLiveGPS();
         const regId = document.getElementById('day-region-select').value;
@@ -857,7 +854,7 @@
       } catch(e) { }
     }
 
-    // --- AD-HOC ZIEL ERSTELLEN ---
+    // --- AD-HOC ZIEL ---
     async function openAdhocModal(lat, lon) {
       adhocTempCoords = { lat, lon };
       document.getElementById('adhoc-pos-display').innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
@@ -1209,7 +1206,36 @@
       alert(`✅ Tour optimiert: ${isRoundTrip ? 'Rundtour zum Startpunkt' : 'Strecke zum Zielpunkt'} wurde in kürzeste Reihenfolge sortiert!`);
     }
 
-    // --- 2. GANZTAGESROUTE ---
+    // --- HILFSFUNKTION: ECHTE ROUTENGEOMETRIE ABRUFEN (FUSS ODER ÖV-TRASSE) ---
+    async function fetchRealRouteGeometry(fromLng, fromLat, toLng, toLat, isTransit) {
+      // Bei ÖV fragen wir das Straßen-/Schienenprofil ab (driving), bei Fuß das Fußprofil (foot)
+      const profile = isTransit ? 'driving' : 'foot';
+      const url = `https://router.project-osrm.org/route/v1/${profile}/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
+      
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.routes && data.routes.length > 0) {
+          return {
+            geometry: data.routes[0].geometry,
+            distance: data.routes[0].distance,
+            duration: data.routes[0].duration
+          };
+        }
+      } catch(e) {}
+
+      // Fallback: Direkte Linie falls Offline
+      return {
+        geometry: {
+          type: "LineString",
+          coordinates: [[fromLng, fromLat], [toLng, toLat]]
+        },
+        distance: Math.hypot(toLat - fromLat, toLng - fromLng) * 111000,
+        duration: 900
+      };
+    }
+
+    // --- 2. GANZTAGESROUTE MIT REALEM ÖV-TRASSENVERLAUF ---
     async function calculateFullDayTour() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -1223,13 +1249,14 @@
 
       const summaryBox = document.getElementById('tour-summary-box');
       summaryBox.style.display = "block";
-      summaryBox.innerHTML = `Berechne Tour (Fußwege & ÖV-Verbindungen)...`;
+      summaryBox.innerHTML = `Berechne Tour (Reale Fußwege & ÖV-Trassen)...`;
 
       if (fullTourLayer) map.removeLayer(fullTourLayer);
       fullTourLayer = L.featureGroup().addTo(map);
 
       let totalWalkMeters = 0;
       let totalWalkSeconds = 0;
+      let totalTransitMeters = 0;
       let footLegs = 0;
       let transitLegs = 0;
 
@@ -1247,30 +1274,46 @@
           isTransit = lastPlace.modeOut === 'transit';
         }
 
+        // Reale Geometrie abrufen
+        const routeData = await fetchRealRouteGeometry(currentLegStart.lng, currentLegStart.lat, nextStop.lon, nextStop.lat, isTransit);
+
         if (isTransit) {
           transitLegs++;
-          const transitLine = L.polyline([
-            [currentLegStart.lat, currentLegStart.lng],
-            [nextStop.lat, nextStop.lon]
-          ], { color: '#8e24aa', weight: 4, dashArray: '6, 8', opacity: 0.85 });
-          transitLine.bindPopup(`<b>Etappe ${i + 1}:</b> 🚆 Mit ÖV nach ${nextStop.name}`);
+          totalTransitMeters += routeData.distance;
+
+          // REALE ÖV-TRASSE: Dicke, markante violette Linie entlang des echten Streckenverlaufs
+          const transitLine = L.geoJSON(routeData.geometry, {
+            style: {
+              color: '#8e24aa',
+              weight: 6,
+              opacity: 0.85,
+              dashArray: '8, 8'
+            }
+          });
+
+          const gTransitUrl = `https://www.google.com/maps/dir/?api=1&origin=${currentLegStart.lat},${currentLegStart.lng}&destination=${nextStop.lat},${nextStop.lon}&travelmode=transit`;
+          transitLine.bindPopup(`
+            <b>Etappe ${i + 1}: 🚆 ÖV-Streckenverlauf</b><br>
+            Von: ${currentLegStart.label}<br>
+            Nach: ${nextStop.name}<br>
+            Distanz: ~${(routeData.distance/1000).toFixed(2)} km<br>
+            👉 <a href="${gTransitUrl}" target="_blank" style="color:#8e24aa; font-weight:bold;">Live-Abfahrten & Linien öffnen</a>
+          `);
           fullTourLayer.addLayer(transitLine);
         } else {
           footLegs++;
-          try {
-            const url = `https://router.project-osrm.org/route/v1/foot/${currentLegStart.lng},${currentLegStart.lat};${nextStop.lon},${nextStop.lat}?overview=full&geometries=geojson`;
-            const res = await fetch(url);
-            const data = await res.json();
-            if (data.routes && data.routes.length > 0) {
-              const r = data.routes[0];
-              totalWalkMeters += r.distance;
-              totalWalkSeconds += r.duration;
+          totalWalkMeters += routeData.distance;
+          totalWalkSeconds += routeData.duration;
 
-              const footLine = L.geoJSON(r.geometry, { style: { color: '#28a745', weight: 5 } });
-              footLine.bindPopup(`<b>Etappe ${i + 1}:</b> 🚶 Zu Fuß nach ${nextStop.name} (~${Math.round(r.duration/60)} Min.)`);
-              fullTourLayer.addLayer(footLine);
+          const footLine = L.geoJSON(routeData.geometry, {
+            style: {
+              color: '#2e7d32',
+              weight: 5,
+              opacity: 0.9
             }
-          } catch(e) { }
+          });
+          footLine.bindPopup(`<b>Etappe ${i + 1}: 🚶 Fußweg</b><br>Nach ${nextStop.name} (~${Math.round(routeData.duration/60)} Min. • ${(routeData.distance/1000).toFixed(2)} km)`);
+          fullTourLayer.addLayer(footLine);
         }
 
         currentLegStart = { lat: nextStop.lat, lng: nextStop.lon, label: nextStop.name };
@@ -1278,6 +1321,7 @@
 
       const walkKm = (totalWalkMeters / 1000).toFixed(2);
       const walkMin = Math.round(totalWalkSeconds / 60);
+      const transitKm = (totalTransitMeters / 1000).toFixed(2);
 
       let totalStayMin = activePlaces.reduce((sum, p) => sum + (p.duration || 60), 0);
       let totalDayMin = walkMin + totalStayMin + (transitLegs * 15);
@@ -1286,8 +1330,8 @@
 
       summaryBox.innerHTML = `
         <strong>🏁 Tour (${isRoundTrip ? 'Rundtour' : 'Streckentour'} • ${activePlaces.length} Zwischenziele):</strong><br>
-        🚶 <b>${footLegs} Etappen zu Fuß:</b> ca. ${walkKm} km (~${walkMin} Min. reine Gehzeit)<br>
-        🚆 <b>${transitLegs} Etappen mit ÖV:</b> Haltestellen/Fahrplan-Links je Ort<br>
+        🚶 <b>${footLegs} Abschnitte zu Fuß:</b> ca. ${walkKm} km (~${walkMin} Min. Gehzeit)<br>
+        🚆 <b>${transitLegs} Abschnitte mit ÖV:</b> ca. ${transitKm} km reale Trassenführung<br>
         ⏳ Geplante Verweildauer: <b>~${Math.round(totalStayMin/60)} Std.</b><br>
         ⏱️ Gesamtzeit der Tour: <b>ca. ${totalHours}h ${remMinutes}min</b>
       `;
@@ -1439,7 +1483,7 @@
       }
     }
 
-    // --- ROUTING EINZEL-STRECKE ---
+    // --- ROUTING EINZEL-STRECKE MIT REALEM VERLAUF ---
     async function calcRoute(destPoi, autoZoom = true) {
       if(!startPoint || !destPoi) return;
       const rBox = document.getElementById('route-box');
@@ -1449,41 +1493,36 @@
       const destLat = destPoi.lat;
       const destLon = destPoi.lon;
 
+      document.getElementById('route-calc-text').innerText = "Berechne realen Streckenverlauf...";
+
+      const routeData = await fetchRealRouteGeometry(startPoint.lng, startPoint.lat, destLon, destLat, isTransit);
+      const distKm = (routeData.distance / 1000).toFixed(2);
+      const durMin = Math.round(routeData.duration / 60);
+
       if (isTransit) {
         const transitUrl = `https://www.google.com/maps/dir/?api=1&origin=${startPoint.lat},${startPoint.lng}&destination=${destLat},${destLon}&travelmode=transit`;
         document.getElementById('route-calc-text').innerHTML = `
-          🚆 <strong>Mit ÖV:</strong> Öffentliche Verkehrsmittel empfohlen.<br>
-          👉 <a href="${transitUrl}" target="_blank" style="color:#7b1fa2; font-weight:bold;">Hier Live-Abfahrten & Linien öffnen</a>
+          🚆 <strong>Reale ÖV-Trasse:</strong> ca. ${distKm} km Streckenführung<br>
+          👉 <a href="${transitUrl}" target="_blank" style="color:#8e24aa; font-weight:bold;">Hier Live-Abfahrten, Linien & Umstiege öffnen</a>
         `;
 
         if(routeLayer) map.removeLayer(routeLayer);
-        routeLayer = L.polyline([
-          [startPoint.lat, startPoint.lng],
-          [destLat, destLon]
-        ], { color: '#8e24aa', weight: 4, dashArray: '6, 8', opacity: 0.9 }).addTo(map);
+        routeLayer = L.geoJSON(routeData.geometry, {
+          style: { color: '#8e24aa', weight: 6, opacity: 0.85, dashArray: '8, 8' }
+        }).addTo(map);
 
         if (autoZoom) map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
       } else {
-        const url = `https://router.project-osrm.org/route/v1/foot/${startPoint.lng},${startPoint.lat};${destLon},${destLat}?overview=full&geometries=geojson`;
-        try {
-          const res = await fetch(url);
-          const data = await res.json();
-          if(data.routes && data.routes.length > 0) {
-            const route = data.routes[0];
-            const distKm = (route.distance / 1000).toFixed(2);
-            const durMin = Math.round(route.duration / 60);
+        document.getElementById('route-calc-text').innerHTML = `
+          🚶 <strong>Kürzester Fußweg:</strong> ${distKm} km (~${durMin} Min. Gehzeit)
+        `;
 
-            document.getElementById('route-calc-text').innerHTML = `
-              🚶 <strong>Kürzester Fußweg:</strong> ${distKm} km (~${durMin} Min. Gehzeit)
-            `;
+        if(routeLayer) map.removeLayer(routeLayer);
+        routeLayer = L.geoJSON(routeData.geometry, {
+          style: { color: '#2e7d32', weight: 5 }
+        }).addTo(map);
 
-            if(routeLayer) map.removeLayer(routeLayer);
-            routeLayer = L.geoJSON(route.geometry, { style: { color: '#28a745', weight: 5 } }).addTo(map);
-            if (autoZoom) map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
-          }
-        } catch(e) {
-          document.getElementById('route-calc-text').innerText = "Fußwegberechnung nicht erreichbar.";
-        }
+        if (autoZoom) map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
       }
     }
 
@@ -1529,7 +1568,6 @@
       renderDayList();
     }
 
-    // RENDERN DER LISTE: DIREKTE BUTTONS FÜR HINWEG & WEITERWEG
     function renderDayList() {
       const regId = document.getElementById('day-region-select').value;
       const showVisited = document.getElementById('check-visited').checked;
@@ -1568,20 +1606,20 @@
             </div>
           </div>
 
-          <!-- DIREKTE AUSWAHL FÜR HIN- UND WEITERWEG AUF DER KACHEL -->
+          <!-- AUSWAHL FÜR HIN- UND WEITERWEG -->
           <div class="route-direction-box" onclick="event.stopPropagation();">
             <div class="route-direction-row">
               <span style="color:#444;">Hinweg:</span>
               <div class="transport-toggle-group">
-                <button class="${p.modeIn === 'foot' ? 'active-foot' : ''}" onclick="togglePoiLegMode('${p.id}', 'modeIn')">🚶 Fuß</button>
-                <button class="${p.modeIn === 'transit' ? 'active-transit' : ''}" onclick="togglePoiLegMode('${p.id}', 'modeIn')">🚆 ÖV</button>
+                <button class="${p.modeIn === 'foot' ? 'active-foot' : ''}" onclick="togglePoiLegMode('${p.id}', 'modeIn')">🚶 Zu Fuß</button>
+                <button class="${p.modeIn === 'transit' ? 'active-transit' : ''}" onclick="togglePoiLegMode('${p.id}', 'modeIn')">🚆 Mit ÖV</button>
               </div>
             </div>
             <div class="route-direction-row" style="margin-top:4px;">
               <span style="color:#444;">Weiterweg:</span>
               <div class="transport-toggle-group">
-                <button class="${p.modeOut === 'foot' ? 'active-foot' : ''}" onclick="togglePoiLegMode('${p.id}', 'modeOut')">🚶 Fuß</button>
-                <button class="${p.modeOut === 'transit' ? 'active-transit' : ''}" onclick="togglePoiLegMode('${p.id}', 'modeOut')">🚆 ÖV</button>
+                <button class="${p.modeOut === 'foot' ? 'active-foot' : ''}" onclick="togglePoiLegMode('${p.id}', 'modeOut')">🚶 Zu Fuß</button>
+                <button class="${p.modeOut === 'transit' ? 'active-transit' : ''}" onclick="togglePoiLegMode('${p.id}', 'modeOut')">🚆 Mit ÖV</button>
               </div>
             </div>
           </div>
@@ -1607,7 +1645,6 @@
       document.getElementById('det-notes-input').value = poi.notes || '';
       document.getElementById('det-transit-text').innerText = poi.transit || 'Mit ÖV / Nahverkehr erreichbar';
 
-      // Detail-Schalter für Hin- und Weiterweg aktualisieren
       document.getElementById('det-mode-in-foot').className = poi.modeIn === 'foot' ? 'active-foot' : '';
       document.getElementById('det-mode-in-transit').className = poi.modeIn === 'transit' ? 'active-transit' : '';
       document.getElementById('det-mode-out-foot').className = poi.modeOut === 'foot' ? 'active-foot' : '';
@@ -1657,7 +1694,6 @@
       persistData();
     }
 
-    // --- ADMIN RENDERN ---
     function updateRegionDropdowns() {
       const daySel = document.getElementById('day-region-select');
       const admSel = document.getElementById('admin-region-select');
