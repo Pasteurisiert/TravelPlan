@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#1976d2">
-  <title>TravelPlan Pro v3.0 - Offline First</title>
-  
-  <link rel="manifest" href="manifest.json">
+  <title>TravelPlan Pro v3.1</title>
 
   <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -157,7 +155,7 @@
 <body>
 
   <header>
-    <div>🌍 TravelPlan Pro v3.0</div>
+    <div>🌍 TravelPlan Pro v3.1</div>
     <div id="sync-pill" onclick="syncWithGitHub()">GitHub: Offline</div>
   </header>
 
@@ -177,7 +175,6 @@
             <select id="day-region-select" onchange="onRegionChange()"></select>
           </div>
 
-          <!-- START- UND ENDPUNKT -->
           <div class="card" style="padding: 10px;">
             <div style="font-weight:bold; font-size:0.88rem; margin-bottom:4px;">📍 Tour-Eckpunkte</div>
             
@@ -204,7 +201,6 @@
             <div id="loc-status" style="font-size:0.75rem; color:#666; font-weight: 500;">Start & Ende bereit</div>
           </div>
 
-          <!-- Aktionen -->
           <div class="card" style="padding: 10px;">
             <div style="display:flex; gap:6px; margin-bottom:6px;">
               <button class="btn btn-primary" style="flex:1.2;" onclick="optimizeDayRoute()">⚡ Optimieren</button>
@@ -219,7 +215,6 @@
 
           <div id="tour-summary-box" class="route-summary" style="display:none;"></div>
 
-          <!-- Orte-Liste -->
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div style="font-weight:bold; font-size:0.9rem;">Geplante Tour-Reihenfolge</div>
             <label style="font-size:0.8rem; cursor:pointer;">
@@ -228,7 +223,6 @@
           </div>
           <div id="day-poi-list"></div>
 
-          <!-- Detailkarte -->
           <div id="detail-card" class="card" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
               <span style="font-weight:bold; font-size:0.95rem; color:var(--primary);">Detail & Infos</span>
@@ -244,7 +238,6 @@
             <label style="font-size:0.78rem; color:#666;">Stadt / Ort:</label>
             <input type="text" id="det-city-input" style="margin-bottom:4px;">
 
-            <!-- Transportmittel getrennt: Anreise & Weiterreise -->
             <div class="route-direction-box" style="margin-bottom:8px;">
               <div class="route-direction-row">
                 <span style="font-weight:bold;">Hinweg zum Ziel:</span>
@@ -511,7 +504,6 @@
   </div>
 
   <script>
-    // STANDARD-DATEN (Werden immer garantiert geladen, selbst wenn alles offline ist)
     const DEFAULT_DATA = {
       regions: [
         {
@@ -586,7 +578,7 @@
           for (let name of names) caches.delete(name);
         });
       }
-      location.reload(true);
+      location.reload();
     }
 
     function sanitizeAppData() {
@@ -614,12 +606,12 @@
       sanitizeAppData();
       initMap();
       initRegionDropdowns();
-      
-      // Nur synchronisieren, wenn GitHub-Zugangsdaten vorliegen
+
       if (ghConfig.token && ghConfig.owner && ghConfig.repo) {
         syncWithGitHub();
       } else {
-        document.getElementById('sync-pill').innerText = "GitHub: Offline";
+        const pill = document.getElementById('sync-pill');
+        if (pill) pill.innerText = "GitHub: Offline";
       }
     });
 
@@ -729,7 +721,8 @@
 
     function setStartPoint(lat, lng, label, dropdownVal = null) {
       startPoint = { lat: parseFloat(lat), lng: parseFloat(lng), label: label };
-      document.getElementById('loc-status').innerText = `Start: ${label} (${startPoint.lat.toFixed(4)}, ${startPoint.lng.toFixed(4)})`;
+      const statusEl = document.getElementById('loc-status');
+      if (statusEl) statusEl.innerText = `Start: ${label} (${startPoint.lat.toFixed(4)}, ${startPoint.lng.toFixed(4)})`;
 
       if (dropdownVal) {
         const startSel = document.getElementById('start-poi-select');
@@ -747,7 +740,8 @@
         }).addTo(map).bindPopup(`<b>Startpunkt:</b><br>${label}`).openPopup();
       }
 
-      const endVal = document.getElementById('end-poi-select').value;
+      const endSel = document.getElementById('end-poi-select');
+      const endVal = endSel ? endSel.value : '__SAME_AS_START__';
       if (endVal === '__SAME_AS_START__') {
         endPoint = { ...startPoint, label: `Ziel (Rundtour: ${label})` };
       }
@@ -771,9 +765,11 @@
       }
 
       if (dropdownVal) {
-        document.getElementById('end-poi-select').value = dropdownVal;
+        const endSel = document.getElementById('end-poi-select');
+        if (endSel) endSel.value = dropdownVal;
       }
-      document.getElementById('loc-status').innerText += ` | Ziel: ${label}`;
+      const statusEl = document.getElementById('loc-status');
+      if (statusEl) statusEl.innerText += ` | Ziel: ${label}`;
     }
 
     function onStartPointChange(val) {
@@ -859,7 +855,6 @@
       if ([...endSel.options].some(o => o.value === curEndVal)) endSel.value = curEndVal;
     }
 
-    // --- LIVE GPS ---
     function toggleLiveGPS() {
       if (gpsWatchId !== null) stopLiveGPS();
       else startLiveGPS();
@@ -910,8 +905,10 @@
         gpsWatchId = null;
       }
       const btn = document.getElementById('btn-live-gps');
-      btn.classList.remove('active');
-      btn.innerText = "🔴 Live GPS";
+      if (btn) {
+        btn.classList.remove('active');
+        btn.innerText = "🔴 Live GPS";
+      }
       if (accuracyCircle && map) {
         map.removeLayer(accuracyCircle);
         accuracyCircle = null;
@@ -931,7 +928,6 @@
       } catch(e) { }
     }
 
-    // --- AD-HOC ZIEL ---
     async function openAdhocModal(lat, lon) {
       adhocTempCoords = { lat, lon };
       document.getElementById('adhoc-pos-display').innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
@@ -1002,7 +998,6 @@
       alert(`✅ Ziel "${name}" wurde zur Tour hinzugefügt!`);
     }
 
-    // --- RECHERCHE ---
     async function deepSearchPOI(poiName, cityName, regionName) {
       const info = {
         lat: 0, lon: 0, description: "", website: "", openingHours: "Nicht erfasst (siehe Google)", fee: "Nicht erfasst (siehe Google)", transit: "Mit ÖV / Nahverkehr erreichbar", cost: 0, duration: 60
@@ -1232,16 +1227,17 @@
 
     function updateDetailTourBtn(p) {
       const btn = document.getElementById('det-tour-btn');
-      if (p.selectedForDay) {
-        btn.className = "btn-tour-select selected";
-        btn.innerText = "⭐ Im Tag aktiv (Klick = Entfernen)";
-      } else {
-        btn.className = "btn-tour-select";
-        btn.innerText = "➕ Für Tagestour auswählen";
+      if (btn) {
+        if (p.selectedForDay) {
+          btn.className = "btn-tour-select selected";
+          btn.innerText = "⭐ Im Tag aktiv (Klick = Entfernen)";
+        } else {
+          btn.className = "btn-tour-select";
+          btn.innerText = "➕ Für Tagestour auswählen";
+        }
       }
     }
 
-    // --- 1. ROUTEN-OPTIMIERUNG ---
     function optimizeDayRoute() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -1251,8 +1247,6 @@
       if (unvisitedSelected.length < 2) return alert("Wählen Sie mindestens 2 Orte mit dem Knopf '➕ Tag' für die Tour aus.");
 
       if (!startPoint) return alert("Bitte zuerst Startpunkt festlegen.");
-
-      let isRoundTrip = !endPoint || (startPoint.lat === endPoint.lat && startPoint.lng === endPoint.lng) || document.getElementById('end-poi-select').value === '__SAME_AS_START__';
 
       let current = { lat: startPoint.lat, lon: startPoint.lng };
       let pool = [...unvisitedSelected];
@@ -1279,7 +1273,7 @@
       persistData();
       renderDayList();
       calculateFullDayTour();
-      alert(`✅ Tour optimiert: Die Tour wurde in kürzeste Reihenfolge sortiert!`);
+      alert("✅ Tour optimiert: Die Tour wurde in kürzeste Reihenfolge sortiert!");
     }
 
     function reverseDayRoute() {
@@ -1346,7 +1340,6 @@
       };
     }
 
-    // --- 2. GANZTAGESROUTE ---
     async function calculateFullDayTour() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -1451,7 +1444,6 @@
       if (window.innerWidth <= 768) setMobileSubTab('map');
     }
 
-    // --- GPX EXPORT ---
     function exportGPX() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -1925,9 +1917,12 @@
       if(savedGh) {
         try {
           ghConfig = JSON.parse(savedGh);
-          document.getElementById('gh-owner').value = ghConfig.owner || '';
-          document.getElementById('gh-repo').value = ghConfig.repo || '';
-          document.getElementById('gh-token').value = ghConfig.token || '';
+          const ownerEl = document.getElementById('gh-owner');
+          const repoEl = document.getElementById('gh-repo');
+          const tokenEl = document.getElementById('gh-token');
+          if (ownerEl) ownerEl.value = ghConfig.owner || '';
+          if (repoEl) repoEl.value = ghConfig.repo || '';
+          if (tokenEl) tokenEl.value = ghConfig.token || '';
         } catch(e) {}
       }
       const localData = localStorage.getItem('travel_data');
@@ -1960,7 +1955,7 @@
     async function syncWithGitHub(pushOnly = false) {
       const pill = document.getElementById('sync-pill');
       if(!ghConfig.token || !ghConfig.owner || !ghConfig.repo) {
-        pill.innerText = "GitHub: Offline";
+        if (pill) pill.innerText = "GitHub: Offline";
         return;
       }
 
@@ -1968,7 +1963,7 @@
       const headers = { "Authorization": `token ${ghConfig.token}`, "Accept": "application/vnd.github.v3+json" };
 
       try {
-        pill.innerText = "Sync...";
+        if (pill) pill.innerText = "Sync...";
         const getRes = await fetch(url, { headers });
         if(getRes.ok) {
           const fileData = await getRes.json();
@@ -1983,7 +1978,7 @@
               updateRegionDropdowns();
               onRegionChange();
             }
-            pill.innerText = "GitHub: Synced ✅";
+            if (pill) pill.innerText = "GitHub: Synced ✅";
             return;
           }
         }
@@ -1997,12 +1992,12 @@
         if(putRes.ok) {
           const resJson = await putRes.json();
           ghConfig.sha = resJson.content.sha;
-          pill.innerText = "GitHub: Synced ✅";
+          if (pill) pill.innerText = "GitHub: Synced ✅";
         } else {
-          pill.innerText = "GitHub: Fehler";
+          if (pill) pill.innerText = "GitHub: Fehler";
         }
       } catch(e) {
-        pill.innerText = "GitHub: Offline";
+        if (pill) pill.innerText = "GitHub: Offline";
       }
     }
 
