@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#1976d2">
-  <title>TravelPlan Pro v2.6 - Fix Startpunkt</title>
+  <title>TravelPlan Pro v2.7 - Reale Fußwege</title>
   
   <link rel="manifest" href="manifest.json">
 
@@ -120,12 +120,11 @@
 <body>
 
   <header>
-    <div>🌍 TravelPlan Pro v2.6</div>
+    <div>🌍 TravelPlan Pro v2.7</div>
     <div id="sync-pill" onclick="syncWithGitHub()">GitHub: Offline</div>
   </header>
 
   <main>
-    <!-- 1. TAGESPLANUNG -->
     <div id="view-day" class="page-view active">
       <div class="mobile-switch">
         <div class="segmented-control">
@@ -671,7 +670,6 @@
       }
     }
 
-    // --- START- UND ENDPUNKT VERWALTUNG (ROBUST & PERSISTENT) ---
     function setStartPoint(lat, lng, label, dropdownVal = null) {
       startPoint = { lat: parseFloat(lat), lng: parseFloat(lng), label: label };
       document.getElementById('loc-status').innerText = `Start: ${label} (${startPoint.lat.toFixed(4)}, ${startPoint.lng.toFixed(4)})`;
@@ -1221,29 +1219,53 @@
       alert(`✅ Tour optimiert: ${isRoundTrip ? 'Rundtour zum Startpunkt' : 'Strecke zum Zielpunkt'} wurde in kürzeste Reihenfolge sortiert!`);
     }
 
+    // --- PRÄZISE ROUTEN-GEOMETRIE: ECHTES FUSS-ROUTING ---
     async function fetchRealRouteGeometry(fromLng, fromLat, toLng, toLat, isTransit) {
-      const profile = isTransit ? 'driving' : 'foot';
-      const url = `https://router.project-osrm.org/route/v1/${profile}/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
-      
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        if (data.routes && data.routes.length > 0) {
-          return {
-            geometry: data.routes[0].geometry,
-            distance: data.routes[0].distance,
-            duration: data.routes[0].duration
-          };
-        }
-      } catch(e) {}
+      if (isTransit) {
+        // ÖV: Straßen- und Schienennetzwerk abfragen
+        try {
+          const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data.routes && data.routes.length > 0) {
+            return {
+              geometry: data.routes[0].geometry,
+              distance: data.routes[0].distance,
+              duration: data.routes[0].duration
+            };
+          }
+        } catch(e) {}
+      } else {
+        // ZU FUSS: Echtes Fußgängerrouting über OSRM Foot Server
+        const footUrls = [
+          `https://routing.openstreetmap.de/routed-foot/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`,
+          `https://router.project-osrm.org/route/v1/foot/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`
+        ];
 
+        for (let u of footUrls) {
+          try {
+            const res = await fetch(u);
+            const data = await res.json();
+            if (data.routes && data.routes.length > 0) {
+              return {
+                geometry: data.routes[0].geometry,
+                distance: data.routes[0].distance,
+                duration: data.routes[0].duration
+              };
+            }
+          } catch(e) {}
+        }
+      }
+
+      // Fallback bei Verbindungsabbrüchen
+      const dist = Math.hypot(toLat - fromLat, toLng - fromLng) * 111000;
       return {
         geometry: {
           type: "LineString",
           coordinates: [[fromLng, fromLat], [toLng, toLat]]
         },
-        distance: Math.hypot(toLat - fromLat, toLng - fromLng) * 111000,
-        duration: 900
+        distance: dist,
+        duration: Math.round(dist / 1.2) // ~4.3 km/h
       };
     }
 
@@ -1261,7 +1283,7 @@
 
       const summaryBox = document.getElementById('tour-summary-box');
       summaryBox.style.display = "block";
-      summaryBox.innerHTML = `Berechne Tour (Reale Fußwege & ÖV-Trassen)...`;
+      summaryBox.innerHTML = `Berechne Tour (Kürzeste Fußwege & ÖV-Trassen)...`;
 
       if (fullTourLayer) map.removeLayer(fullTourLayer);
       fullTourLayer = L.featureGroup().addTo(map);
@@ -1319,10 +1341,10 @@
             style: {
               color: '#2e7d32',
               weight: 5,
-              opacity: 0.9
+              opacity: 0.95
             }
           });
-          footLine.bindPopup(`<b>Etappe ${i + 1}: 🚶 Fußweg</b><br>Nach ${nextStop.name} (~${Math.round(routeData.duration/60)} Min. • ${(routeData.distance/1000).toFixed(2)} km)`);
+          footLine.bindPopup(`<b>Etappe ${i + 1}: 🚶 Kürzester Fußweg</b><br>Nach ${nextStop.name} (~${Math.round(routeData.duration/60)} Min. • ${(routeData.distance/1000).toFixed(2)} km)`);
           fullTourLayer.addLayer(footLine);
         }
 
@@ -1340,8 +1362,8 @@
 
       summaryBox.innerHTML = `
         <strong>🏁 Tour (${isRoundTrip ? 'Rundtour' : 'Streckentour'} • ${activePlaces.length} Zwischenziele):</strong><br>
-        🚶 <b>${footLegs} Abschnitte zu Fuß:</b> ca. ${walkKm} km (~${walkMin} Min. Gehzeit)<br>
-        🚆 <b>${transitLegs} Abschnitte mit ÖV:</b> ca. ${transitKm} km reale Trassenführung<br>
+        🚶 <b>${footLegs} Abschnitte zu Fuß:</b> ca. ${walkKm} km (~${walkMin} Min. Gehzeit via Fußpfade)<br>
+        🚆 <b>${transitLegs} Abschnitte mit ÖV:</b> ca. ${transitKm} km ÖV-Trassen<br>
         ⏳ Geplante Verweildauer: <b>~${Math.round(totalStayMin/60)} Std.</b><br>
         ⏱️ Gesamtzeit der Tour: <b>ca. ${totalHours}h ${remMinutes}min</b>
       `;
@@ -1489,7 +1511,7 @@
       }
     }
 
-    // --- ROUTING EINZEL-STRECKE (Start -> Klick-Ort) ---
+    // --- ROUTING EINZEL-STRECKE ---
     async function calcRoute(destPoi, autoZoom = true) {
       if(!startPoint || !destPoi || !destPoi.lat || !destPoi.lon) return;
       const rBox = document.getElementById('route-box');
@@ -1499,7 +1521,7 @@
       const destLat = destPoi.lat;
       const destLon = destPoi.lon;
 
-      document.getElementById('route-calc-text').innerText = "Berechne Route...";
+      document.getElementById('route-calc-text').innerText = isTransit ? "Berechne ÖV-Trasse..." : "Berechne kürzesten Fußweg...";
 
       const routeData = await fetchRealRouteGeometry(startPoint.lng, startPoint.lat, destLon, destLat, isTransit);
       const distKm = (routeData.distance / 1000).toFixed(2);
@@ -1520,7 +1542,7 @@
         if (autoZoom) map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
       } else {
         document.getElementById('route-calc-text').innerHTML = `
-          🚶 <strong>Kürzester Fußweg:</strong> ${distKm} km (~${durMin} Min. Gehzeit)
+          🚶 <strong>Kürzester Fußweg (Fußpfade/Gassen):</strong> ${distKm} km (~${durMin} Min. Gehzeit)
         `;
 
         if(routeLayer) map.removeLayer(routeLayer);
@@ -1532,7 +1554,7 @@
       }
     }
 
-    // --- RENDERING TAGESPLANUNG (Startpunkt bleibt sauber fixiert) ---
+    // --- RENDERING TAGESPLANUNG ---
     function onRegionChange() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -1559,14 +1581,12 @@
         });
         if(bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
 
-        // Startpunkt NUR initialisieren, falls noch überhaupt gar keiner gesetzt wurde
         if (!startPoint) {
           const firstValid = region.places.find(p => p.lat && p.lon);
           if (firstValid) {
             setStartPoint(firstValid.lat, firstValid.lon, firstValid.name, firstValid.id);
           }
         } else {
-          // Den bereits bestehenden Startpunkt erneut zeichnen
           setStartPoint(startPoint.lat, startPoint.lng, startPoint.label);
         }
       }
@@ -1760,7 +1780,6 @@
       persistData();
     }
 
-    // --- GITHUB & STORAGE ---
     function loadSettings() {
       const savedGh = localStorage.getItem('gh_config');
       if(savedGh) {
