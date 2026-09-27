@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#1976d2">
-  <title>TravelPlan Pro v2.8 - Nummerierte Route & Umkehren</title>
+  <title>TravelPlan Pro v2.9 - Fixed Dropdowns</title>
   
   <link rel="manifest" href="manifest.json">
 
@@ -94,7 +94,6 @@
     .poi-card.visited { opacity: 0.5; text-decoration: line-through; background: #e9ecef; }
     .poi-card-header { display: flex; justify-content: space-between; align-items: center; }
 
-    /* Nummerierungs-Badge */
     .tour-number-badge {
       display: inline-flex;
       align-items: center;
@@ -110,7 +109,6 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
 
-    /* Nummerierte Karten-Marker */
     .numbered-map-marker {
       display: flex;
       align-items: center;
@@ -159,12 +157,11 @@
 <body>
 
   <header>
-    <div>🌍 TravelPlan Pro v2.8</div>
+    <div>🌍 TravelPlan Pro v2.9</div>
     <div id="sync-pill" onclick="syncWithGitHub()">GitHub: Offline</div>
   </header>
 
   <main>
-    <!-- 1. TAGESPLANUNG -->
     <div id="view-day" class="page-view active">
       <div class="mobile-switch">
         <div class="segmented-control">
@@ -180,7 +177,6 @@
             <select id="day-region-select" onchange="onRegionChange()"></select>
           </div>
 
-          <!-- START- UND ENDPUNKT -->
           <div class="card" style="padding: 10px;">
             <div style="font-weight:bold; font-size:0.88rem; margin-bottom:4px;">📍 Tour-Eckpunkte</div>
             
@@ -207,11 +203,9 @@
             <div id="loc-status" style="font-size:0.75rem; color:#666; font-weight: 500;">Start & Ende bereit</div>
           </div>
 
-          <!-- Aktionen: Optimieren, Invertieren, Route berechnen -->
           <div class="card" style="padding: 10px;">
             <div style="display:flex; gap:6px; margin-bottom:6px;">
               <button class="btn btn-primary" style="flex:1.2;" onclick="optimizeDayRoute()">⚡ Optimieren</button>
-              <!-- NEUER BUTTON: ROUTE INVERTIEREN -->
               <button class="btn btn-secondary" style="flex:1;" onclick="reverseDayRoute()">🔄 Invertieren</button>
               <button class="btn btn-success" style="flex:1.2;" onclick="calculateFullDayTour()">🗺️ Ganztag</button>
             </div>
@@ -223,7 +217,6 @@
 
           <div id="tour-summary-box" class="route-summary" style="display:none;"></div>
 
-          <!-- Orte-Liste -->
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div style="font-weight:bold; font-size:0.9rem;">Geplante Tour-Reihenfolge</div>
             <label style="font-size:0.8rem; cursor:pointer;">
@@ -232,7 +225,6 @@
           </div>
           <div id="day-poi-list"></div>
 
-          <!-- Detailkarte -->
           <div id="detail-card" class="card" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
               <span style="font-weight:bold; font-size:0.95rem; color:var(--primary);">Detail & Infos</span>
@@ -586,7 +578,11 @@
     };
 
     function sanitizeAppData() {
-      if (!appData || !appData.regions) return;
+      if (!appData || !appData.regions || !Array.isArray(appData.regions) || appData.regions.length === 0) {
+        appData = {
+          regions: [{ id: "copenhagen", name: "Kopenhagen", places: [] }]
+        };
+      }
       appData.regions.forEach(r => {
         if (!r.places) r.places = [];
         r.places.forEach(p => {
@@ -607,7 +603,7 @@
       initMap();
       loadSettings();
       sanitizeAppData();
-      updateRegionDropdowns();
+      initRegionDropdowns();
       if(ghConfig.token) syncWithGitHub();
     });
 
@@ -821,7 +817,7 @@
       `;
 
       const region = appData.regions.find(r => r.id === regId);
-      if (region && region.places.length > 0) {
+      if (region && region.places && region.places.length > 0) {
         region.places.forEach(p => {
           const opt1 = document.createElement('option');
           opt1.value = p.id;
@@ -1260,7 +1256,6 @@
       alert(`✅ Tour optimiert: Die Tour wurde in kürzeste Reihenfolge sortiert!`);
     }
 
-    // --- NEU: ROUTE INVERTIEREN / UMKEHREN ---
     function reverseDayRoute() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -1269,7 +1264,6 @@
       const selectedPlaces = region.places.filter(p => p.selectedForDay && !p.visited);
       if (selectedPlaces.length < 2) return alert("Mindestens 2 ausgewählte Orte erforderlich, um die Route umzukehren.");
 
-      // Ausgewählte Orte umkehren
       const reversed = [...selectedPlaces].reverse();
       const others = region.places.filter(p => !p.selectedForDay || p.visited);
       region.places = [...reversed, ...others];
@@ -1611,15 +1605,63 @@
       }
     }
 
-    // --- RENDERING: NUMMERIERTE MARKER AUF DER KARTE ---
+    // --- INITIALISIERUNG DER REGION-DROPDOWNS (OHNE REKURSION) ---
+    function initRegionDropdowns() {
+      const daySel = document.getElementById('day-region-select');
+      const admSel = document.getElementById('admin-region-select');
+
+      if (!appData.regions || appData.regions.length === 0) {
+        appData.regions = [{ id: "copenhagen", name: "Kopenhagen", places: [] }];
+      }
+
+      const opts = appData.regions.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+      daySel.innerHTML = opts;
+      admSel.innerHTML = opts;
+
+      // Ersten Wert auswählen falls leer
+      if (!daySel.value && appData.regions.length > 0) {
+        daySel.value = appData.regions[0].id;
+      }
+      if (!admSel.value && appData.regions.length > 0) {
+        admSel.value = appData.regions[0].id;
+      }
+
+      admSel.onchange = renderAdminList;
+      onRegionChange();
+    }
+
+    function updateRegionDropdowns() {
+      const daySel = document.getElementById('day-region-select');
+      const admSel = document.getElementById('admin-region-select');
+
+      const savedDayVal = daySel.value;
+      const savedAdmVal = admSel.value;
+
+      const opts = appData.regions.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+      daySel.innerHTML = opts;
+      admSel.innerHTML = opts;
+
+      if ([...daySel.options].some(o => o.value === savedDayVal)) daySel.value = savedDayVal;
+      else if (appData.regions.length > 0) daySel.value = appData.regions[0].id;
+
+      if ([...admSel.options].some(o => o.value === savedAdmVal)) admSel.value = savedAdmVal;
+      else if (appData.regions.length > 0) admSel.value = appData.regions[0].id;
+    }
+
+    // --- RENDERING TAGESPLANUNG ---
     function onRegionChange() {
-      const regId = document.getElementById('day-region-select').value;
+      const daySel = document.getElementById('day-region-select');
+      const regId = daySel ? daySel.value : null;
+      if (!regId) return;
+
       const region = appData.regions.find(r => r.id === regId);
-      markersLayer.clearLayers();
+      if (!region) return;
+
+      if (markersLayer) markersLayer.clearLayers();
 
       updatePointDropdowns();
 
-      if(region && region.places.length > 0) {
+      if(region.places && region.places.length > 0) {
         const bounds = [];
         let tourNumber = 1;
 
@@ -1630,7 +1672,6 @@
 
             if (p.selectedForDay && !p.visited) {
               const currentNum = tourNumber++;
-              // Nummeriertes DivIcon
               markerIcon = L.divIcon({
                 className: 'custom-pin',
                 html: `<div class="numbered-map-marker" style="background-color: ${catColor};">${currentNum}</div>`,
@@ -1654,7 +1695,7 @@
           }
         });
 
-        if(bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
+        if(bounds.length > 0 && map) map.fitBounds(bounds, { padding: [30, 30] });
 
         if (!startPoint) {
           const firstValid = region.places.find(p => p.lat && p.lon);
@@ -1669,15 +1710,16 @@
       renderDayList();
     }
 
-    // --- RENDERING: ZIELLISTE IN ROUTEN-REIHENFOLGE NUMMERIERT ---
     function renderDayList() {
-      const regId = document.getElementById('day-region-select').value;
+      const daySel = document.getElementById('day-region-select');
+      const regId = daySel ? daySel.value : null;
       const showVisited = document.getElementById('check-visited').checked;
       const listEl = document.getElementById('day-poi-list');
       listEl.innerHTML = "";
 
+      if (!regId) return;
       const region = appData.regions.find(r => r.id === regId);
-      if(!region || !region.places.length) {
+      if(!region || !region.places || !region.places.length) {
         listEl.innerHTML = "<small style='color:#666;'>Keine Orte in dieser Region.</small>";
         return;
       }
@@ -1742,7 +1784,7 @@
       renderDayList();
 
       const reg = appData.regions.find(r => r.id === document.getElementById('day-region-select').value);
-      const targetQuery = `${poi.name}, ${poi.city || reg.name}`;
+      const targetQuery = `${poi.name}, ${poi.city || (reg ? reg.name : '')}`;
 
       document.getElementById('detail-card').style.display = "block";
       document.getElementById('det-name-input').value = poi.name;
@@ -1800,23 +1842,13 @@
       persistData();
     }
 
-    function updateRegionDropdowns() {
-      const daySel = document.getElementById('day-region-select');
-      const admSel = document.getElementById('admin-region-select');
-      const opts = appData.regions.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
-      daySel.innerHTML = opts;
-      admSel.innerHTML = opts;
-      admSel.onchange = renderAdminList;
-      onRegionChange();
-    }
-
     function renderAdminList() {
       const regId = document.getElementById('admin-region-select').value;
       const listEl = document.getElementById('admin-poi-list');
       listEl.innerHTML = "";
 
       const region = appData.regions.find(r => r.id === regId);
-      if(!region || !region.places.length) {
+      if(!region || !region.places || !region.places.length) {
         listEl.innerHTML = "<small style='color:#666;'>Keine Orte in dieser Region.</small>";
         return;
       }
@@ -1859,9 +1891,9 @@
       document.getElementById('admin-new-region').value = "";
       updateRegionDropdowns();
       persistData();
+      alert(`Region "${name}" angelegt!`);
     }
 
-    // --- GITHUB & STORAGE ---
     function loadSettings() {
       const savedGh = localStorage.getItem('gh_config');
       if(savedGh) {
@@ -1915,6 +1947,7 @@
             sanitizeAppData();
             localStorage.setItem('travel_data', JSON.stringify(appData));
             updateRegionDropdowns();
+            onRegionChange();
             pill.innerText = "GitHub: Synced ✅";
             return;
           }
