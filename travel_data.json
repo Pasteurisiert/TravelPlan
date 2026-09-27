@@ -890,7 +890,7 @@
           "fee": "k.A.",
           "transit": "ÖV vorhanden",
           "cost": 0,
-          "duration": 60,
+          "duration": 5,
           "notes": "",
           "visited": false
         }
