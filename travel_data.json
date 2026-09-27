@@ -259,13 +259,15 @@
           "fee": "no",
           "visited": false,
           "transit": "Haltestelle \"Nørreport\" (< 450m)",
-          "category": "kultur",
+          "category": "natur",
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
           "cost": 0,
           "modeIn": "foot",
-          "modeOut": "foot"
+          "modeOut": "foot",
+          "city": "",
+          "notes": ""
         },
         {
           "id": "poi_1790423362446",
