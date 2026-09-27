@@ -377,13 +377,14 @@
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
           "visited": false,
-          "category": "kultur",
+          "category": "hotel",
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
           "cost": 0,
           "modeIn": "foot",
-          "modeOut": "foot"
+          "modeOut": "foot",
+          "notes": ""
         },
         {
           "id": "poi_1790430288868",
