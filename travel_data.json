@@ -838,6 +838,11 @@
           "visited": false
         }
       ]
+    },
+    {
+      "id": "z-rich",
+      "name": "Zürich",
+      "places": []
     }
   ]
 }
