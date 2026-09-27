@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#1976d2">
-  <title>TravelPlan Pro v2.2 - Ad-Hoc Map Targets</title>
+  <title>TravelPlan Pro v2.3 - Rundtouren & Split-Transport</title>
   
   <link rel="manifest" href="manifest.json">
 
@@ -42,7 +42,7 @@
 
     #view-day { padding: 0; }
     .split-container { display: flex; width: 100%; height: 100%; position: relative; }
-    .day-sidebar { width: 450px; height: 100%; overflow-y: auto; padding: 12px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+    .day-sidebar { width: 460px; height: 100%; overflow-y: auto; padding: 12px; background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
     .map-wrapper { flex: 1; height: 100%; position: relative; }
     #map { width: 100%; height: 100%; }
 
@@ -72,9 +72,11 @@
     .btn-tour-select { padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: bold; border: 1px solid #1976d2; background: #e3f2fd; color: #1976d2; cursor: pointer; }
     .btn-tour-select.selected { background: #1976d2; color: #ffffff; }
 
-    .btn-mode-toggle { padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: bold; border: 1px solid #ccc; cursor: pointer; }
-    .btn-mode-toggle.mode-foot { background: #e8f5e9; color: #2e7d32; border-color: #81c784; }
-    .btn-mode-toggle.mode-transit { background: #f3e5f5; color: #7b1fa2; border-color: #ba68c8; }
+    /* Modus Buttons */
+    .transport-toggle { display: inline-flex; border: 1px solid #ccc; border-radius: 5px; overflow: hidden; }
+    .transport-toggle button { border: none; padding: 3px 7px; font-size: 0.72rem; cursor: pointer; background: #fff; color: #555; }
+    .transport-toggle button.active-foot { background: #e8f5e9; color: #2e7d32; font-weight: bold; }
+    .transport-toggle button.active-transit { background: #f3e5f5; color: #7b1fa2; font-weight: bold; }
 
     .btn-block { width: 100%; }
 
@@ -98,7 +100,6 @@
     .badge.cat-badge { font-weight: bold; }
 
     .info-section { background: #fdfdfd; border: 1px solid #e0e0e0; border-radius: 6px; padding: 8px; margin: 6px 0; font-size: 0.84rem; line-height: 1.4; color: #333; }
-
     .route-summary { background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 0.85rem; }
     .google-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
     .google-actions a { display: block; text-align: center; background: #f1f3f4; border: 1px solid #dadce0; border-radius: 6px; padding: 6px; font-size: 0.75rem; color: #1a73e8; text-decoration: none; font-weight: 500; }
@@ -118,7 +119,7 @@
 <body>
 
   <header>
-    <div>🌍 TravelPlan Pro v2.2</div>
+    <div>🌍 TravelPlan Pro v2.3</div>
     <div id="sync-pill" onclick="syncWithGitHub()">GitHub: Offline</div>
   </header>
 
@@ -135,27 +136,38 @@
       <div class="split-container">
         <div class="day-sidebar" id="day-sidebar">
           <div>
-            <label style="font-size:0.8rem; font-weight:bold;">Region wählen:</label>
+            <label style="font-size:0.8rem; font-weight:bold;">Region / Stadt wählen:</label>
             <select id="day-region-select" onchange="onRegionChange()"></select>
           </div>
 
-          <!-- Standort / Live GPS / Ad-Hoc Klick -->
+          <!-- START- UND ENDPUNKT VERWALTUNG -->
           <div class="card" style="padding: 10px;">
-            <div style="font-weight:bold; font-size:0.88rem; margin-bottom:4px;">📍 Standort / Steuerung</div>
-            <select id="start-poi-select" onchange="onStartPoiSelect(this.value)">
-              <option value="">-- Ort als Start wählen --</option>
+            <div style="font-weight:bold; font-size:0.88rem; margin-bottom:4px;">📍 Tour-Eckpunkte</div>
+            
+            <label style="font-size:0.75rem; color:#444;">Startpunkt:</label>
+            <select id="start-poi-select" onchange="onStartPointChange(this.value)">
+              <option value="__GPS__">📡 Aktueller GPS Standort</option>
+              <option value="__CUSTOM__">🗺️ Manuell / Klick / Adresse</option>
             </select>
-            <div style="display:flex; gap:4px; margin-top:4px;">
+
+            <label style="font-size:0.75rem; color:#444; margin-top:4px;">Endpunkt:</label>
+            <select id="end-poi-select" onchange="onEndPointChange(this.value)">
+              <option value="__SAME_AS_START__">🔄 Rundtour (zurück zum Startpunkt)</option>
+              <option value="__GPS__">📡 GPS Standort als Ziel</option>
+              <option value="__CUSTOM__">🗺️ Manuell / Klick auf Karte</option>
+            </select>
+
+            <div style="display:flex; gap:4px; margin-top:6px;">
               <button class="btn btn-live" id="btn-live-gps" style="flex:1;" onclick="toggleLiveGPS()">🔴 Live GPS</button>
-              <button class="btn btn-secondary" style="flex:1;" id="btn-pick" onclick="toggleMapPick('start')">🗺️ Klick Start</button>
-              <!-- NEUER BUTTON: AD-HOC ZIEL AUF KARTE -->
-              <button class="btn btn-adhoc" style="flex:1.2;" id="btn-adhoc-target" onclick="toggleMapPick('target')">📍 + Ziel auf Karte</button>
+              <button class="btn btn-secondary" style="flex:1;" id="btn-pick-start" onclick="toggleMapPick('start')">🗺️ Klick Start</button>
+              <button class="btn btn-secondary" style="flex:1;" id="btn-pick-end" onclick="toggleMapPick('end')">🏁 Klick End</button>
+              <button class="btn btn-adhoc" style="flex:1.2;" id="btn-adhoc-target" onclick="toggleMapPick('target')">📍 + Ziel</button>
             </div>
-            <input type="text" id="manual-loc-input" placeholder="Adresse für Startpunkt..." style="margin-top:4px;" onchange="geocodeAddress(this.value)">
-            <div id="loc-status" style="font-size:0.75rem; color:#666;">Standort nicht gesetzt</div>
+            <input type="text" id="manual-loc-input" placeholder="Adresse für Startpunkt eingeben..." style="margin-top:4px;" onchange="geocodeAddress(this.value)">
+            <div id="loc-status" style="font-size:0.75rem; color:#666;">Start & Ende bereit</div>
           </div>
 
-          <!-- Aktionen -->
+          <!-- Aktionen: Rundtour / Optimieren / Ganztagestour -->
           <div class="card" style="padding: 10px;">
             <div style="display:flex; gap:6px; margin-bottom:6px;">
               <button class="btn btn-primary" style="flex:1;" onclick="optimizeDayRoute()">⚡ Tour Optimieren</button>
@@ -178,7 +190,7 @@
           </div>
           <div id="day-poi-list"></div>
 
-          <!-- Detailkarte des ausgewählten Ortes mit ALLEN automatischen Infos -->
+          <!-- Detailkarte des ausgewählten Ortes -->
           <div id="detail-card" class="card" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
               <span style="font-weight:bold; font-size:0.95rem; color:var(--primary);">Detail & Infos</span>
@@ -194,23 +206,33 @@
             <label style="font-size:0.78rem; color:#666;">Stadt / Ort:</label>
             <input type="text" id="det-city-input" style="margin-bottom:4px;">
 
-            <!-- Modus für diesen Ort (Zu Fuß / ÖV) -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin: 4px 0 6px 0; background:#f0f4f8; padding:6px 10px; border-radius:6px;">
-              <span style="font-size:0.8rem; font-weight:bold;">Anreise zu diesem Ziel:</span>
-              <button id="det-mode-btn" class="btn-mode-toggle" onclick="toggleSelectedPoiMode()">🚶 Zu Fuß</button>
+            <!-- Transportmittel getrennt: Anreise & Abreise -->
+            <div style="background:#f0f4f8; padding:8px; border-radius:6px; margin: 4px 0 6px 0;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span style="font-size:0.78rem; font-weight:bold;">Anreise (zum Punkt):</span>
+                <div class="transport-toggle">
+                  <button id="det-mode-in-foot" onclick="setDetailedMode('modeIn', 'foot')">🚶 Fuß</button>
+                  <button id="det-mode-in-transit" onclick="setDetailedMode('modeIn', 'transit')">🚆 ÖV</button>
+                </div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.78rem; font-weight:bold;">Weiterreise (ab dem Punkt):</span>
+                <div class="transport-toggle">
+                  <button id="det-mode-out-foot" onclick="setDetailedMode('modeOut', 'foot')">🚶 Fuß</button>
+                  <button id="det-mode-out-transit" onclick="setDetailedMode('modeOut', 'transit')">🚆 ÖV</button>
+                </div>
+              </div>
             </div>
 
-            <!-- In die Tagestour aufnehmen Toggle -->
+            <!-- In die Tagestour aufnehmen -->
             <div style="display:flex; justify-content:space-between; align-items:center; margin: 0 0 8px 0; background:#e8f4fd; padding:6px 10px; border-radius:6px;">
               <span style="font-size:0.8rem; font-weight:bold;">Teil der heutigen Tour:</span>
               <button id="det-tour-btn" class="btn-tour-select" onclick="toggleSelectedPoiTour()">➕ In Tour aufnehmen</button>
             </div>
 
-            <!-- AUTOMATISCH RECHERCHIERTE BESCHREIBUNG -->
-            <label style="font-size:0.78rem; color:#666;">Kurzbeschreibung (automatisch ermittelt / editierbar):</label>
+            <label style="font-size:0.78rem; color:#666;">Kurzbeschreibung (automatisch / editierbar):</label>
             <textarea id="det-desc-input" rows="3" style="margin-bottom:6px;"></textarea>
 
-            <!-- AUTOMATISCH ERMITTELTE ÖV-ANBINDUNG -->
             <div class="info-section">
               <strong>🚆 ÖV-Anbindung / Haltestellen:</strong>
               <div id="det-transit-text" style="color:#555; margin-top:2px;">Wird ermittelt...</div>
@@ -219,8 +241,7 @@
             <label style="font-size:0.78rem; color:#666;">Persönliche Notizen & Buchungscodes:</label>
             <textarea id="det-notes-input" rows="2" placeholder="z.B. Tickets online vorab buchen, Code 1234"></textarea>
 
-            <!-- BADGES: ÖFFNUNGSZEITEN, EINTRITT, KOSTEN, DAUER -->
-            <div style="font-size:0.78rem; color:#666; margin-top:4px;">Automatische Daten (Klicken zum Ändern):</div>
+            <div style="font-size:0.78rem; color:#666; margin-top:4px;">Daten (Klicken zum Ändern):</div>
             <div id="det-badges"></div>
 
             <button class="btn btn-success btn-block" style="margin-top:6px;" onclick="launchExternalNavigation()">
@@ -270,11 +291,22 @@
         <label style="font-size:0.8rem;">Stadt / Ort:</label>
         <input type="text" id="admin-new-city" placeholder="z.B. Kopenhagen, Schwangau">
 
-        <label style="font-size:0.8rem;">Standard-Anreise:</label>
-        <select id="admin-new-mode">
-          <option value="foot" selected>🚶 Zu Fuß (Voreinstellung)</option>
-          <option value="transit">🚆 Mit ÖV</option>
-        </select>
+        <div style="display:flex; gap:6px;">
+          <div style="flex:1;">
+            <label style="font-size:0.8rem;">Anreise:</label>
+            <select id="admin-new-mode-in">
+              <option value="foot" selected>🚶 Zu Fuß</option>
+              <option value="transit">🚆 Mit ÖV</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label style="font-size:0.8rem;">Weiterreise:</label>
+            <select id="admin-new-mode-out">
+              <option value="foot" selected>🚶 Zu Fuß</option>
+              <option value="transit">🚆 Mit ÖV</option>
+            </select>
+          </div>
+        </div>
 
         <label style="font-size:0.8rem;">Kategorie (Farbcodierung):</label>
         <select id="admin-new-cat" onchange="handleAdminCatChange(this.value)">
@@ -344,11 +376,22 @@
       <label style="font-size:0.8rem;">Stadt / Stadtteil:</label>
       <input type="text" id="adhoc-city" placeholder="Wird automatisch ermittelt...">
 
-      <label style="font-size:0.8rem;">Anreise:</label>
-      <select id="adhoc-mode">
-        <option value="foot" selected>🚶 Zu Fuß (Voreinstellung)</option>
-        <option value="transit">🚆 Mit ÖV</option>
-      </select>
+      <div style="display:flex; gap:6px;">
+        <div style="flex:1;">
+          <label style="font-size:0.8rem;">Anreise:</label>
+          <select id="adhoc-mode-in">
+            <option value="foot" selected>🚶 Zu Fuß</option>
+            <option value="transit">🚆 Mit ÖV</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:0.8rem;">Weiterreise:</label>
+          <select id="adhoc-mode-out">
+            <option value="foot" selected>🚶 Zu Fuß</option>
+            <option value="transit">🚆 Mit ÖV</option>
+          </select>
+        </div>
+      </div>
 
       <label style="font-size:0.8rem;">Kategorie:</label>
       <select id="adhoc-cat">
@@ -378,11 +421,22 @@
       <label style="font-size:0.8rem;">Stadt:</label>
       <input type="text" id="modal-city">
 
-      <label style="font-size:0.8rem;">Anreise:</label>
-      <select id="modal-mode">
-        <option value="foot">🚶 Zu Fuß</option>
-        <option value="transit">🚆 Mit ÖV</option>
-      </select>
+      <div style="display:flex; gap:6px;">
+        <div style="flex:1;">
+          <label style="font-size:0.8rem;">Anreise:</label>
+          <select id="modal-mode-in">
+            <option value="foot">🚶 Zu Fuß</option>
+            <option value="transit">🚆 Mit ÖV</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:0.8rem;">Weiterreise:</label>
+          <select id="modal-mode-out">
+            <option value="foot">🚶 Zu Fuß</option>
+            <option value="transit">🚆 Mit ÖV</option>
+          </select>
+        </div>
+      </div>
 
       <label style="font-size:0.8rem;">Kategorie:</label>
       <select id="modal-cat">
@@ -419,12 +473,6 @@
   </div>
 
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (let reg of registrations) reg.update();
-      });
-    }
-
     function forceClearAppCache() {
       if ('caches' in window) {
         caches.keys().then(names => {
@@ -446,7 +494,8 @@
               name: "Studiestræde 57",
               city: "Kopenhagen",
               category: "hotel",
-              mode: "foot",
+              modeIn: "foot",
+              modeOut: "foot",
               lat: 55.6767,
               lon: 12.5668,
               description: "Studiestræde 57, 1554 København, Dänemark",
@@ -466,10 +515,17 @@
     };
 
     let ghConfig = { owner: "", repo: "", token: "", path: "travel_data.json", sha: null };
-    let currentPosition = null;
+    
+    // START- UND ENDPUNKTE (Objekte mit lat, lng, label)
+    let startPoint = null;
+    let endPoint = null;
     let selectedPoi = null;
+
     let map, markersLayer, routeLayer, fullTourLayer;
-    let pickMode = null; // null | 'start' | 'target'
+    let startMarker = null;
+    let endMarker = null;
+
+    let pickMode = null; // null | 'start' | 'end' | 'target'
     let gpsWatchId = null;
     let accuracyCircle = null;
     let lastRouteCalcTime = 0;
@@ -491,13 +547,15 @@
       oev: '🚆 ÖV'
     };
 
+    // Daten bereinigen: stellt sicher, dass modeIn/modeOut und selectedForDay immer existieren
     function sanitizeAppData() {
       if (!appData || !appData.regions) return;
       appData.regions.forEach(r => {
         if (!r.places) r.places = [];
         r.places.forEach(p => {
           if (!p.category) p.category = 'kultur';
-          if (!p.mode) p.mode = (p.category === 'oev' ? 'transit' : 'foot');
+          if (!p.modeIn) p.modeIn = p.mode || (p.category === 'oev' ? 'transit' : 'foot');
+          if (!p.modeOut) p.modeOut = p.mode || (p.category === 'oev' ? 'transit' : 'foot');
           if (p.selectedForDay === undefined) p.selectedForDay = false;
           if (p.duration === undefined) p.duration = 60;
           if (p.cost === undefined) p.cost = 0;
@@ -526,12 +584,14 @@
 
       markersLayer = L.layerGroup().addTo(map);
 
-      // KARTENKLICK LOGIK (Startpunkt ODER Ad-Hoc Ziel)
+      // KARTENKLICK LOGIK (Startpunkt, Endpunkt oder Ad-hoc Ziel)
       map.on('click', (e) => {
         if (pickMode === 'start') {
           stopLiveGPS();
-          document.getElementById('start-poi-select').value = "";
-          setCustomPosition(e.latlng.lat, e.latlng.lng, "Karten-Punkt");
+          setStartPoint(e.latlng.lat, e.latlng.lng, "Karten-Startpunkt");
+          toggleMapPick(null);
+        } else if (pickMode === 'end') {
+          setEndPoint(e.latlng.lat, e.latlng.lng, "Karten-Endpunkt");
           toggleMapPick(null);
         } else if (pickMode === 'target') {
           openAdhocModal(e.latlng.lat, e.latlng.lng);
@@ -583,125 +643,152 @@
 
     function handleAdminCatChange(cat) {
       if (cat === 'oev') {
-        document.getElementById('admin-new-mode').value = 'transit';
+        document.getElementById('admin-new-mode-in').value = 'transit';
+        document.getElementById('admin-new-mode-out').value = 'transit';
       }
     }
 
     // --- KLICK-MODUS STEUERUNG ---
     function toggleMapPick(mode) {
-      const btnPick = document.getElementById('btn-pick');
+      const btnPickStart = document.getElementById('btn-pick-start');
+      const btnPickEnd = document.getElementById('btn-pick-end');
       const btnAdhoc = document.getElementById('btn-adhoc-target');
 
       if (pickMode === mode || mode === null) {
         pickMode = null;
-        btnPick.style.background = '#e9ecef';
-        btnPick.innerText = "🗺️ Klick Start";
+        btnPickStart.style.background = '#e9ecef';
+        btnPickStart.innerText = "🗺️ Klick Start";
+        btnPickEnd.style.background = '#e9ecef';
+        btnPickEnd.innerText = "🏁 Klick End";
         btnAdhoc.classList.remove('active');
-        btnAdhoc.innerText = "📍 + Ziel auf Karte";
+        btnAdhoc.innerText = "📍 + Ziel";
       } else {
         pickMode = mode;
-        if (mode === 'start') {
-          btnPick.style.background = '#ffc107';
-          btnPick.innerText = "Klick auf Karte...";
-          btnAdhoc.classList.remove('active');
-          btnAdhoc.innerText = "📍 + Ziel auf Karte";
-          alert("Tippen Sie auf die Karte, um den STARTPUNKT festzulegen.");
-        } else if (mode === 'target') {
-          btnAdhoc.classList.add('active');
-          btnAdhoc.innerText = "Tippe auf Karte...";
-          btnPick.style.background = '#e9ecef';
-          btnPick.innerText = "🗺️ Klick Start";
-          alert("Tippen Sie auf die Karte, wo Sie ein NEUES ZIEL anlegen möchten.");
-        }
+        btnPickStart.style.background = mode === 'start' ? '#ffc107' : '#e9ecef';
+        btnPickEnd.style.background = mode === 'end' ? '#ffc107' : '#e9ecef';
+        btnAdhoc.className = mode === 'target' ? 'btn btn-adhoc active' : 'btn btn-adhoc';
+
+        if (mode === 'start') alert("Tippen Sie auf die Karte für den STARTPUNKT.");
+        else if (mode === 'end') alert("Tippen Sie auf die Karte für den ENDPUNKT.");
+        else if (mode === 'target') alert("Tippen Sie auf die Karte für ein NEUES ZIEL.");
+        
         if (window.innerWidth <= 768) setMobileSubTab('map');
       }
     }
 
-    // --- AD-HOC ZIEL MODAL & LOGIK ---
-    async function openAdhocModal(lat, lon) {
-      adhocTempCoords = { lat, lon };
-      document.getElementById('adhoc-pos-display').innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-      document.getElementById('adhoc-name').value = "Neues Ziel";
-      document.getElementById('adhoc-city').value = "";
-      document.getElementById('adhoc-create-modal').style.display = 'flex';
+    // --- START- UND ENDPUNKT LOGIK (FEHLER BEI ORTSWECHSEL BEHOBEN) ---
+    function setStartPoint(lat, lng, label) {
+      startPoint = { lat, lng, label };
+      document.getElementById('loc-status').innerText = `Start: ${label} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
 
-      // Automatisches Reverse-Geocoding für Adresse/Stadt
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-        const data = await res.json();
-        if (data && data.address) {
-          const city = data.address.city || data.address.town || data.address.village || data.address.municipality || "";
-          const road = data.address.road || data.address.pedestrian || "";
-          const houseNumber = data.address.house_number || "";
-          if (road) {
-            document.getElementById('adhoc-name').value = `${road} ${houseNumber}`.trim();
-          }
-          if (city) {
-            document.getElementById('adhoc-city').value = city;
-          }
+      if (startMarker) map.removeLayer(startMarker);
+      startMarker = L.circleMarker([lat, lng], { color: 'blue', fillColor: '#2196f3', fillOpacity: 0.9, radius: 9, weight: 3 })
+        .addTo(map).bindPopup(`<b>Start:</b> ${label}`).openPopup();
+
+      // Prüfen ob Rundtour aktiv ist
+      const endVal = document.getElementById('end-poi-select').value;
+      if (endVal === '__SAME_AS_START__') {
+        endPoint = { ...startPoint, label: `Ziel (Rundtour: ${label})` };
+      }
+
+      if (selectedPoi && selectedPoi.lat && selectedPoi.lon) {
+        calcRoute(selectedPoi, true);
+      }
+    }
+
+    function setEndPoint(lat, lng, label) {
+      endPoint = { lat, lng, label };
+      if (endMarker) map.removeLayer(endMarker);
+      endMarker = L.circleMarker([lat, lng], { color: '#b71c1c', fillColor: '#f44336', fillOpacity: 0.9, radius: 9, weight: 3 })
+        .addTo(map).bindPopup(`<b>Ziel/Ende:</b> ${label}`);
+
+      document.getElementById('end-poi-select').value = "__CUSTOM__";
+      document.getElementById('loc-status').innerText += ` | Ziel: ${label}`;
+    }
+
+    function onStartPointChange(val) {
+      if (val === '__GPS__') {
+        startLiveGPS();
+      } else if (val === '__CUSTOM__') {
+        // Manuell belassen
+      } else {
+        stopLiveGPS();
+        const regId = document.getElementById('day-region-select').value;
+        const region = appData.regions.find(r => r.id === regId);
+        if (!region) return;
+        const p = region.places.find(item => item.id === val);
+        if (p && p.lat && p.lon) {
+          setStartPoint(p.lat, p.lon, p.name);
+          map.panTo([p.lat, p.lon]);
+        } else {
+          alert("Dieser Ort besitzt keine gültigen Koordinaten.");
         }
-      } catch(e) {}
+      }
     }
 
-    function closeAdhocModal() {
-      document.getElementById('adhoc-create-modal').style.display = 'none';
-      adhocTempCoords = null;
+    function onEndPointChange(val) {
+      if (val === '__SAME_AS_START__') {
+        if (endMarker) map.removeLayer(endMarker);
+        endMarker = null;
+        if (startPoint) {
+          endPoint = { ...startPoint, label: `Ziel (Rundtour)` };
+          document.getElementById('loc-status').innerText = `Rundtour: Start & Ende bei ${startPoint.label}`;
+        }
+      } else if (val === '__GPS__') {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(pos => {
+            setEndPoint(pos.coords.latitude, pos.coords.longitude, "GPS Ziel");
+          });
+        }
+      } else if (val !== '__CUSTOM__') {
+        const regId = document.getElementById('day-region-select').value;
+        const region = appData.regions.find(r => r.id === regId);
+        if (!region) return;
+        const p = region.places.find(item => item.id === val);
+        if (p && p.lat && p.lon) {
+          setEndPoint(p.lat, p.lon, p.name);
+        }
+      }
     }
 
-    async function saveAdhocPOI() {
-      if (!adhocTempCoords) return;
+    // Dropdown-Listen für Start und Ziel sauber aktualisieren bei Ortswechsel
+    function updatePointDropdowns() {
       const regId = document.getElementById('day-region-select').value;
+      const startSel = document.getElementById('start-poi-select');
+      const endSel = document.getElementById('end-poi-select');
+
+      const savedStartVal = startSel.value;
+      const savedEndVal = endSel.value;
+
+      startSel.innerHTML = `
+        <option value="__GPS__">📡 Aktueller GPS Standort</option>
+        <option value="__CUSTOM__">🗺️ Manuell / Klick / Adresse</option>
+      `;
+
+      endSel.innerHTML = `
+        <option value="__SAME_AS_START__">🔄 Rundtour (zurück zum Startpunkt)</option>
+        <option value="__GPS__">📡 GPS Standort als Ziel</option>
+        <option value="__CUSTOM__">🗺️ Manuell / Klick auf Karte</option>
+      `;
+
       const region = appData.regions.find(r => r.id === regId);
-      if (!region) return alert("Keine Region aktiv.");
+      if (region && region.places.length > 0) {
+        region.places.forEach(p => {
+          const opt1 = document.createElement('option');
+          opt1.value = p.id;
+          opt1.text = `${p.visited ? '✓ ' : ''}${p.name}${p.city ? ' ('+p.city+')' : ''}`;
+          startSel.appendChild(opt1);
 
-      const name = document.getElementById('adhoc-name').value.trim() || "Karten-Ziel";
-      const city = document.getElementById('adhoc-city').value.trim() || region.name;
-      const mode = document.getElementById('adhoc-mode').value;
-      const cat = document.getElementById('adhoc-cat').value;
+          const opt2 = document.createElement('option');
+          opt2.value = p.id;
+          opt2.text = `${p.name}${p.city ? ' ('+p.city+')' : ''}`;
+          endSel.appendChild(opt2);
+        });
+      }
 
-      const newPOI = {
-        id: "poi_" + Date.now(),
-        name: name,
-        city: city,
-        category: cat,
-        mode: mode,
-        lat: adhocTempCoords.lat,
-        lon: adhocTempCoords.lon,
-        description: `Ad-hoc auf der Karte erstelltes Ziel bei [${adhocTempCoords.lat.toFixed(5)}, ${adhocTempCoords.lon.toFixed(5)}]`,
-        website: "",
-        openingHours: "Frei zugänglich",
-        fee: "Kostenlos",
-        transit: "Haltestellen in der Nähe prüfen",
-        cost: 0,
-        duration: 45,
-        notes: "Direkt über Karte hinzugefügt",
-        selectedForDay: true, // Direkt aktiv für die Tour
-        visited: false
-      };
-
-      region.places.push(newPOI);
-      closeAdhocModal();
-      persistData();
-      renderDayList();
-      renderAdminList();
-      updateStartPoiDropdown();
-      onRegionChange();
-      selectPoi(newPOI);
-
-      // Nahegelegene Haltestellen im Hintergrund ermitteln
-      try {
-        const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:400,${newPOI.lat},${newPOI.lon})[highway=bus_stop];out 1;`;
-        const opRes = await fetch(overpassUrl);
-        const opData = await opRes.json();
-        if (opData.elements?.length > 0) {
-          const stopName = opData.elements[0].tags?.name || "ÖV-Haltestelle";
-          newPOI.transit = `Haltestelle "${stopName}" (< 400m)`;
-          persistData();
-          if (selectedPoi && selectedPoi.id === newPOI.id) selectPoi(newPOI);
-        }
-      } catch(e) {}
-
-      alert(`✅ Ad-hoc Ziel "${name}" wurde zur Tour hinzugefügt!`);
+      // Falls die alten Werte in der neuen Region existieren, wiederherstellen
+      if ([...startSel.options].some(o => o.value === savedStartVal)) startSel.value = savedStartVal;
+      if ([...endSel.options].some(o => o.value === savedEndVal)) endSel.value = savedEndVal;
     }
 
     // --- LIVE GPS ---
@@ -712,7 +799,7 @@
 
     function startLiveGPS() {
       if (!navigator.geolocation) return alert("GPS nicht unterstützt");
-      document.getElementById('start-poi-select').value = "";
+      document.getElementById('start-poi-select').value = "__GPS__";
       const btn = document.getElementById('btn-live-gps');
       btn.classList.add('active');
       btn.innerText = "⏹️ Live AUS";
@@ -724,14 +811,8 @@
           const lng = pos.coords.longitude;
           const acc = Math.round(pos.coords.accuracy);
 
-          currentPosition = { lat, lng };
+          setStartPoint(lat, lng, "Live GPS");
           document.getElementById('loc-status').innerHTML = `🔵 <b>Live:</b> ${lat.toFixed(4)}, ${lng.toFixed(4)} (±${acc}m)`;
-
-          if (window.posMarker) {
-            window.posMarker.setLatLng([lat, lng]);
-          } else {
-            window.posMarker = L.circleMarker([lat, lng], { color: '#0d47a1', fillColor: '#2196f3', fillOpacity: 0.9, radius: 9, weight: 3 }).addTo(map);
-          }
 
           if (accuracyCircle) {
             accuracyCircle.setLatLng([lat, lng]);
@@ -768,62 +849,89 @@
       }
     }
 
-    function setCustomPosition(lat, lng, label) {
-      stopLiveGPS();
-      currentPosition = { lat, lng };
-      document.getElementById('loc-status').innerText = `${label} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
-
-      if(window.posMarker) map.removeLayer(window.posMarker);
-      window.posMarker = L.circleMarker([lat, lng], { color: 'blue', fillColor: '#2196f3', fillOpacity: 0.85, radius: 9 })
-        .addTo(map).bindPopup(`<b>Start:</b> ${label}`).openPopup();
-
-      if(selectedPoi && selectedPoi.lat && selectedPoi.lon) {
-        calcRoute(selectedPoi, true);
-      }
-    }
-
-    function onStartPoiSelect(poiId) {
-      if(!poiId) return;
-      stopLiveGPS();
-      const regId = document.getElementById('day-region-select').value;
-      const region = appData.regions.find(r => r.id === regId);
-      if(!region) return;
-
-      const p = region.places.find(item => item.id === poiId);
-      if(!p || !p.lat || !p.lon) return alert("Keine Koordinaten hinterlegt.");
-
-      document.getElementById('manual-loc-input').value = "";
-      setCustomPosition(p.lat, p.lon, `[Start] ${p.name}`);
-      map.panTo([p.lat, p.lon]);
-    }
-
-    function updateStartPoiDropdown() {
-      const regId = document.getElementById('day-region-select').value;
-      const selectEl = document.getElementById('start-poi-select');
-      selectEl.innerHTML = '<option value="">-- Ort als Start wählen --</option>';
-
-      const region = appData.regions.find(r => r.id === regId);
-      if(!region || !region.places.length) return;
-
-      region.places.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.id;
-        opt.text = `${p.visited ? '✓ ' : ''}${p.name}${p.city ? ' ('+p.city+')' : ''}`;
-        selectEl.appendChild(opt);
-      });
-    }
-
     async function geocodeAddress(query) {
       if(!query) return;
       stopLiveGPS();
-      document.getElementById('start-poi-select').value = "";
+      document.getElementById('start-poi-select').value = "__CUSTOM__";
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`);
         const data = await res.json();
         if(data && data.length > 0) {
-          setCustomPosition(parseFloat(data[0].lat), parseFloat(data[0].lon), query);
+          setStartPoint(parseFloat(data[0].lat), parseFloat(data[0].lon), query);
+          map.panTo([parseFloat(data[0].lat), parseFloat(data[0].lon)]);
         }
       } catch(e) { }
+    }
+
+    // --- AD-HOC ZIEL ERSTELLEN ---
+    async function openAdhocModal(lat, lon) {
+      adhocTempCoords = { lat, lon };
+      document.getElementById('adhoc-pos-display').innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+      document.getElementById('adhoc-name').value = "Neues Ziel";
+      document.getElementById('adhoc-city').value = "";
+      document.getElementById('adhoc-create-modal').style.display = 'flex';
+
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+        const data = await res.json();
+        if (data && data.address) {
+          const city = data.address.city || data.address.town || data.address.village || data.address.municipality || "";
+          const road = data.address.road || data.address.pedestrian || "";
+          const houseNumber = data.address.house_number || "";
+          if (road) document.getElementById('adhoc-name').value = `${road} ${houseNumber}`.trim();
+          if (city) document.getElementById('adhoc-city').value = city;
+        }
+      } catch(e) {}
+    }
+
+    function closeAdhocModal() {
+      document.getElementById('adhoc-create-modal').style.display = 'none';
+      adhocTempCoords = null;
+    }
+
+    async function saveAdhocPOI() {
+      if (!adhocTempCoords) return;
+      const regId = document.getElementById('day-region-select').value;
+      const region = appData.regions.find(r => r.id === regId);
+      if (!region) return alert("Keine Region aktiv.");
+
+      const name = document.getElementById('adhoc-name').value.trim() || "Karten-Ziel";
+      const city = document.getElementById('adhoc-city').value.trim() || region.name;
+      const modeIn = document.getElementById('adhoc-mode-in').value;
+      const modeOut = document.getElementById('adhoc-mode-out').value;
+      const cat = document.getElementById('adhoc-cat').value;
+
+      const newPOI = {
+        id: "poi_" + Date.now(),
+        name: name,
+        city: city,
+        category: cat,
+        modeIn: modeIn,
+        modeOut: modeOut,
+        lat: adhocTempCoords.lat,
+        lon: adhocTempCoords.lon,
+        description: `Ad-hoc Ziel bei [${adhocTempCoords.lat.toFixed(5)}, ${adhocTempCoords.lon.toFixed(5)}]`,
+        website: "",
+        openingHours: "Frei zugänglich",
+        fee: "Kostenlos",
+        transit: "Haltestelle in der Nähe prüfen",
+        cost: 0,
+        duration: 45,
+        notes: "Direkt über Karte hinzugefügt",
+        selectedForDay: true,
+        visited: false
+      };
+
+      region.places.push(newPOI);
+      closeAdhocModal();
+      persistData();
+      renderDayList();
+      renderAdminList();
+      updatePointDropdowns();
+      onRegionChange();
+      selectPoi(newPOI);
+
+      alert(`✅ Ziel "${name}" wurde zur Tour hinzugefügt!`);
     }
 
     // --- RECHERCHE ---
@@ -835,7 +943,6 @@
       const cityClean = (cityName || regionName || "").trim();
       const combined = `${poiName}, ${cityClean}`;
 
-      // Wikivoyage
       try {
         const wvRes = await fetch(`https://de.wikivoyage.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(combined)}&format=json&origin=*`);
         const wvData = await wvRes.json();
@@ -861,7 +968,6 @@
         }
       } catch (e) { }
 
-      // OSM
       const queries = [combined, `${poiName} ${cityClean}`, poiName];
       for (let q of queries) {
         try {
@@ -882,7 +988,6 @@
         } catch(e) {}
       }
 
-      // Wikipedia
       try {
         const wpRes = await fetch(`https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(poiName + ' ' + cityClean)}&format=json&origin=*`);
         const wpData = await wpRes.json();
@@ -914,7 +1019,6 @@
         }
       } catch (e) { }
 
-      // Overpass
       if (info.lat && info.lon) {
         try {
           const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:400,${info.lat},${info.lon})[highway=bus_stop];out 1;`;
@@ -936,7 +1040,8 @@
       const name = document.getElementById('admin-new-poi').value.trim();
       const city = document.getElementById('admin-new-city').value.trim();
       const cat = document.getElementById('admin-new-cat').value;
-      const mode = (cat === 'oev') ? 'transit' : (document.getElementById('admin-new-mode').value || 'foot');
+      const modeIn = (cat === 'oev') ? 'transit' : (document.getElementById('admin-new-mode-in').value || 'foot');
+      const modeOut = (cat === 'oev') ? 'transit' : (document.getElementById('admin-new-mode-out').value || 'foot');
       const statusEl = document.getElementById('admin-search-status');
 
       if (!name || !regId) return alert("Region und Ziel/Adresse erforderlich!");
@@ -954,7 +1059,8 @@
           name: name,
           city: city || region.name,
           category: cat,
-          mode: mode,
+          modeIn: modeIn,
+          modeOut: modeOut,
           lat: info.lat,
           lon: info.lon,
           description: info.description,
@@ -973,7 +1079,7 @@
         document.getElementById('admin-new-poi').value = "";
         document.getElementById('admin-new-city').value = "";
         renderAdminList();
-        updateStartPoiDropdown();
+        updatePointDropdowns();
         persistData();
         statusEl.innerText = info.lat ? `✅ Platziert: [${info.lat.toFixed(5)}, ${info.lon.toFixed(5)}]` : `⚠️ Angelegt (Keine Geodaten gefunden).`;
         alert(`Ort "${name}" erfolgreich angelegt!`);
@@ -1015,23 +1121,29 @@
       alert(`Daten zu "${targetPOI.name}" erfolgreich aktualisiert!`);
     }
 
-    function togglePoiMode(poiId) {
+    // --- AN- UND ABREISEMODUS UMSCHALTEN (ZU FUSS / ÖV) ---
+    function setDetailedMode(field, mode) {
+      if (!selectedPoi) return;
+      selectedPoi[field] = mode;
+      persistData();
+      renderDayList();
+      selectPoi(selectedPoi);
+    }
+
+    function togglePoiQuickMode(poiId) {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
       if(!region) return;
 
       const p = region.places.find(item => item.id === poiId);
       if(p) {
-        p.mode = (p.mode === 'transit') ? 'foot' : 'transit';
+        const nextMode = (p.modeIn === 'transit') ? 'foot' : 'transit';
+        p.modeIn = nextMode;
+        p.modeOut = nextMode;
         persistData();
         renderDayList();
         if(selectedPoi && selectedPoi.id === p.id) selectPoi(p);
       }
-    }
-
-    function toggleSelectedPoiMode() {
-      if(!selectedPoi) return;
-      togglePoiMode(selectedPoi.id);
     }
 
     function toggleDayTourSelection(poiId) {
@@ -1064,7 +1176,7 @@
       }
     }
 
-    // --- 1. ROUTEN-OPTIMIERUNG ---
+    // --- 1. ROUTEN-OPTIMIERUNG (INCL. START- & ENDPUNKT / RUNDTOUR) ---
     function optimizeDayRoute() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -1073,12 +1185,15 @@
       const unvisitedSelected = region.places.filter(p => p.selectedForDay && !p.visited && p.lat && p.lon);
       if (unvisitedSelected.length < 2) return alert("Wählen Sie mindestens 2 Orte mit dem Knopf '➕ Tag' für die Tour aus.");
 
-      if (!currentPosition) return alert("Bitte zuerst Standort oder Startpunkt festlegen.");
+      if (!startPoint) return alert("Bitte zuerst Startpunkt festlegen (GPS, Klick oder Ort aus Liste).");
 
-      let current = { lat: currentPosition.lat, lon: currentPosition.lng };
+      let isRoundTrip = !endPoint || (startPoint.lat === endPoint.lat && startPoint.lng === endPoint.lng) || document.getElementById('end-poi-select').value === '__SAME_AS_START__';
+
+      let current = { lat: startPoint.lat, lon: startPoint.lng };
       let pool = [...unvisitedSelected];
       let sorted = [];
 
+      // Nearest-Neighbor Kette
       while (pool.length > 0) {
         let nearestIdx = 0;
         let minDist = Infinity;
@@ -1100,17 +1215,20 @@
       persistData();
       renderDayList();
       calculateFullDayTour();
-      alert("✅ Tour optimiert: Die für den Tag ausgewählten Ziele wurden in die kürzeste Reihenfolge sortiert!");
+      alert(`✅ Tour optimiert: ${isRoundTrip ? 'Rundtour zum Startpunkt' : 'Strecke zum Zielpunkt'} wurde in kürzeste Reihenfolge sortiert!`);
     }
 
-    // --- 2. GANZTAGESROUTE ---
+    // --- 2. GANZTAGESROUTE (BERÜCKSICHTIGT START, ALLE ZIELE, ENDPUNKT & SPLIT-TRANSPORT) ---
     async function calculateFullDayTour() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
-      if (!region || !currentPosition) return alert("Bitte Standort und Region wählen.");
+      if (!region || !startPoint) return alert("Bitte Startpunkt und Region wählen.");
 
       const activePlaces = region.places.filter(p => p.selectedForDay && !p.visited && p.lat && p.lon);
       if (activePlaces.length === 0) return alert("Keine Orte für die Tagestour ausgewählt (Knopf '➕ Tag' aktivieren).");
+
+      const isRoundTrip = !endPoint || (startPoint.lat === endPoint.lat && startPoint.lng === endPoint.lng) || document.getElementById('end-poi-select').value === '__SAME_AS_START__';
+      const actualEndPoint = isRoundTrip ? startPoint : (endPoint || startPoint);
 
       const summaryBox = document.getElementById('tour-summary-box');
       summaryBox.style.display = "block";
@@ -1121,27 +1239,38 @@
 
       let totalWalkMeters = 0;
       let totalWalkSeconds = 0;
-      let footCount = 0;
-      let transitCount = 0;
+      let footLegs = 0;
+      let transitLegs = 0;
 
-      let fromCoord = { lat: currentPosition.lat, lng: currentPosition.lng };
+      // Etappenkette: Start -> Ort1 -> Ort2 -> ... -> OrtN -> Ziel
+      let currentLegStart = { lat: startPoint.lat, lng: startPoint.lng, label: startPoint.label };
 
-      for (let i = 0; i < activePlaces.length; i++) {
-        const dest = activePlaces[i];
-        const isTransit = dest.mode === 'transit';
+      for (let i = 0; i <= activePlaces.length; i++) {
+        let nextStop, isTransit;
+
+        if (i < activePlaces.length) {
+          nextStop = activePlaces[i];
+          // Für Etappe zum Ort i gilt das modeIn von Ort i
+          isTransit = nextStop.modeIn === 'transit';
+        } else {
+          // Letzte Etappe zurück zum Endpunkt: gilt das modeOut des letzten Ortes
+          const lastPlace = activePlaces[activePlaces.length - 1];
+          nextStop = { lat: actualEndPoint.lat, lon: actualEndPoint.lng, name: actualEndPoint.label };
+          isTransit = lastPlace.modeOut === 'transit';
+        }
 
         if (isTransit) {
-          transitCount++;
+          transitLegs++;
           const transitLine = L.polyline([
-            [fromCoord.lat, fromCoord.lng],
-            [dest.lat, dest.lon]
+            [currentLegStart.lat, currentLegStart.lng],
+            [nextStop.lat, nextStop.lon]
           ], { color: '#8e24aa', weight: 4, dashArray: '6, 8', opacity: 0.85 });
-          transitLine.bindPopup(`<b>Etappe ${i + 1}:</b> 🚆 Mit ÖV nach ${dest.name}`);
+          transitLine.bindPopup(`<b>Etappe ${i + 1}:</b> 🚆 Mit ÖV nach ${nextStop.name}`);
           fullTourLayer.addLayer(transitLine);
         } else {
-          footCount++;
+          footLegs++;
           try {
-            const url = `https://router.project-osrm.org/route/v1/foot/${fromCoord.lng},${fromCoord.lat};${dest.lon},${dest.lat}?overview=full&geometries=geojson`;
+            const url = `https://router.project-osrm.org/route/v1/foot/${currentLegStart.lng},${currentLegStart.lat};${nextStop.lon},${nextStop.lat}?overview=full&geometries=geojson`;
             const res = await fetch(url);
             const data = await res.json();
             if (data.routes && data.routes.length > 0) {
@@ -1150,29 +1279,29 @@
               totalWalkSeconds += r.duration;
 
               const footLine = L.geoJSON(r.geometry, { style: { color: '#28a745', weight: 5 } });
-              footLine.bindPopup(`<b>Etappe ${i + 1}:</b> 🚶 Zu Fuß nach ${dest.name} (~${Math.round(r.duration/60)} Min.)`);
+              footLine.bindPopup(`<b>Etappe ${i + 1}:</b> 🚶 Zu Fuß nach ${nextStop.name} (~${Math.round(r.duration/60)} Min.)`);
               fullTourLayer.addLayer(footLine);
             }
           } catch(e) { }
         }
 
-        fromCoord = { lat: dest.lat, lng: dest.lon };
+        currentLegStart = { lat: nextStop.lat, lng: nextStop.lon, label: nextStop.name };
       }
 
       const walkKm = (totalWalkMeters / 1000).toFixed(2);
       const walkMin = Math.round(totalWalkSeconds / 60);
 
       let totalStayMin = activePlaces.reduce((sum, p) => sum + (p.duration || 60), 0);
-      let totalDayMin = walkMin + totalStayMin + (transitCount * 20);
+      let totalDayMin = walkMin + totalStayMin + (transitLegs * 15);
       let totalHours = Math.floor(totalDayMin / 60);
       let remMinutes = totalDayMin % 60;
 
       summaryBox.innerHTML = `
-        <strong>🏁 Tagestour (${activePlaces.length} Ziele):</strong><br>
-        🚶 <b>${footCount} Ziele zu Fuß:</b> ca. ${walkKm} km (~${walkMin} Min. Laufzeit)<br>
-        🚆 <b>${transitCount} Ziele mit ÖV:</b> Haltestellen/Fahrplan-Links je Ort<br>
-        ⏳ Geplante Aufenthaltszeit: <b>~${Math.round(totalStayMin/60)} Std.</b><br>
-        ⏱️ Gesamtdauer der Tour: <b>ca. ${totalHours}h ${remMinutes}min</b>
+        <strong>🏁 Tour (${isRoundTrip ? 'Rundtour' : 'Strecke'} • ${activePlaces.length} Zwischenziele):</strong><br>
+        🚶 <b>${footLegs} Etappen zu Fuß:</b> ca. ${walkKm} km (~${walkMin} Min. reine Gehzeit)<br>
+        🚆 <b>${transitLegs} Etappen mit ÖV:</b> Haltestellen/Fahrplan-Links je Ort<br>
+        ⏳ Geplante Verweildauer: <b>~${Math.round(totalStayMin/60)} Std.</b><br>
+        ⏱️ Gesamtzeit der Tour: <b>ca. ${totalHours}h ${remMinutes}min</b>
       `;
 
       map.fitBounds(fullTourLayer.getBounds(), { padding: [40, 40] });
@@ -1194,16 +1323,20 @@
   <rte>
     <name>Tagesroute ${region.name}</name>`;
 
-      if (currentPosition) {
-        gpx += `\n    <rtept lat="${currentPosition.lat}" lon="${currentPosition.lng}"><name>Startpunkt</name></rtept>`;
+      if (startPoint) {
+        gpx += `\n    <rtept lat="${startPoint.lat}" lon="${startPoint.lng}"><name>Start: ${startPoint.label}</name></rtept>`;
       }
 
       activePlaces.forEach((p, idx) => {
         gpx += `\n    <rtept lat="${p.lat}" lon="${p.lon}">
-      <name>${idx + 1}. [${p.mode === 'transit' ? 'ÖV' : 'Fuß'}] ${p.name}</name>
+      <name>${idx + 1}. [An:${p.modeIn === 'transit' ? 'ÖV' : 'Fuß'}|Ab:${p.modeOut === 'transit' ? 'ÖV' : 'Fuß'}] ${p.name}</name>
       <desc>${p.description || ''}</desc>
     </rtept>`;
       });
+
+      if (endPoint) {
+        gpx += `\n    <rtept lat="${endPoint.lat}" lon="${endPoint.lng}"><name>Ende: ${endPoint.label}</name></rtept>`;
+      }
 
       gpx += `\n  </rte>\n</gpx>`;
       downloadFile(`Tour_${region.id}.gpx`, gpx);
@@ -1225,7 +1358,7 @@
       if (!selectedPoi || !selectedPoi.lat || !selectedPoi.lon) return alert("Kein Ort mit Koordinaten ausgewählt.");
       const lat = selectedPoi.lat;
       const lon = selectedPoi.lon;
-      const isTransit = selectedPoi.mode === 'transit';
+      const isTransit = selectedPoi.modeIn === 'transit';
       const isApple = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
       if (isApple) {
@@ -1271,7 +1404,8 @@
           document.getElementById('modal-poi-id').value = p.id;
           document.getElementById('modal-name').value = p.name || '';
           document.getElementById('modal-city').value = p.city || '';
-          document.getElementById('modal-mode').value = p.mode || 'foot';
+          document.getElementById('modal-mode-in').value = p.modeIn || 'foot';
+          document.getElementById('modal-mode-out').value = p.modeOut || 'foot';
           document.getElementById('modal-cat').value = p.category || 'kultur';
           document.getElementById('modal-hours').value = p.openingHours || '';
           document.getElementById('modal-cost').value = p.cost || 0;
@@ -1296,7 +1430,8 @@
         if (p) {
           p.name = document.getElementById('modal-name').value.trim() || p.name;
           p.city = document.getElementById('modal-city').value.trim();
-          p.mode = document.getElementById('modal-mode').value;
+          p.modeIn = document.getElementById('modal-mode-in').value;
+          p.modeOut = document.getElementById('modal-mode-out').value;
           p.category = document.getElementById('modal-cat').value;
           p.openingHours = document.getElementById('modal-hours').value.trim();
           p.cost = parseFloat(document.getElementById('modal-cost').value) || 0;
@@ -1316,18 +1451,18 @@
       }
     }
 
-    // --- ROUTING EINZEL-STRECKE ---
+    // --- ROUTING EINZEL-STRECKE (Start -> Klick-Ort) ---
     async function calcRoute(destPoi, autoZoom = true) {
-      if(!currentPosition || !destPoi) return;
+      if(!startPoint || !destPoi) return;
       const rBox = document.getElementById('route-box');
       rBox.style.display = "block";
 
-      const isTransit = destPoi.mode === 'transit';
+      const isTransit = destPoi.modeIn === 'transit';
       const destLat = destPoi.lat;
       const destLon = destPoi.lon;
 
       if (isTransit) {
-        const transitUrl = `https://www.google.com/maps/dir/?api=1&origin=${currentPosition.lat},${currentPosition.lng}&destination=${destLat},${destLon}&travelmode=transit`;
+        const transitUrl = `https://www.google.com/maps/dir/?api=1&origin=${startPoint.lat},${startPoint.lng}&destination=${destLat},${destLon}&travelmode=transit`;
         document.getElementById('route-calc-text').innerHTML = `
           🚆 <strong>Mit ÖV:</strong> Öffentliche Verkehrsmittel empfohlen.<br>
           👉 <a href="${transitUrl}" target="_blank" style="color:#7b1fa2; font-weight:bold;">Hier Live-Abfahrten & Linien öffnen</a>
@@ -1335,13 +1470,13 @@
 
         if(routeLayer) map.removeLayer(routeLayer);
         routeLayer = L.polyline([
-          [currentPosition.lat, currentPosition.lng],
+          [startPoint.lat, startPoint.lng],
           [destLat, destLon]
         ], { color: '#8e24aa', weight: 4, dashArray: '6, 8', opacity: 0.9 }).addTo(map);
 
         if (autoZoom) map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
       } else {
-        const url = `https://router.project-osrm.org/route/v1/foot/${currentPosition.lng},${currentPosition.lat};${destLon},${destLat}?overview=full&geometries=geojson`;
+        const url = `https://router.project-osrm.org/route/v1/foot/${startPoint.lng},${startPoint.lat};${destLon},${destLat}?overview=full&geometries=geojson`;
         try {
           const res = await fetch(url);
           const data = await res.json();
@@ -1364,11 +1499,14 @@
       }
     }
 
-    // --- RENDERING TAGESPLANUNG ---
+    // --- RENDERING TAGESPLANUNG (BEHEBT ORTSWECHSEL-FEHLER) ---
     function onRegionChange() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
       markersLayer.clearLayers();
+
+      // Bei Ortswechsel: Dropdowns aktualisieren
+      updatePointDropdowns();
 
       if(region && region.places.length > 0) {
         const bounds = [];
@@ -1381,16 +1519,28 @@
               fillOpacity: 0.85,
               radius: p.selectedForDay ? 9 : 6,
               weight: p.selectedForDay ? 3 : 1
-            }).addTo(markersLayer).bindPopup(`<b>${idx + 1}. ${p.name}</b><br><small>${p.city || ''} (${p.mode === 'transit' ? '🚆 ÖV' : '🚶 Fuß'}) • ${CAT_LABELS[p.category] || '🏛️'}</small>`);
+            }).addTo(markersLayer).bindPopup(`<b>${idx + 1}. ${p.name}</b><br><small>${p.city || ''} (An:${p.modeIn === 'transit' ? 'ÖV' : 'Fuß'}|Ab:${p.modeOut === 'transit' ? 'ÖV' : 'Fuß'})</small>`);
             
             m.on('click', () => selectPoi(p));
             bounds.push([p.lat, p.lon]);
           }
         });
         if(bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
+
+        // Wenn kein Startpunkt gesetzt oder Startpunkt aus alter Region stammte: ersten Ort als Standard-Start nehmen
+        if (!startPoint || !region.places.some(p => p.name === startPoint.label)) {
+          const firstValid = region.places.find(p => p.lat && p.lon);
+          if (firstValid) {
+            setStartPoint(firstValid.lat, firstValid.lon, firstValid.name);
+            document.getElementById('start-poi-select').value = firstValid.id;
+          }
+        }
+      } else {
+        startPoint = null;
+        if (startMarker) map.removeLayer(startMarker);
       }
+
       renderDayList();
-      updateStartPoiDropdown();
     }
 
     function renderDayList() {
@@ -1401,17 +1551,17 @@
 
       const region = appData.regions.find(r => r.id === regId);
       if(!region || !region.places.length) {
-        listEl.innerHTML = "<small style='color:#666;'>Keine Orte eingetragen.</small>";
+        listEl.innerHTML = "<small style='color:#666;'>Keine Orte in dieser Region.</small>";
         return;
       }
 
       let tourIdx = 1;
       region.places.forEach(p => {
         if(!showVisited && p.visited) return;
-        if(!p.mode) p.mode = (p.category === 'oev' ? 'transit' : 'foot');
+        if(!p.modeIn) p.modeIn = 'foot';
+        if(!p.modeOut) p.modeOut = 'foot';
 
         const isSelected = !!p.selectedForDay;
-        const isTransit = p.mode === 'transit';
         const el = document.createElement('div');
         el.className = `poi-card cat-${p.category || 'kultur'} ${isSelected ? 'in-tour' : ''} ${p.visited ? 'visited' : ''} ${selectedPoi && selectedPoi.id === p.id ? 'active' : ''}`;
         
@@ -1422,14 +1572,13 @@
               <div style="font-size:0.75rem; color:#666;">📍 ${p.city || region.name} • ${CAT_LABELS[p.category] || '🏛️'} • ⏱️ ~${p.duration || 60} Min.</div>
             </div>
             <div style="display:flex; align-items:center; gap:5px;">
-              <!-- MODUS TOGGLE: FUSS vs ÖV -->
-              <button class="btn-mode-toggle ${isTransit ? 'mode-transit' : 'mode-foot'}" 
-                      title="Umschalten: Zu Fuß oder ÖV"
-                      onclick="event.stopPropagation(); togglePoiMode('${p.id}')">
-                ${isTransit ? '🚆 ÖV' : '🚶 Fuß'}
+              <!-- SCHNELL-UMSCHALTER: FUSS vs ÖV -->
+              <button class="transport-toggle" onclick="event.stopPropagation(); togglePoiQuickMode('${p.id}')" title="Klick schaltet Hin- und Rückweg um">
+                <span style="font-size:0.75rem; padding: 2px 4px; font-weight:bold; color:${p.modeIn === 'transit' ? '#7b1fa2' : '#2e7d32'};">
+                  ${p.modeIn === 'transit' ? '🚆 ÖV' : '🚶 Fuß'}
+                </span>
               </button>
 
-              <!-- IN DIE TAGESROUTE AUFNEHMEN / ABWÄHLEN -->
               <button class="btn-tour-select ${isSelected ? 'selected' : ''}" 
                       title="Ziel in die Tagestour aufnehmen"
                       onclick="event.stopPropagation(); toggleDayTourSelection('${p.id}')">
@@ -1447,7 +1596,8 @@
 
     function selectPoi(poi) {
       selectedPoi = poi;
-      if(!poi.mode) poi.mode = (poi.category === 'oev' ? 'transit' : 'foot');
+      if(!poi.modeIn) poi.modeIn = 'foot';
+      if(!poi.modeOut) poi.modeOut = 'foot';
       renderDayList();
 
       const reg = appData.regions.find(r => r.id === document.getElementById('day-region-select').value);
@@ -1460,10 +1610,11 @@
       document.getElementById('det-notes-input').value = poi.notes || '';
       document.getElementById('det-transit-text').innerText = poi.transit || 'Mit ÖV / Nahverkehr erreichbar';
 
-      const modeBtn = document.getElementById('det-mode-btn');
-      const isTransit = poi.mode === 'transit';
-      modeBtn.className = `btn-mode-toggle ${isTransit ? 'mode-transit' : 'mode-foot'}`;
-      modeBtn.innerText = isTransit ? '🚆 Mit ÖV' : '🚶 Zu Fuß';
+      // Buttons für Anreise & Abreise aktualisieren
+      document.getElementById('det-mode-in-foot').className = poi.modeIn === 'foot' ? 'active-foot' : '';
+      document.getElementById('det-mode-in-transit').className = poi.modeIn === 'transit' ? 'active-transit' : '';
+      document.getElementById('det-mode-out-foot').className = poi.modeOut === 'foot' ? 'active-foot' : '';
+      document.getElementById('det-mode-out-transit').className = poi.modeOut === 'transit' ? 'active-transit' : '';
 
       updateDetailTourBtn(poi);
 
@@ -1472,7 +1623,7 @@
       document.getElementById('link-google').href = `https://www.google.com/search?q=${encodeURIComponent(targetQuery)}`;
       document.getElementById('link-hours').href = `https://www.google.com/search?q=${encodeURIComponent(targetQuery + ' öffnungszeiten')}`;
       
-      const originParam = currentPosition ? `${currentPosition.lat},${currentPosition.lng}` : '';
+      const originParam = startPoint ? `${startPoint.lat},${startPoint.lng}` : '';
       document.getElementById('link-transit').href = `https://www.google.com/maps/dir/?api=1&origin=${originParam}&destination=${encodeURIComponent(targetQuery)}&travelmode=transit`;
 
       const webA = document.getElementById('link-web');
@@ -1495,7 +1646,7 @@
 
       if(poi.lat && poi.lon && poi.lat !== 0) {
         map.setView([poi.lat, poi.lon], 16);
-        if(currentPosition) calcRoute(poi, true);
+        if(startPoint) calcRoute(poi, true);
       }
     }
 
@@ -1505,7 +1656,7 @@
         if(p) { p.visited = !p.visited; break; }
       }
       renderDayList();
-      updateStartPoiDropdown();
+      updatePointDropdowns();
       persistData();
     }
 
@@ -1539,7 +1690,7 @@
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
               <strong style="${p.visited ? 'text-decoration: line-through;' : ''}">${p.name}</strong>
-              <div style="font-size:0.75rem; color:#555;">🏙️ ${p.city || region.name} • ${p.mode === 'transit' ? '🚆 ÖV' : '🚶 Fuß'} • ${CAT_LABELS[p.category] || '🏛️'}</div>
+              <div style="font-size:0.75rem; color:#555;">🏙️ ${p.city || region.name} • Hin:${p.modeIn === 'transit' ? '🚆 ÖV' : '🚶 Fuß'} • Weiter:${p.modeOut === 'transit' ? '🚆 ÖV' : '🚶 Fuß'} • ${CAT_LABELS[p.category] || '🏛️'}</div>
             </div>
             <div style="display:flex; gap:4px;">
               <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="openAdminEditModal('${p.id}')">✏️ Edit</button>
@@ -1657,46 +1808,6 @@
       a.click();
       document.body.removeChild(a);
     }
-
-    const manifestFileContent = JSON.stringify({
-      "name": "TravelPlan Pro",
-      "short_name": "TravelPlan",
-      "start_url": "index.html",
-      "display": "standalone",
-      "background_color": "#ffffff",
-      "theme_color": "#1976d2",
-      "icons": [
-        { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-        { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
-      ]
-    }, null, 2);
-
-    const swFileContent = `const CACHE_NAME = 'travelplan-cache-v2-force';
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
-];
-
-self.addEventListener('install', (e) => {
-  self.skipWaiting();
-  e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
-});
-
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.map((k) => k !== CACHE_NAME && caches.delete(k))))
-  );
-  return self.clients.claim();
-});
-
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((res) => res || fetch(e.request).catch(() => caches.match('./index.html')))
-  );
-});`;
   </script>
 </body>
 </html>
