@@ -158,7 +158,7 @@
           "fee": "Kostenlos",
           "transit": "Haltestellen in der Nähe prüfen",
           "cost": 0,
-          "duration": 45,
+          "duration": 0,
           "notes": "Direkt über Karte hinzugefügt",
           "selectedForDay": true,
           "visited": false,
