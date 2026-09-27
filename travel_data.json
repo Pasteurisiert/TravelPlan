@@ -129,6 +129,25 @@
           "selectedForDay": false,
           "duration": 60,
           "cost": 0
+        },
+        {
+          "id": "poi_1790493103661",
+          "name": "Cruise Port",
+          "city": "Bergen, Norwegen",
+          "category": "oev",
+          "mode": "transit",
+          "lat": 20.6542908,
+          "lon": -105.2410583,
+          "description": "Cruise Port, Francisco Medina Ascencio, Puerto Vallarta, Región Costa Norte, Jalisco, 48300, Mexico",
+          "website": "",
+          "openingHours": "Nicht erfasst (siehe Google)",
+          "fee": "Nicht erfasst (siehe Google)",
+          "transit": "Haltestelle \"Francisco Medina Ascencio y Avenida Prisciliano Sánchez\" (< 400m Fußweg)",
+          "cost": 0,
+          "duration": 15,
+          "notes": "",
+          "selectedForDay": false,
+          "visited": false
         }
       ]
     },
