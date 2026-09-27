@@ -20,7 +20,9 @@
           "mode": "foot",
           "selectedForDay": true,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790430868118",
@@ -38,7 +40,9 @@
           "mode": "foot",
           "selectedForDay": true,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790430895824",
@@ -56,7 +60,9 @@
           "mode": "foot",
           "selectedForDay": true,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790430740443",
@@ -74,7 +80,9 @@
           "mode": "foot",
           "selectedForDay": true,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790430816439",
@@ -92,7 +100,9 @@
           "mode": "foot",
           "selectedForDay": true,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790431053973",
@@ -110,7 +120,9 @@
           "mode": "foot",
           "selectedForDay": true,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790430770852",
@@ -128,7 +140,9 @@
           "mode": "transit",
           "selectedForDay": true,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "transit",
+          "modeOut": "transit"
         },
         {
           "id": "poi_1790493393322",
@@ -147,7 +161,9 @@
           "duration": 45,
           "notes": "Direkt über Karte hinzugefügt",
           "selectedForDay": true,
-          "visited": false
+          "visited": false,
+          "modeIn": "transit",
+          "modeOut": "transit"
         }
       ]
     },
@@ -170,7 +186,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790423289343",
@@ -188,7 +206,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790423303335",
@@ -205,7 +225,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790423318612",
@@ -222,7 +244,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790423341958",
@@ -239,7 +263,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790423362446",
@@ -257,7 +283,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790423383588",
@@ -274,7 +302,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790423394158",
@@ -291,7 +321,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790423411070",
@@ -308,7 +340,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790423498131",
@@ -325,7 +359,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790429848448",
@@ -343,7 +379,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790430288868",
@@ -361,7 +399,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790430371342",
@@ -379,7 +419,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790430473390",
@@ -397,7 +439,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790430497179",
@@ -415,7 +459,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790431913824",
@@ -433,7 +479,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790437280468",
@@ -451,7 +499,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790437313550",
@@ -469,7 +519,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         }
       ]
     },
@@ -493,7 +545,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790431594036",
@@ -511,7 +565,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790431632443",
@@ -529,7 +585,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790431707573",
@@ -547,7 +605,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         }
       ]
     },
@@ -571,7 +631,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790432100441",
@@ -589,7 +651,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790432134628",
@@ -607,7 +671,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790432167392",
@@ -625,7 +691,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790432209780",
@@ -643,7 +711,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         }
       ]
     },
@@ -667,7 +737,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790432578681",
@@ -685,7 +757,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790432805401",
@@ -703,7 +777,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         }
       ]
     },
@@ -727,7 +803,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790434229906",
@@ -745,7 +823,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790434246995",
@@ -763,7 +843,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790434257737",
@@ -781,7 +863,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790434275387",
@@ -799,7 +883,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790434776500",
@@ -817,7 +903,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         }
       ]
     },
@@ -841,7 +929,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790434894606",
@@ -859,7 +949,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790434918410",
@@ -877,7 +969,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790434994587",
@@ -895,7 +989,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790435021530",
@@ -913,7 +1009,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790435037301",
@@ -931,7 +1029,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790435053659",
@@ -949,7 +1049,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790435074317",
@@ -967,7 +1069,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         }
       ]
     },
@@ -991,7 +1095,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790435872103",
@@ -1009,7 +1115,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790435895741",
@@ -1027,7 +1135,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790435914652",
@@ -1045,7 +1155,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790435984566",
@@ -1063,7 +1175,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         }
       ]
     },
@@ -1087,7 +1201,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790436208987",
@@ -1105,7 +1221,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790436255335",
@@ -1123,7 +1241,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790436301500",
@@ -1141,7 +1261,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790436335468",
@@ -1159,7 +1281,9 @@
           "mode": "foot",
           "selectedForDay": false,
           "duration": 60,
-          "cost": 0
+          "cost": 0,
+          "modeIn": "foot",
+          "modeOut": "foot"
         }
       ]
     },
@@ -1184,7 +1308,9 @@
           "notes": "",
           "visited": false,
           "mode": "transit",
-          "selectedForDay": true
+          "selectedForDay": true,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790492278947",
@@ -1203,7 +1329,9 @@
           "notes": "",
           "visited": false,
           "mode": "foot",
-          "selectedForDay": true
+          "selectedForDay": true,
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790492262218",
@@ -1222,7 +1350,9 @@
           "notes": "",
           "visited": false,
           "mode": "foot",
-          "selectedForDay": true
+          "selectedForDay": true,
+          "modeIn": "foot",
+          "modeOut": "foot"
         }
       ]
     }
