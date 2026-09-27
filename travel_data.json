@@ -1309,7 +1309,7 @@
           "visited": false,
           "mode": "transit",
           "selectedForDay": true,
-          "modeIn": "transit",
+          "modeIn": "foot",
           "modeOut": "foot"
         },
         {
@@ -1352,7 +1352,7 @@
           "mode": "foot",
           "selectedForDay": true,
           "modeIn": "foot",
-          "modeOut": "foot"
+          "modeOut": "transit"
         }
       ]
     }
