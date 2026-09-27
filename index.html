@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#1976d2">
-  <title>TravelPlan Pro v2.7 - Reale Fußwege</title>
+  <title>TravelPlan Pro v2.8 - Nummerierte Route & Umkehren</title>
   
   <link rel="manifest" href="manifest.json">
 
@@ -94,6 +94,45 @@
     .poi-card.visited { opacity: 0.5; text-decoration: line-through; background: #e9ecef; }
     .poi-card-header { display: flex; justify-content: space-between; align-items: center; }
 
+    /* Nummerierungs-Badge */
+    .tour-number-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 0.8rem;
+      margin-right: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    /* Nummerierte Karten-Marker */
+    .numbered-map-marker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px !important;
+      height: 26px !important;
+      border-radius: 50%;
+      color: white;
+      font-weight: bold;
+      font-size: 13px;
+      border: 2px solid white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.35);
+      text-align: center;
+    }
+    .numbered-map-marker.inactive {
+      width: 14px !important;
+      height: 14px !important;
+      background: #757575 !important;
+      border-color: #ffffff;
+      font-size: 0;
+    }
+
     .badge { display: inline-block; background: #e9ecef; padding: 4px 7px; border-radius: 4px; font-size: 0.78rem; margin: 2px 3px 3px 0; cursor: pointer; }
     .badge.ok { background: #d4edda; color: #155724; }
     .badge.warn { background: #fff3cd; color: #856404; }
@@ -120,11 +159,12 @@
 <body>
 
   <header>
-    <div>🌍 TravelPlan Pro v2.7</div>
+    <div>🌍 TravelPlan Pro v2.8</div>
     <div id="sync-pill" onclick="syncWithGitHub()">GitHub: Offline</div>
   </header>
 
   <main>
+    <!-- 1. TAGESPLANUNG -->
     <div id="view-day" class="page-view active">
       <div class="mobile-switch">
         <div class="segmented-control">
@@ -167,11 +207,13 @@
             <div id="loc-status" style="font-size:0.75rem; color:#666; font-weight: 500;">Start & Ende bereit</div>
           </div>
 
-          <!-- Aktionen -->
+          <!-- Aktionen: Optimieren, Invertieren, Route berechnen -->
           <div class="card" style="padding: 10px;">
             <div style="display:flex; gap:6px; margin-bottom:6px;">
-              <button class="btn btn-primary" style="flex:1;" onclick="optimizeDayRoute()">⚡ Tour Optimieren</button>
-              <button class="btn btn-success" style="flex:1;" onclick="calculateFullDayTour()">🗺️ Ganztagesroute</button>
+              <button class="btn btn-primary" style="flex:1.2;" onclick="optimizeDayRoute()">⚡ Optimieren</button>
+              <!-- NEUER BUTTON: ROUTE INVERTIEREN -->
+              <button class="btn btn-secondary" style="flex:1;" onclick="reverseDayRoute()">🔄 Invertieren</button>
+              <button class="btn btn-success" style="flex:1.2;" onclick="calculateFullDayTour()">🗺️ Ganztag</button>
             </div>
             <div style="display:flex; gap:6px;">
               <button class="btn btn-secondary" style="flex:1;" onclick="exportGPX()">💾 GPX Export</button>
@@ -183,7 +225,7 @@
 
           <!-- Orte-Liste -->
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="font-weight:bold; font-size:0.9rem;">Orte der Region</div>
+            <div style="font-weight:bold; font-size:0.9rem;">Geplante Tour-Reihenfolge</div>
             <label style="font-size:0.8rem; cursor:pointer;">
               <input type="checkbox" id="check-visited" onchange="renderDayList()" style="width:auto; margin:0;"> Besuchte zeigen
             </label>
@@ -206,7 +248,6 @@
             <label style="font-size:0.78rem; color:#666;">Stadt / Ort:</label>
             <input type="text" id="det-city-input" style="margin-bottom:4px;">
 
-            <!-- Transportmittel getrennt: Anreise & Weiterreise -->
             <div class="route-direction-box" style="margin-bottom:8px;">
               <div class="route-direction-row">
                 <span style="font-weight:bold;">Hinweg zum Ziel:</span>
@@ -719,7 +760,7 @@
       if (val === '__GPS__') {
         startLiveGPS();
       } else if (val === '__CUSTOM__') {
-        // Manuelle Wahl beibehalten
+        // Belassen
       } else {
         stopLiveGPS();
         const regId = document.getElementById('day-region-select').value;
@@ -1216,13 +1257,31 @@
       persistData();
       renderDayList();
       calculateFullDayTour();
-      alert(`✅ Tour optimiert: ${isRoundTrip ? 'Rundtour zum Startpunkt' : 'Strecke zum Zielpunkt'} wurde in kürzeste Reihenfolge sortiert!`);
+      alert(`✅ Tour optimiert: Die Tour wurde in kürzeste Reihenfolge sortiert!`);
     }
 
-    // --- PRÄZISE ROUTEN-GEOMETRIE: ECHTES FUSS-ROUTING ---
+    // --- NEU: ROUTE INVERTIEREN / UMKEHREN ---
+    function reverseDayRoute() {
+      const regId = document.getElementById('day-region-select').value;
+      const region = appData.regions.find(r => r.id === regId);
+      if (!region) return;
+
+      const selectedPlaces = region.places.filter(p => p.selectedForDay && !p.visited);
+      if (selectedPlaces.length < 2) return alert("Mindestens 2 ausgewählte Orte erforderlich, um die Route umzukehren.");
+
+      // Ausgewählte Orte umkehren
+      const reversed = [...selectedPlaces].reverse();
+      const others = region.places.filter(p => !p.selectedForDay || p.visited);
+      region.places = [...reversed, ...others];
+
+      persistData();
+      renderDayList();
+      calculateFullDayTour();
+      alert("🔄 Route umgekehrt: Reihenfolge und Wegführung wurden invertiert!");
+    }
+
     async function fetchRealRouteGeometry(fromLng, fromLat, toLng, toLat, isTransit) {
       if (isTransit) {
-        // ÖV: Straßen- und Schienennetzwerk abfragen
         try {
           const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
           const res = await fetch(url);
@@ -1236,7 +1295,6 @@
           }
         } catch(e) {}
       } else {
-        // ZU FUSS: Echtes Fußgängerrouting über OSRM Foot Server
         const footUrls = [
           `https://routing.openstreetmap.de/routed-foot/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`,
           `https://router.project-osrm.org/route/v1/foot/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`
@@ -1257,7 +1315,6 @@
         }
       }
 
-      // Fallback bei Verbindungsabbrüchen
       const dist = Math.hypot(toLat - fromLat, toLng - fromLng) * 111000;
       return {
         geometry: {
@@ -1265,7 +1322,7 @@
           coordinates: [[fromLng, fromLat], [toLng, toLat]]
         },
         distance: dist,
-        duration: Math.round(dist / 1.2) // ~4.3 km/h
+        duration: Math.round(dist / 1.2)
       };
     }
 
@@ -1554,7 +1611,7 @@
       }
     }
 
-    // --- RENDERING TAGESPLANUNG ---
+    // --- RENDERING: NUMMERIERTE MARKER AUF DER KARTE ---
     function onRegionChange() {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -1564,21 +1621,39 @@
 
       if(region && region.places.length > 0) {
         const bounds = [];
-        region.places.forEach((p, idx) => {
+        let tourNumber = 1;
+
+        region.places.forEach((p) => {
           if(p.lat && p.lon && p.lat !== 0) {
             const catColor = CAT_COLORS[p.category] || '#1976d2';
-            const m = L.circleMarker([p.lat, p.lon], {
-              color: catColor,
-              fillColor: catColor,
-              fillOpacity: 0.85,
-              radius: p.selectedForDay ? 9 : 6,
-              weight: p.selectedForDay ? 3 : 1
-            }).addTo(markersLayer).bindPopup(`<b>${idx + 1}. ${p.name}</b><br><small>${p.city || ''} (Hin:${p.modeIn === 'transit' ? '🚆 ÖV' : '🚶 Fuß'}|Weiter:${p.modeOut === 'transit' ? '🚆 ÖV' : '🚶 Fuß'})</small>`);
+            let markerIcon;
+
+            if (p.selectedForDay && !p.visited) {
+              const currentNum = tourNumber++;
+              // Nummeriertes DivIcon
+              markerIcon = L.divIcon({
+                className: 'custom-pin',
+                html: `<div class="numbered-map-marker" style="background-color: ${catColor};">${currentNum}</div>`,
+                iconSize: [26, 26],
+                iconAnchor: [13, 13]
+              });
+            } else {
+              markerIcon = L.divIcon({
+                className: 'custom-pin-inactive',
+                html: `<div class="numbered-map-marker inactive"></div>`,
+                iconSize: [14, 14],
+                iconAnchor: [7, 7]
+              });
+            }
+
+            const m = L.marker([p.lat, p.lon], { icon: markerIcon }).addTo(markersLayer)
+              .bindPopup(`<b>${p.name}</b><br><small>${p.city || ''} (Hin:${p.modeIn === 'transit' ? '🚆 ÖV' : '🚶 Fuß'})</small>`);
             
             m.on('click', () => selectPoi(p));
             bounds.push([p.lat, p.lon]);
           }
         });
+
         if(bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
 
         if (!startPoint) {
@@ -1594,6 +1669,7 @@
       renderDayList();
     }
 
+    // --- RENDERING: ZIELLISTE IN ROUTEN-REIHENFOLGE NUMMERIERT ---
     function renderDayList() {
       const regId = document.getElementById('day-region-select').value;
       const showVisited = document.getElementById('check-visited').checked;
@@ -1612,15 +1688,20 @@
         if(!p.modeIn) p.modeIn = 'foot';
         if(!p.modeOut) p.modeOut = 'foot';
 
-        const isSelected = !!p.selectedForDay;
+        const isSelected = !!p.selectedForDay && !p.visited;
+        const currentTourNumber = isSelected ? tourIdx++ : null;
+
         const el = document.createElement('div');
         el.className = `poi-card cat-${p.category || 'kultur'} ${isSelected ? 'in-tour' : ''} ${p.visited ? 'visited' : ''} ${selectedPoi && selectedPoi.id === p.id ? 'active' : ''}`;
         
         el.innerHTML = `
           <div class="poi-card-header">
-            <div>
-              <strong>${isSelected ? (tourIdx++) + '. ' : ''}${p.name}</strong>
-              <div style="font-size:0.75rem; color:#666;">📍 ${p.city || region.name} • ${CAT_LABELS[p.category] || '🏛️'} • ⏱️ ~${p.duration || 60} Min.</div>
+            <div style="display:flex; align-items:center;">
+              ${isSelected ? `<span class="tour-number-badge" style="background:${CAT_COLORS[p.category] \vert{}\vert{} 'var(--primary)'};">${currentTourNumber}</span>` : ''}
+              <div>
+                <strong>${p.name}</strong>
+                <div style="font-size:0.75rem; color:#666;">📍 ${p.city || region.name} • ${CAT_LABELS[p.category] || '🏛️'} • ⏱️ ~${p.duration || 60} Min.</div>
+              </div>
             </div>
             <div style="display:flex; align-items:center; gap:6px;">
               <button class="btn-tour-select ${isSelected ? 'selected' : ''}" 
@@ -1715,7 +1796,7 @@
         if(p) { p.visited = !p.visited; break; }
       }
       renderDayList();
-      updatePointDropdowns();
+      onRegionChange();
       persistData();
     }
 
@@ -1780,6 +1861,7 @@
       persistData();
     }
 
+    // --- GITHUB & STORAGE ---
     function loadSettings() {
       const savedGh = localStorage.getItem('gh_config');
       if(savedGh) {
