@@ -5,45 +5,6 @@
       "name": "Bergen, Norwegen",
       "places": [
         {
-          "id": "poi_1790430740443",
-          "name": "Bryggen",
-          "city": "Bergen, Norwegen",
-          "lat": 60.3977257,
-          "lon": 5.3229328,
-          "description": "Das Hanseviertel Bryggen (deutsch Landungsbrücke, Kai) oder Tyskebryggen (Deutsche Brücke) besteht aus den ehemaligen Handelskontoren der Hanse in Bergen/Norwegen. Die Hansekontore nehmen fast das gesamte nordöstliche Ufer der Bucht Vågen ein.\n\n...",
-          "website": "https://de.wikipedia.org/wiki/Bryggen",
-          "openingHours": "Siehe Google-Info",
-          "fee": "Siehe Google-Info",
-          "transit": "Mit ÖV erreichbar",
-          "visited": false
-        },
-        {
-          "id": "poi_1790430770852",
-          "name": "Edvard-Grieg-Museum",
-          "city": "Troldhaugen",
-          "lat": 60.319623,
-          "lon": 5.329455,
-          "description": "Mit dem Taxi?\n\nTroldhaugen ist der Name des Hauses des norwegischen Komponisten Edvard Grieg und dessen Frau Nina. Es liegt in Hop im Stadtteil Fana im Süden beider Heimatstadt Bergen am Ufer des Nordåsvannet. Sie lebten dort von 1885 bis zu seinem Tode im Jahre 1907. Ihrer beiden sterblichen Überreste ruhen im Inneren eines Berggrabes in der Nähe des Hauses. Das...",
-          "website": "https://www.griegmuseum.no/",
-          "openingHours": "Jan-Apr: Mo-Su 10:00-16:00; May-Sep: Mo-Su 09:00-18:00; Oct-Dec: Mo-Su 10:00-16:00",
-          "fee": "yes",
-          "transit": "Mit ÖV erreichbar",
-          "visited": false
-        },
-        {
-          "id": "poi_1790430816439",
-          "name": "Festung Bergenhus",
-          "city": "Bergen, Norwegen",
-          "lat": 60.4001102,
-          "lon": 5.3178547,
-          "description": "Die Festung Bergenhus in Bergen ist eine der ältesten und am besten erhaltenen Festungen Norwegens. Die ältesten Teile der Festung, die im Stadtteil Bergenhus liegt, stammen aus dem 12. Jahrhundert, die neuesten Teile aus der Zeit des Zweiten Weltkrieges....",
-          "website": "https://www.forsvarsbygg.no/no/festningene/finn-din-festning/bergenhus-festning/",
-          "openingHours": "Mo-Su 06:30-23:00",
-          "fee": "Siehe Google-Info",
-          "transit": "Haltestelle \"Bradbenken\" (< 350m)",
-          "visited": false
-        },
-        {
           "id": "poi_1790430836093",
           "name": "Bergen Domkirke",
           "city": "Bergen, Norwegen",
@@ -83,6 +44,32 @@
           "visited": false
         },
         {
+          "id": "poi_1790430740443",
+          "name": "Bryggen",
+          "city": "Bergen, Norwegen",
+          "lat": 60.3977257,
+          "lon": 5.3229328,
+          "description": "Das Hanseviertel Bryggen (deutsch Landungsbrücke, Kai) oder Tyskebryggen (Deutsche Brücke) besteht aus den ehemaligen Handelskontoren der Hanse in Bergen/Norwegen. Die Hansekontore nehmen fast das gesamte nordöstliche Ufer der Bucht Vågen ein.\n\n...",
+          "website": "https://de.wikipedia.org/wiki/Bryggen",
+          "openingHours": "Siehe Google-Info",
+          "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
+        },
+        {
+          "id": "poi_1790430816439",
+          "name": "Festung Bergenhus",
+          "city": "Bergen, Norwegen",
+          "lat": 60.4001102,
+          "lon": 5.3178547,
+          "description": "Die Festung Bergenhus in Bergen ist eine der ältesten und am besten erhaltenen Festungen Norwegens. Die ältesten Teile der Festung, die im Stadtteil Bergenhus liegt, stammen aus dem 12. Jahrhundert, die neuesten Teile aus der Zeit des Zweiten Weltkrieges....",
+          "website": "https://www.forsvarsbygg.no/no/festningene/finn-din-festning/bergenhus-festning/",
+          "openingHours": "Mo-Su 06:30-23:00",
+          "fee": "Siehe Google-Info",
+          "transit": "Haltestelle \"Bradbenken\" (< 350m)",
+          "visited": false
+        },
+        {
           "id": "poi_1790431053973",
           "name": "Art Museum",
           "city": "Bergen, Norwegen",
@@ -92,6 +79,19 @@
           "website": "",
           "openingHours": "Th 10:00-20:00; Tu,We,Fr-Su 10:00-17:00; Mo off",
           "fee": "Siehe Google-Info",
+          "transit": "Mit ÖV erreichbar",
+          "visited": false
+        },
+        {
+          "id": "poi_1790430770852",
+          "name": "Edvard-Grieg-Museum",
+          "city": "Troldhaugen",
+          "lat": 60.319623,
+          "lon": 5.329455,
+          "description": "Mit dem Taxi?\n\nTroldhaugen ist der Name des Hauses des norwegischen Komponisten Edvard Grieg und dessen Frau Nina. Es liegt in Hop im Stadtteil Fana im Süden beider Heimatstadt Bergen am Ufer des Nordåsvannet. Sie lebten dort von 1885 bis zu seinem Tode im Jahre 1907. Ihrer beiden sterblichen Überreste ruhen im Inneren eines Berggrabes in der Nähe des Hauses. Das...",
+          "website": "https://www.griegmuseum.no/",
+          "openingHours": "Jan-Apr: Mo-Su 10:00-16:00; May-Sep: Mo-Su 09:00-18:00; Oct-Dec: Mo-Su 10:00-16:00",
+          "fee": "yes",
           "transit": "Mit ÖV erreichbar",
           "visited": false
         }
