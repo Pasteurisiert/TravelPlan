@@ -23,6 +23,7 @@
       --border: #dee2e6;
       --success: #28a745;
       --transit-color: #9c27b0;
+      --transit-cat: #9c27b0;
       --live: #e53935;
       --culture: #673ab7;
       --nature: #2e7d32;
@@ -83,6 +84,7 @@
     .poi-card.cat-natur { border-left-color: var(--nature); }
     .poi-card.cat-gastro { border-left-color: var(--food); }
     .poi-card.cat-hotel { border-left-color: var(--hotel); }
+    .poi-card.cat-oev { border-left-color: var(--transit-cat); }
     .poi-card.in-tour { background: #f3f9ff; border-color: #90caf9; }
     .poi-card.active { border-color: var(--primary); }
     .poi-card.visited { opacity: 0.5; text-decoration: line-through; background: #e9ecef; }
@@ -253,7 +255,7 @@
         <select id="admin-region-select" onchange="syncAdminCityDefault()"></select>
 
         <label style="font-size:0.8rem;">Ziel / Sehenswürdigkeit / Adresse:</label>
-        <input type="text" id="admin-new-poi" placeholder="z.B. Studiestræde 57, Schloss Neuschwanstein">
+        <input type="text" id="admin-new-poi" placeholder="z.B. Studiestræde 57, Hauptbahnhof, Schloss Neuschwanstein">
 
         <label style="font-size:0.8rem;">Stadt / Ort:</label>
         <input type="text" id="admin-new-city" placeholder="z.B. Kopenhagen, Schwangau">
@@ -265,11 +267,12 @@
         </select>
 
         <label style="font-size:0.8rem;">Kategorie:</label>
-        <select id="admin-new-cat">
+        <select id="admin-new-cat" onchange="handleAdminCatChange(this.value)">
           <option value="kultur">🏛️ Kultur & Sehenswürdigkeit</option>
           <option value="natur">🌳 Natur & Aussicht</option>
           <option value="gastro">☕ Café / Restaurant / Pause</option>
           <option value="hotel">🏨 Unterkunft / Hotel</option>
+          <option value="oev">🚆 ÖV / Bahnhof / Haltestelle</option>
         </select>
 
         <button class="btn btn-primary btn-block" id="btn-add-poi" style="margin-top:6px;" onclick="searchAndAddPOI()">Recherche & Hinzufügen</button>
@@ -346,6 +349,7 @@
         <option value="natur">🌳 Natur</option>
         <option value="gastro">☕ Gastro</option>
         <option value="hotel">🏨 Hotel</option>
+        <option value="oev">🚆 ÖV / Bahnhof / Haltestelle</option>
       </select>
 
       <label style="font-size:0.8rem;">Öffnungszeiten:</label>
@@ -417,11 +421,21 @@
     let accuracyCircle = null;
     let lastRouteCalcTime = 0;
 
+    // Farbpalette je Kategorie inkl. ÖV
     const CAT_COLORS = {
       kultur: '#673ab7',
       natur: '#2e7d32',
       gastro: '#ef6c00',
-      hotel: '#0277bd'
+      hotel: '#0277bd',
+      oev: '#9c27b0'
+    };
+
+    const CAT_LABELS = {
+      kultur: '🏛️ Kultur',
+      natur: '🌳 Natur',
+      gastro: '☕ Gastro',
+      hotel: '🏨 Hotel',
+      oev: '🚆 ÖV'
     };
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -490,6 +504,13 @@
       const reg = appData.regions.find(r => r.id === regId);
       const cityInput = document.getElementById('admin-new-city');
       if (reg && !cityInput.value) cityInput.placeholder = `z.B. ${reg.name}`;
+    }
+
+    function handleAdminCatChange(cat) {
+      // Wenn Kategorie ÖV gewählt wird, automatisch Anreise auf ÖV setzen
+      if (cat === 'oev') {
+        document.getElementById('admin-new-mode').value = 'transit';
+      }
     }
 
     // --- LIVE GPS ---
@@ -624,7 +645,7 @@
       } catch(e) { }
     }
 
-    // --- RECHERCHE: ALLE DETAILS VOLLSTÄNDIG ERFASSEN ---
+    // --- RECHERCHE ---
     async function deepSearchPOI(poiName, cityName, regionName) {
       const info = {
         lat: 0,
@@ -717,7 +738,6 @@
               if (p.extract) info.description = p.extract.slice(0, 350) + "...";
               if (!info.website && p.fullurl) info.website = p.fullurl;
 
-              // Homepage aus Wikidata holen
               const wikibaseItem = p.pageprops?.wikibase_item;
               if (wikibaseItem && !info.website) {
                 try {
@@ -757,7 +777,8 @@
       const name = document.getElementById('admin-new-poi').value.trim();
       const city = document.getElementById('admin-new-city').value.trim();
       const cat = document.getElementById('admin-new-cat').value;
-      const mode = document.getElementById('admin-new-mode').value || 'foot';
+      // Bei Kategorie oev automatisch transit, sonst Auswahlwert
+      const mode = (cat === 'oev') ? 'transit' : (document.getElementById('admin-new-mode').value || 'foot');
       const statusEl = document.getElementById('admin-search-status');
 
       if (!name || !regId) return alert("Region und Ziel/Adresse erforderlich!");
@@ -784,7 +805,7 @@
           fee: info.fee,
           transit: info.transit,
           cost: 0,
-          duration: 60,
+          duration: (cat === 'oev' ? 15 : 60),
           notes: "",
           selectedForDay: true,
           visited: false
@@ -1189,7 +1210,7 @@
               fillOpacity: 0.85,
               radius: p.selectedForDay ? 9 : 6,
               weight: p.selectedForDay ? 3 : 1
-            }).addTo(markersLayer).bindPopup(`<b>${idx + 1}. ${p.name}</b><br><small>${p.city || ''} (${p.mode === 'transit' ? '🚆 ÖV' : '🚶 Fuß'})</small>`);
+            }).addTo(markersLayer).bindPopup(`<b>${idx + 1}. ${p.name}</b><br><small>${p.city || ''} (${p.mode === 'transit' ? '🚆 ÖV' : '🚶 Fuß'}) • ${CAT_LABELS[p.category] || '🏛️'}</small>`);
             
             m.on('click', () => selectPoi(p));
             bounds.push([p.lat, p.lon]);
@@ -1216,7 +1237,7 @@
       let tourIdx = 1;
       region.places.forEach(p => {
         if(!showVisited && p.visited) return;
-        if(!p.mode) p.mode = 'foot';
+        if(!p.mode) p.mode = (p.category === 'oev' ? 'transit' : 'foot');
 
         const isSelected = !!p.selectedForDay;
         const isTransit = p.mode === 'transit';
@@ -1227,7 +1248,7 @@
           <div class="poi-card-header">
             <div>
               <strong>${isSelected ? (tourIdx++) + '. ' : ''}${p.name}</strong>
-              <div style="font-size:0.75rem; color:#666;">📍 ${p.city || region.name} • ⏱️ ~${p.duration || 60} Min.</div>
+              <div style="font-size:0.75rem; color:#666;">📍 ${p.city || region.name} • ${CAT_LABELS[p.category] || '🏛️'} • ⏱️ ~${p.duration || 60} Min.</div>
             </div>
             <div style="display:flex; align-items:center; gap:5px;">
               <button class="btn-mode-toggle ${isTransit ? 'mode-transit' : 'mode-foot'}" 
@@ -1250,7 +1271,7 @@
 
     function selectPoi(poi) {
       selectedPoi = poi;
-      if(!poi.mode) poi.mode = 'foot';
+      if(!poi.mode) poi.mode = (poi.category === 'oev' ? 'transit' : 'foot');
       renderDayList();
 
       const reg = appData.regions.find(r => r.id === document.getElementById('day-region-select').value);
@@ -1287,6 +1308,7 @@
       const badgesEl = document.getElementById('det-badges');
       badgesEl.innerHTML = `
         <span class="badge ${poi.lat ? 'ok' : 'warn'}">📍 ${poi.lat ? poi.lat.toFixed(4) + ', ' + poi.lon.toFixed(4) : 'Keine Koord'}</span>
+        <span class="badge info">${CAT_LABELS[poi.category] || '🏛️ Kultur'}</span>
         <span class="badge info" onclick="editBadgePrompt('openingHours', 'Öffnungszeiten')">🕒 ${poi.openingHours || 'k.A.'} ✏️</span>
         <span class="badge info" onclick="editBadgePrompt('fee', 'Eintrittspreis')">💵 ${poi.fee || 'k.A.'} ✏️</span>
         <span class="badge info" onclick="editBadgePrompt('cost', 'Budget / Kosten (€)', true)">💰 ${poi.cost || 0} € ✏️</span>
@@ -1339,7 +1361,7 @@
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <div>
               <strong style="${p.visited ? 'text-decoration: line-through;' : ''}">${p.name}</strong>
-              <div style="font-size:0.75rem; color:#555;">🏙️ ${p.city || region.name} • ${p.mode === 'transit' ? '🚆 ÖV' : '🚶 Fuß'} • ${p.category || 'kultur'}</div>
+              <div style="font-size:0.75rem; color:#555;">🏙️ ${p.city || region.name} • ${p.mode === 'transit' ? '🚆 ÖV' : '🚶 Fuß'} • ${CAT_LABELS[p.category] || '🏛️'}</div>
             </div>
             <div style="display:flex; gap:4px;">
               <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="openAdminEditModal('${p.id}')">✏️ Edit</button>
@@ -1434,6 +1456,8 @@
           const resJson = await putRes.json();
           ghConfig.sha = resJson.content.sha;
           pill.innerText = "GitHub: Synced ✅";
+        } else {
+          pill.innerText = "GitHub: Fehler";
         }
       } catch(e) {
         pill.innerText = "GitHub: Offline";
