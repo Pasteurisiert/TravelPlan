@@ -1331,7 +1331,7 @@
           "mode": "foot",
           "selectedForDay": true,
           "modeIn": "foot",
-          "modeOut": "foot"
+          "modeOut": "transit"
         },
         {
           "id": "poi_1790492262218",
