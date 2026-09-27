@@ -502,26 +502,6 @@
           "cost": 0,
           "modeIn": "foot",
           "modeOut": "foot"
-        },
-        {
-          "id": "poi_1790437313550",
-          "name": "Hauptbahnhof",
-          "city": "Kopenhagen",
-          "lat": 52.5252949,
-          "lon": 13.3706843,
-          "description": "Hauptbahnhof (Tunnel), Friedrich-List-Ufer, Europacity, Moabit, Mitte, Berlin, 10557, Deutschland",
-          "website": "",
-          "openingHours": "Siehe Google-Info",
-          "fee": "Siehe Google-Info",
-          "transit": "Mit ÖV erreichbar",
-          "visited": false,
-          "category": "kultur",
-          "mode": "foot",
-          "selectedForDay": false,
-          "duration": 60,
-          "cost": 0,
-          "modeIn": "foot",
-          "modeOut": "foot"
         }
       ]
     },
