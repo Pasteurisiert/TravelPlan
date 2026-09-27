@@ -15,7 +15,12 @@
           "openingHours": "Tu,Th-Fr 12:00-14:00",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Torget (C)\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790430868118",
@@ -28,7 +33,12 @@
           "openingHours": "Mo-Fr 07:30-24:00, Sa,Su,PH 08:00-24:00",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790430895824",
@@ -41,7 +51,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Torget (C)\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790430740443",
@@ -54,7 +69,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790430816439",
@@ -67,7 +87,12 @@
           "openingHours": "Mo-Su 06:30-23:00",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Bradbenken\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790431053973",
@@ -80,7 +105,12 @@
           "openingHours": "Th 10:00-20:00; Tu,We,Fr-Su 10:00-17:00; Mo off",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790430770852",
@@ -93,7 +123,12 @@
           "openingHours": "Jan-Apr: Mo-Su 10:00-16:00; May-Sep: Mo-Su 09:00-18:00; Oct-Dec: Mo-Su 10:00-16:00",
           "fee": "yes",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "transit",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         }
       ]
     },
@@ -111,7 +146,12 @@
           "openingHours": "Tu-Su 10:00-17:00",
           "fee": "k.A.",
           "visited": false,
-          "transit": "Haltestelle \"Gammel Strand St., Christiansborg\" (< 450m)"
+          "transit": "Haltestelle \"Gammel Strand St., Christiansborg\" (< 450m)",
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790423289343",
@@ -124,7 +164,12 @@
           "fee": "k.A.",
           "visited": false,
           "transit": "Mit ÖV erreichbar",
-          "city": ""
+          "city": "",
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790423303335",
@@ -136,7 +181,12 @@
           "openingHours": "k.A.",
           "fee": "k.A.",
           "visited": false,
-          "transit": "Haltestelle \"Gammel Strand St., Christiansborg\" (< 450m)"
+          "transit": "Haltestelle \"Gammel Strand St., Christiansborg\" (< 450m)",
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790423318612",
@@ -148,7 +198,12 @@
           "openingHours": "1. Mai - 31. Okt. 10:00-16:00, 1. Nov. - 21. Dez. Di-So 10:00-16:00, 22. Dez. - 26. Dez. geschlossen, 27. Dez. - 30. Dez. 11:00-16:00, 31. Dez. geschlossen, 01. Jan. - 30. Apr. Di-So 10:00-16:00",
           "fee": "Erwachsene: 90 DKK, Kinder unter 18: frei, Gruppen (mindesten 12 Personen): 70 DKK, Studenten: 60 DKK, 2 Tage Ticket für Amalienborg und Rosenborg: 125 DKK",
           "visited": false,
-          "transit": "Christian VIII's Palæ"
+          "transit": "Christian VIII's Palæ",
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790423341958",
@@ -160,7 +215,12 @@
           "openingHours": "Apr-Sep: 08:30-18:00, Oct-Mar: 08:30-16:00",
           "fee": "no",
           "visited": false,
-          "transit": "Haltestelle \"Nørreport\" (< 450m)"
+          "transit": "Haltestelle \"Nørreport\" (< 450m)",
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790423362446",
@@ -173,7 +233,12 @@
           "fee": "k.A.",
           "visited": false,
           "transit": "Mit ÖV erreichbar",
-          "city": ""
+          "city": "",
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790423383588",
@@ -185,7 +250,12 @@
           "openingHours": "Di + Mi 10.00 – 17.00 Uhr, Do 10.00 – 21.00 Uhr, Fr – So 10.00 – 17.00 Uhr, Mo geschlossen",
           "fee": "150 DKK, 135 DKK online",
           "visited": false,
-          "transit": "Haltestelle \"Hovedbanegården, Tivoli (Bernstorffsgade)\" (< 450m)"
+          "transit": "Haltestelle \"Hovedbanegården, Tivoli (Bernstorffsgade)\" (< 450m)",
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790423394158",
@@ -197,7 +267,12 @@
           "openingHours": "Apr-Oct Mo-Su,PH 10:00-17:00; Nov-Mar Mo closed, Tu-Su,PH 10:00-17:00; Dec 24,25,31 off",
           "fee": "yes",
           "visited": false,
-          "transit": "Haltestelle \"Glyptoteket\" (< 450m)"
+          "transit": "Haltestelle \"Glyptoteket\" (< 450m)",
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790423411070",
@@ -209,7 +284,12 @@
           "openingHours": "Tu-We, Fr-Su 10:00-18:00; Th 10:00-20:00",
           "fee": "k.A.",
           "visited": false,
-          "transit": "Mit ÖV erreichbar"
+          "transit": "Mit ÖV erreichbar",
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790423498131",
@@ -221,7 +301,12 @@
           "openingHours": "10:00 - 17:00 Uhr (saisonal variierend, im Winter teils bis 16:00 Uhr)",
           "fee": "ca. 145 DKK (ca. 19,50 €), Kinder unter 18 Jahren frei",
           "visited": false,
-          "transit": "Mit ÖV erreichbar"
+          "transit": "Mit ÖV erreichbar",
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790429848448",
@@ -234,7 +319,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790430288868",
@@ -247,7 +337,12 @@
           "openingHours": "Mo off; Tu-Fr 11:00-22:00; Sa-Su 11:00-18:00",
           "fee": "yes",
           "transit": "Haltestelle \"Louisiana\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790430371342",
@@ -260,7 +355,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790430473390",
@@ -273,7 +373,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Sankt Peders Stræde\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790430497179",
@@ -286,7 +391,12 @@
           "openingHours": "Mo-Su 10:00-16:00+",
           "fee": "yes",
           "transit": "Haltestelle \"Sankt Clara Vej\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790431913824",
@@ -299,7 +409,12 @@
           "openingHours": "Jan-Jun:Tu-Su 11:00-17:00; Jul-Aug 11:00-18:00; Sep-Dec:Tu-Su 11:00-17:00",
           "fee": "yes",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790437280468",
@@ -312,7 +427,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790437313550",
@@ -325,7 +445,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         }
       ]
     },
@@ -344,7 +469,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790431594036",
@@ -357,7 +487,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790431632443",
@@ -370,7 +505,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790431707573",
@@ -383,7 +523,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Jostedalsbreen nasjonalparksenter\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         }
       ]
     },
@@ -402,7 +547,12 @@
           "openingHours": "Mo-Fr 10:00-17:00; Sa-Su 10:00-16:00",
           "fee": "yes",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790432100441",
@@ -415,7 +565,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Parkvegen\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790432134628",
@@ -428,7 +583,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790432167392",
@@ -441,7 +601,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790432209780",
@@ -454,7 +619,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         }
       ]
     },
@@ -473,7 +643,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790432578681",
@@ -486,7 +661,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790432805401",
@@ -499,7 +679,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         }
       ]
     },
@@ -518,7 +703,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790434229906",
@@ -531,7 +721,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790434246995",
@@ -544,7 +739,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Luster\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790434257737",
@@ -557,7 +757,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790434275387",
@@ -570,7 +775,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Sognefjellet fylkesgrensa\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790434776500",
@@ -583,7 +793,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         }
       ]
     },
@@ -602,7 +817,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790434894606",
@@ -615,7 +835,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790434918410",
@@ -628,7 +853,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790434994587",
@@ -641,7 +871,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Havnaberg seniorsenter (B)\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790435021530",
@@ -654,7 +889,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790435037301",
@@ -667,7 +907,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "yes",
           "transit": "Haltestelle \"Havnaberg seniorsenter (B)\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790435053659",
@@ -680,7 +925,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "yes",
           "transit": "Haltestelle \"Sørhauggata terminal\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790435074317",
@@ -693,7 +943,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Skudeneshavn (A)\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         }
       ]
     },
@@ -712,7 +967,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790435872103",
@@ -725,7 +985,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Fossatromma\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790435895741",
@@ -738,7 +1003,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790435914652",
@@ -751,7 +1021,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790435984566",
@@ -764,7 +1039,12 @@
           "openingHours": "täglich von 10:00 bis 18:00 Uhr (üblicherweise von April bis Oktober)",
           "fee": "yes",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         }
       ]
     },
@@ -783,7 +1063,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Kreuzfahrtterminal Altona\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790436208987",
@@ -796,7 +1081,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790436255335",
@@ -809,7 +1099,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Haltestelle \"Inselpark\" (< 350m)",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790436301500",
@@ -822,7 +1117,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         },
         {
           "id": "poi_1790436335468",
@@ -835,7 +1135,12 @@
           "openingHours": "Siehe Google-Info",
           "fee": "Siehe Google-Info",
           "transit": "Mit ÖV erreichbar",
-          "visited": false
+          "visited": false,
+          "category": "kultur",
+          "mode": "foot",
+          "selectedForDay": false,
+          "duration": 60,
+          "cost": 0
         }
       ]
     },
@@ -858,7 +1163,9 @@
           "cost": 0,
           "duration": 60,
           "notes": "",
-          "visited": false
+          "visited": false,
+          "mode": "foot",
+          "selectedForDay": false
         },
         {
           "id": "poi_1790492278947",
@@ -875,7 +1182,9 @@
           "cost": 0,
           "duration": 60,
           "notes": "",
-          "visited": false
+          "visited": false,
+          "mode": "foot",
+          "selectedForDay": false
         },
         {
           "id": "poi_1790492319170",
@@ -892,7 +1201,9 @@
           "cost": 0,
           "duration": 5,
           "notes": "",
-          "visited": false
+          "visited": false,
+          "mode": "foot",
+          "selectedForDay": false
         }
       ]
     }
