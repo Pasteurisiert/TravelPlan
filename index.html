@@ -69,9 +69,9 @@
     .btn-danger { background: #dc3545; color: white; }
     
     .btn-tag { background: #e3f2fd; color: #1976d2; border: 1px solid #90caf9; }
-    .btn-tag.selected { background: #1976d2; color: white; }
+    .btn-tag.selected { background: #1976d2; color: white; font-weight: bold; }
 
-    .btn-mode-toggle { padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; border: 1px solid #ccc; background: white; cursor: pointer; }
+    .btn-mode-toggle { padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: bold; border: 1px solid #ccc; background: white; cursor: pointer; }
     .btn-mode-toggle.mode-foot { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
     .btn-mode-toggle.mode-transit { background: #f3e5f5; color: #7b1fa2; border-color: #ce93d8; }
 
@@ -79,7 +79,7 @@
 
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.75; } 100% { opacity: 1; } }
 
-    .poi-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; cursor: pointer; border-left: 5px solid #9e9e9e; transition: all 0.2s; }
+    .poi-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; cursor: pointer; border-left: 6px solid #9e9e9e; transition: all 0.2s; }
     .poi-card.cat-kultur { border-left-color: var(--culture); }
     .poi-card.cat-natur { border-left-color: var(--nature); }
     .poi-card.cat-gastro { border-left-color: var(--food); }
@@ -190,10 +190,16 @@
             <label style="font-size:0.78rem; color:#666;">Stadt / Ort:</label>
             <input type="text" id="det-city-input" style="margin-bottom:4px;">
 
-            <!-- Modus für diesen Ort -->
+            <!-- Modus für diesen Ort (Zu Fuß / ÖV) -->
             <div style="display:flex; justify-content:space-between; align-items:center; margin: 4px 0 8px 0; background:#f0f4f8; padding:6px 10px; border-radius:6px;">
               <span style="font-size:0.8rem; font-weight:bold;">Anreise zu diesem Ziel:</span>
               <button id="det-mode-btn" class="btn-mode-toggle" onclick="toggleSelectedPoiMode()">🚶 Zu Fuß</button>
+            </div>
+
+            <!-- In die Tagestour aufnehmen Toggle -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin: 4px 0 8px 0; background:#e8f4fd; padding:6px 10px; border-radius:6px;">
+              <span style="font-size:0.8rem; font-weight:bold;">Teil der heutigen Tour:</span>
+              <button id="det-tour-btn" class="btn btn-tag" onclick="toggleSelectedPoiTour()">➕ In Tour aufnehmen</button>
             </div>
 
             <!-- AUTOMATISCH RECHERCHIERTE BESCHREIBUNG -->
@@ -421,7 +427,7 @@
     let accuracyCircle = null;
     let lastRouteCalcTime = 0;
 
-    // Farbpalette je Kategorie inkl. ÖV
+    // Farbpalette je Kategorie
     const CAT_COLORS = {
       kultur: '#673ab7',
       natur: '#2e7d32',
@@ -438,9 +444,28 @@
       oev: '🚆 ÖV'
     };
 
+    // Daten-Migration für alte Bestände (stellt sicher, dass mode & selectedForDay existieren)
+    function sanitizeAppData() {
+      if (!appData || !appData.regions) return;
+      appData.regions.forEach(r => {
+        if (!r.places) r.places = [];
+        r.places.forEach(p => {
+          if (!p.category) p.category = 'kultur';
+          if (!p.mode) p.mode = (p.category === 'oev' ? 'transit' : 'foot');
+          if (p.selectedForDay === undefined) p.selectedForDay = false;
+          if (p.duration === undefined) p.duration = 60;
+          if (p.cost === undefined) p.cost = 0;
+          if (!p.openingHours) p.openingHours = 'k.A.';
+          if (!p.fee) p.fee = 'k.A.';
+          if (!p.transit) p.transit = 'Mit ÖV / Nahverkehr erreichbar';
+        });
+      });
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
       initMap();
       loadSettings();
+      sanitizeAppData();
       updateRegionDropdowns();
       if(ghConfig.token) syncWithGitHub();
     });
@@ -507,7 +532,6 @@
     }
 
     function handleAdminCatChange(cat) {
-      // Wenn Kategorie ÖV gewählt wird, automatisch Anreise auf ÖV setzen
       if (cat === 'oev') {
         document.getElementById('admin-new-mode').value = 'transit';
       }
@@ -662,7 +686,7 @@
       const cityClean = (cityName || regionName || "").trim();
       const combined = `${poiName}, ${cityClean}`;
 
-      // 1. Wikivoyage für Öffnungszeiten & Eintrittspreise
+      // 1. Wikivoyage
       try {
         const wvRes = await fetch(`https://de.wikivoyage.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(combined)}&format=json&origin=*`);
         const wvData = await wvRes.json();
@@ -691,7 +715,7 @@
         }
       } catch (e) { }
 
-      // 2. OpenStreetMap Nominatim für punktgenaue Geodaten & Extratags
+      // 2. OpenStreetMap
       const queries = [combined, `${poiName} ${cityClean}`, poiName];
       for (let q of queries) {
         try {
@@ -719,7 +743,7 @@
         } catch(e) {}
       }
 
-      // 3. Wikipedia & Wikidata für Kurzbeschreibung & offizielle Website
+      // 3. Wikipedia & Wikidata
       try {
         const wpRes = await fetch(`https://de.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(poiName + ' ' + cityClean)}&format=json&origin=*`);
         const wpData = await wpRes.json();
@@ -754,7 +778,7 @@
         }
       } catch (e) { }
 
-      // 4. ÖV-Haltestelle im Umkreis von 400m über Overpass
+      // 4. Haltestelle im Umkreis
       if (info.lat && info.lon) {
         try {
           const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node(around:400,${info.lat},${info.lon})[highway=bus_stop];out 1;`;
@@ -777,7 +801,6 @@
       const name = document.getElementById('admin-new-poi').value.trim();
       const city = document.getElementById('admin-new-city').value.trim();
       const cat = document.getElementById('admin-new-cat').value;
-      // Bei Kategorie oev automatisch transit, sonst Auswahlwert
       const mode = (cat === 'oev') ? 'transit' : (document.getElementById('admin-new-mode').value || 'foot');
       const statusEl = document.getElementById('admin-search-status');
 
@@ -807,7 +830,7 @@
           cost: 0,
           duration: (cat === 'oev' ? 15 : 60),
           notes: "",
-          selectedForDay: true,
+          selectedForDay: false, // Standard: Neu angelegt, noch nicht aktiv im Tag
           visited: false
         };
 
@@ -858,7 +881,7 @@
       alert(`Daten zu "${targetPOI.name}" erfolgreich aktualisiert!`);
     }
 
-    // --- MODUS JE ZIEL UMSCHALTEN ---
+    // --- MODUS JE ZIEL UMSCHALTEN (Fuß vs ÖV) ---
     function togglePoiMode(poiId) {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -880,6 +903,7 @@
       togglePoiMode(selectedPoi.id);
     }
 
+    // --- IN DIE TAGESTOUR AUFNEHMEN / ABWÄHLEN ---
     function toggleDayTourSelection(poiId) {
       const regId = document.getElementById('day-region-select').value;
       const region = appData.regions.find(r => r.id === regId);
@@ -890,6 +914,25 @@
         p.selectedForDay = !p.selectedForDay;
         persistData();
         renderDayList();
+        if(selectedPoi && selectedPoi.id === p.id) {
+          updateDetailTourBtn(p);
+        }
+      }
+    }
+
+    function toggleSelectedPoiTour() {
+      if(!selectedPoi) return;
+      toggleDayTourSelection(selectedPoi.id);
+    }
+
+    function updateDetailTourBtn(p) {
+      const btn = document.getElementById('det-tour-btn');
+      if (p.selectedForDay) {
+        btn.className = "btn btn-tag selected";
+        btn.innerText = "⭐ In Tagesroute aktiv (Klicken zum Entfernen)";
+      } else {
+        btn.className = "btn btn-tag";
+        btn.innerText = "➕ In Tagesroute aufnehmen";
       }
     }
 
@@ -900,7 +943,7 @@
       if (!region) return;
 
       const unvisitedSelected = region.places.filter(p => p.selectedForDay && !p.visited && p.lat && p.lon);
-      if (unvisitedSelected.length < 2) return alert("Wählen Sie mindestens 2 Orte mit dem Knopf '➕ Tour' aus.");
+      if (unvisitedSelected.length < 2) return alert("Wählen Sie mindestens 2 Orte mit dem Knopf '➕ Tag' für die Tour aus.");
 
       if (!currentPosition) return alert("Bitte zuerst Standort oder Startpunkt festlegen.");
 
@@ -929,7 +972,7 @@
       persistData();
       renderDayList();
       calculateFullDayTour();
-      alert("✅ Tour optimiert: Die ausgewählten Orte wurden in die kürzeste Reihenfolge sortiert!");
+      alert("✅ Tour optimiert: Die für den Tag ausgewählten Ziele wurden in die kürzeste Reihenfolge sortiert!");
     }
 
     // --- 2. GANZTAGESROUTE ---
@@ -939,7 +982,7 @@
       if (!region || !currentPosition) return alert("Bitte Standort und Region wählen.");
 
       const activePlaces = region.places.filter(p => p.selectedForDay && !p.visited && p.lat && p.lon);
-      if (activePlaces.length === 0) return alert("Keine Orte für die Tagestour ausgewählt (Knopf '➕ Tour' aktivieren).");
+      if (activePlaces.length === 0) return alert("Keine Orte für die Tagestour ausgewählt (Knopf '➕ Tag' aktivieren).");
 
       const summaryBox = document.getElementById('tour-summary-box');
       summaryBox.style.display = "block";
@@ -1251,15 +1294,20 @@
               <div style="font-size:0.75rem; color:#666;">📍 ${p.city || region.name} • ${CAT_LABELS[p.category] || '🏛️'} • ⏱️ ~${p.duration || 60} Min.</div>
             </div>
             <div style="display:flex; align-items:center; gap:5px;">
+              <!-- MODUS TOGGLE: FUSS vs ÖV -->
               <button class="btn-mode-toggle ${isTransit ? 'mode-transit' : 'mode-foot'}" 
-                      title="Klicken zum Umschalten zwischen Fuß und ÖV"
+                      title="Umschalten: Zu Fuß oder ÖV"
                       onclick="event.stopPropagation(); togglePoiMode('${p.id}')">
                 ${isTransit ? '🚆 ÖV' : '🚶 Fuß'}
               </button>
-              <button class="btn btn-tag ${isSelected ? 'selected' : ''}" style="padding:3px 7px; font-size:0.75rem;" 
+
+              <!-- IN DIE TAGESROUTE AUFNEHMEN / ABWÄHLEN -->
+              <button class="btn btn-tag ${isSelected ? 'selected' : ''}" style="padding:4px 8px; font-size:0.75rem;" 
+                      title="Ziel in die Tagestour aufnehmen"
                       onclick="event.stopPropagation(); toggleDayTourSelection('${p.id}')">
-                ${isSelected ? '⭐ In Tour' : '➕ Tag'}
+                ${isSelected ? '⭐ Im Tag' : '➕ Tag'}
               </button>
+
               <input type="checkbox" ${p.visited ? 'checked' : ''} title="Besucht" style="width:auto; margin:0;" onclick="event.stopPropagation(); toggleVisited('${p.id}')">
             </div>
           </div>
@@ -1288,6 +1336,8 @@
       const isTransit = poi.mode === 'transit';
       modeBtn.className = `btn-mode-toggle ${isTransit ? 'mode-transit' : 'mode-foot'}`;
       modeBtn.innerText = isTransit ? '🚆 Mit ÖV' : '🚶 Zu Fuß';
+
+      updateDetailTourBtn(poi);
 
       document.getElementById('det-update-btn').onclick = () => autoUpdatePOI(poi.id);
 
@@ -1403,7 +1453,12 @@
         document.getElementById('gh-token').value = ghConfig.token || '';
       }
       const localData = localStorage.getItem('travel_data');
-      if(localData) appData = JSON.parse(localData);
+      if(localData) {
+        try {
+          appData = JSON.parse(localData);
+          sanitizeAppData();
+        } catch(e){}
+      }
     }
 
     function saveSettings() {
@@ -1439,6 +1494,7 @@
           if(!pushOnly) {
             const content = decodeURIComponent(escape(atob(fileData.content)));
             appData = JSON.parse(content);
+            sanitizeAppData();
             localStorage.setItem('travel_data', JSON.stringify(appData));
             updateRegionDropdowns();
             pill.innerText = "GitHub: Synced ✅";
