@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#1976d2">
-  <title>TravelPlan Pro v3.1</title>
+  <title>TravelPlan Pro v3.2</title>
 
   <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -155,7 +155,7 @@
 <body>
 
   <header>
-    <div>🌍 TravelPlan Pro v3.1</div>
+    <div>🌍 TravelPlan Pro v3.2</div>
     <div id="sync-pill" onclick="syncWithGitHub()">GitHub: Offline</div>
   </header>
 
@@ -364,7 +364,7 @@
       <h3>GitHub & PWA-Download Manager</h3>
       <div class="card">
         <h4>☁️ GitHub Synchronisation</h4>
-        <p style="font-size:0.8rem; color:#666;">Status "Offline" bedeutet lediglich, dass keine Synchronisation mit GitHub eingerichtet ist. Alle Daten werden lokal auf Ihrem Gerät gespeichert!</p>
+        <p style="font-size:0.8rem; color:#666;">Status "Offline" bedeutet lediglich, dass keine Verbindung zu GitHub eingerichtet ist. Alle Daten werden lokal im Gerät gesichert!</p>
         <label style="font-size:0.8rem;">GitHub Username:</label>
         <input type="text" id="gh-owner" placeholder="z.B. benutzername">
         <label style="font-size:0.8rem;">Repository Name:</label>
@@ -377,7 +377,7 @@
 
       <div class="card">
         <h4>🧹 Reset & Reparatur</h4>
-        <p style="font-size:0.82rem; color:#555;">Falls Daten fehlen oder hängen geblieben sind, setzt dieser Button die App sicher auf die Standardregion zurück:</p>
+        <p style="font-size:0.82rem; color:#555;">Setzt alle Daten sicher auf die Standardregion zurück und repariert alte Speicherstände:</p>
         <button class="btn btn-danger btn-block" onclick="forceResetApp()">Standard-Daten wiederherstellen & Cache leeren</button>
       </div>
     </div>
@@ -504,6 +504,7 @@
   </div>
 
   <script>
+    // Standard-Datensatz
     const DEFAULT_DATA = {
       regions: [
         {
@@ -572,12 +573,9 @@
     };
 
     function forceResetApp() {
-      localStorage.removeItem('travel_data');
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          for (let name of names) caches.delete(name);
-        });
-      }
+      try {
+        localStorage.clear();
+      } catch(e) {}
       location.reload();
     }
 
@@ -604,8 +602,8 @@
     window.addEventListener("DOMContentLoaded", () => {
       loadSettings();
       sanitizeAppData();
-      initMap();
       initRegionDropdowns();
+      initMap();
 
       if (ghConfig.token && ghConfig.owner && ghConfig.repo) {
         syncWithGitHub();
@@ -617,6 +615,9 @@
 
     function initMap() {
       try {
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer || map) return;
+
         map = L.map('map', { zoomControl: false }).setView([55.6761, 12.5683], 13);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -639,6 +640,9 @@
             toggleMapPick(null);
           }
         });
+
+        // Sofort Marker für die aktive Region zeichnen
+        renderMapMarkers();
       } catch(e) {
         console.error("Leaflet Init Error:", e);
       }
@@ -776,7 +780,7 @@
       if (val === '__GPS__') {
         startLiveGPS();
       } else if (val === '__CUSTOM__') {
-        // Manuelle Wahl beibehalten
+        // Manuelle Wahl
       } else {
         stopLiveGPS();
         const regId = document.getElementById('day-region-select').value;
@@ -786,8 +790,6 @@
         if (p && p.lat && p.lon) {
           setStartPoint(p.lat, p.lon, p.name, p.id);
           if (map) map.panTo([p.lat, p.lon]);
-        } else {
-          alert("Dieser Ort besitzt keine gültigen Koordinaten.");
         }
       }
     }
@@ -818,9 +820,11 @@
     }
 
     function updatePointDropdowns() {
-      const regId = document.getElementById('day-region-select').value;
+      const daySel = document.getElementById('day-region-select');
+      const regId = daySel ? daySel.value : null;
       const startSel = document.getElementById('start-poi-select');
       const endSel = document.getElementById('end-poi-select');
+      if (!startSel || !endSel) return;
 
       const curStartVal = startSel.value;
       const curEndVal = endSel.value;
@@ -992,7 +996,7 @@
       renderDayList();
       renderAdminList();
       updatePointDropdowns();
-      onRegionChange();
+      renderMapMarkers();
       selectPoi(newPOI);
 
       alert(`✅ Ziel "${name}" wurde zur Tour hinzugefügt!`);
@@ -1178,7 +1182,7 @@
       persistData();
       selectPoi(targetPOI);
       renderAdminList();
-      onRegionChange();
+      renderMapMarkers();
 
       if (btn) btn.innerText = "🔄 Auto-Update";
       alert(`Daten zu "${targetPOI.name}" erfolgreich aktualisiert!`);
@@ -1216,6 +1220,7 @@
         p.selectedForDay = !p.selectedForDay;
         persistData();
         renderDayList();
+        renderMapMarkers();
         if(selectedPoi && selectedPoi.id === p.id) updateDetailTourBtn(p);
       }
     }
@@ -1272,8 +1277,9 @@
 
       persistData();
       renderDayList();
+      renderMapMarkers();
       calculateFullDayTour();
-      alert("✅ Tour optimiert: Die Tour wurde in kürzeste Reihenfolge sortiert!");
+      alert(`✅ Tour optimiert: Die Tour wurde in kürzeste Reihenfolge sortiert!`);
     }
 
     function reverseDayRoute() {
@@ -1290,6 +1296,7 @@
 
       persistData();
       renderDayList();
+      renderMapMarkers();
       calculateFullDayTour();
       alert("🔄 Route umgekehrt: Reihenfolge und Wegführung wurden invertiert!");
     }
@@ -1511,7 +1518,7 @@
       persistData();
       renderDayList();
       renderAdminList();
-      onRegionChange();
+      renderMapMarkers();
       selectPoi(selectedPoi);
       alert("Änderungen gesichert!");
     }
@@ -1574,7 +1581,7 @@
           persistData();
           renderAdminList();
           renderDayList();
-          onRegionChange();
+          renderMapMarkers();
           closeAdminModal();
           alert("Ort aktualisiert!");
           return;
@@ -1585,13 +1592,14 @@
     async function calcRoute(destPoi, autoZoom = true) {
       if(!startPoint || !destPoi || !destPoi.lat || !destPoi.lon) return;
       const rBox = document.getElementById('route-box');
-      rBox.style.display = "block";
+      if (rBox) rBox.style.display = "block";
 
       const isTransit = destPoi.modeIn === 'transit';
       const destLat = destPoi.lat;
       const destLon = destPoi.lon;
 
-      document.getElementById('route-calc-text').innerText = isTransit ? "Berechne ÖV-Trasse..." : "Berechne kürzesten Fußweg...";
+      const calcText = document.getElementById('route-calc-text');
+      if (calcText) calcText.innerText = isTransit ? "Berechne ÖV-Trasse..." : "Berechne kürzesten Fußweg...";
 
       const routeData = await fetchRealRouteGeometry(startPoint.lng, startPoint.lat, destLon, destLat, isTransit);
       const distKm = (routeData.distance / 1000).toFixed(2);
@@ -1599,10 +1607,12 @@
 
       if (isTransit) {
         const transitUrl = `https://www.google.com/maps/dir/?api=1&origin=${startPoint.lat},${startPoint.lng}&destination=${destLat},${destLon}&travelmode=transit`;
-        document.getElementById('route-calc-text').innerHTML = `
-          🚆 <strong>Reale ÖV-Trasse:</strong> ca. ${distKm} km Streckenführung<br>
-          👉 <a href="${transitUrl}" target="_blank" style="color:#8e24aa; font-weight:bold;">Hier Live-Abfahrten, Linien & Umstiege öffnen</a>
-        `;
+        if (calcText) {
+          calcText.innerHTML = `
+            🚆 <strong>Reale ÖV-Trasse:</strong> ca. ${distKm} km Streckenführung<br>
+            👉 <a href="${transitUrl}" target="_blank" style="color:#8e24aa; font-weight:bold;">Hier Live-Abfahrten, Linien & Umstiege öffnen</a>
+          `;
+        }
 
         if(routeLayer && map) map.removeLayer(routeLayer);
         if(map) {
@@ -1613,9 +1623,11 @@
           if (autoZoom) map.fitBounds(routeLayer.getBounds(), { padding: [40, 40] });
         }
       } else {
-        document.getElementById('route-calc-text').innerHTML = `
-          🚶 <strong>Kürzester Fußweg (Fußpfade/Gassen):</strong> ${distKm} km (~${durMin} Min. Gehzeit)
-        `;
+        if (calcText) {
+          calcText.innerHTML = `
+            🚶 <strong>Kürzester Fußweg (Fußpfade/Gassen):</strong> ${distKm} km (~${durMin} Min. Gehzeit)
+          `;
+        }
 
         if(routeLayer && map) map.removeLayer(routeLayer);
         if(map) {
@@ -1632,9 +1644,7 @@
       const daySel = document.getElementById('day-region-select');
       const admSel = document.getElementById('admin-region-select');
 
-      if (!appData.regions || appData.regions.length === 0) {
-        appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
-      }
+      if (!daySel || !admSel) return;
 
       const opts = appData.regions.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
       daySel.innerHTML = opts;
@@ -1650,6 +1660,7 @@
     function updateRegionDropdowns() {
       const daySel = document.getElementById('day-region-select');
       const admSel = document.getElementById('admin-region-select');
+      if (!daySel || !admSel) return;
 
       const savedDayVal = daySel.value;
       const savedAdmVal = admSel.value;
@@ -1673,59 +1684,66 @@
       const region = appData.regions.find(r => r.id === regId);
       if (!region) return;
 
-      if (markersLayer) markersLayer.clearLayers();
-
       updatePointDropdowns();
 
-      if(region.places && region.places.length > 0) {
-        const bounds = [];
-        let tourNumber = 1;
-
-        region.places.forEach((p) => {
-          if(p.lat && p.lon && p.lat !== 0) {
-            const catColor = CAT_COLORS[p.category] || '#1976d2';
-            let markerIcon;
-
-            if (p.selectedForDay && !p.visited) {
-              const currentNum = tourNumber++;
-              markerIcon = L.divIcon({
-                className: 'custom-pin',
-                html: `<div class="numbered-map-marker" style="background-color: ${catColor};">${currentNum}</div>`,
-                iconSize: [26, 26],
-                iconAnchor: [13, 13]
-              });
-            } else {
-              markerIcon = L.divIcon({
-                className: 'custom-pin-inactive',
-                html: `<div class="numbered-map-marker inactive"></div>`,
-                iconSize: [14, 14],
-                iconAnchor: [7, 7]
-              });
-            }
-
-            if (markersLayer) {
-              const m = L.marker([p.lat, p.lon], { icon: markerIcon }).addTo(markersLayer)
-                .bindPopup(`<b>${p.name}</b><br><small>${p.city || ''} (Hin:${p.modeIn === 'transit' ? '🚆 ÖV' : '🚶 Fuß'})</small>`);
-              
-              m.on('click', () => selectPoi(p));
-            }
-            bounds.push([p.lat, p.lon]);
-          }
-        });
-
-        if(bounds.length > 0 && map) map.fitBounds(bounds, { padding: [30, 30] });
-
-        if (!startPoint) {
-          const firstValid = region.places.find(p => p.lat && p.lon);
-          if (firstValid) {
-            setStartPoint(firstValid.lat, firstValid.lon, firstValid.name, firstValid.id);
-          }
-        } else {
-          setStartPoint(startPoint.lat, startPoint.lng, startPoint.label);
+      if (!startPoint) {
+        const firstValid = region.places.find(p => p.lat && p.lon);
+        if (firstValid) {
+          setStartPoint(firstValid.lat, firstValid.lon, firstValid.name, firstValid.id);
         }
+      } else {
+        setStartPoint(startPoint.lat, startPoint.lng, startPoint.label);
       }
 
       renderDayList();
+      renderMapMarkers();
+    }
+
+    function renderMapMarkers() {
+      if (!map || !markersLayer) return;
+      markersLayer.clearLayers();
+
+      const daySel = document.getElementById('day-region-select');
+      const regId = daySel ? daySel.value : null;
+      if (!regId) return;
+
+      const region = appData.regions.find(r => r.id === regId);
+      if (!region || !region.places) return;
+
+      const bounds = [];
+      let tourNumber = 1;
+
+      region.places.forEach((p) => {
+        if(p.lat && p.lon && p.lat !== 0) {
+          const catColor = CAT_COLORS[p.category] || '#1976d2';
+          let markerIcon;
+
+          if (p.selectedForDay && !p.visited) {
+            const currentNum = tourNumber++;
+            markerIcon = L.divIcon({
+              className: 'custom-pin',
+              html: `<div class="numbered-map-marker" style="background-color: ${catColor};">${currentNum}</div>`,
+              iconSize: [26, 26],
+              iconAnchor: [13, 13]
+            });
+          } else {
+            markerIcon = L.divIcon({
+              className: 'custom-pin-inactive',
+              html: `<div class="numbered-map-marker inactive"></div>`,
+              iconSize: [14, 14],
+              iconAnchor: [7, 7]
+            });
+          }
+
+          const m = L.marker([p.lat, p.lon], { icon: markerIcon }).addTo(markersLayer)
+            .bindPopup(`<b>${p.name}</b><br><small>${p.city || ''} (Hin:${p.modeIn === 'transit' ? '🚆 ÖV' : '🚶 Fuß'})</small>`);
+          
+          m.on('click', () => selectPoi(p));
+          bounds.push([p.lat, p.lon]);
+        }
+      });
+
+      if(bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
     }
 
     function renderDayList() {
@@ -1733,6 +1751,7 @@
       const regId = daySel ? daySel.value : null;
       const showVisited = document.getElementById('check-visited').checked;
       const listEl = document.getElementById('day-poi-list');
+      if (!listEl) return;
       listEl.innerHTML = "";
 
       if (!regId) return;
@@ -1856,13 +1875,14 @@
         if(p) { p.visited = !p.visited; break; }
       }
       renderDayList();
-      onRegionChange();
+      renderMapMarkers();
       persistData();
     }
 
     function renderAdminList() {
       const regId = document.getElementById('admin-region-select').value;
       const listEl = document.getElementById('admin-poi-list');
+      if (!listEl) return;
       listEl.innerHTML = "";
 
       const region = appData.regions.find(r => r.id === regId);
@@ -1896,7 +1916,8 @@
       if(reg && confirm("Ort wirklich löschen?")) {
         reg.places.splice(idx, 1);
         renderAdminList();
-        onRegionChange();
+        renderDayList();
+        renderMapMarkers();
         persistData();
       }
     }
@@ -1976,7 +1997,8 @@
               sanitizeAppData();
               localStorage.setItem('travel_data', JSON.stringify(appData));
               updateRegionDropdowns();
-              onRegionChange();
+              renderMapMarkers();
+              renderDayList();
             }
             if (pill) pill.innerText = "GitHub: Synced ✅";
             return;
