@@ -184,7 +184,7 @@
           "transit": "Haltestelle \"Gammel Strand St., Christiansborg\" (< 450m)",
           "category": "kultur",
           "mode": "foot",
-          "selectedForDay": false,
+          "selectedForDay": true,
           "duration": 60,
           "cost": 0,
           "modeIn": "foot",
