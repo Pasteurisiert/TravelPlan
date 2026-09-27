@@ -1309,8 +1309,8 @@
           "visited": false,
           "mode": "transit",
           "selectedForDay": true,
-          "modeIn": "transit",
-          "modeOut": "transit"
+          "modeIn": "foot",
+          "modeOut": "foot"
         },
         {
           "id": "poi_1790492278947",
