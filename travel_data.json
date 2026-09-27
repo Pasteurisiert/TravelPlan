@@ -842,7 +842,25 @@
     {
       "id": "z-rich",
       "name": "Zürich",
-      "places": []
+      "places": [
+        {
+          "id": "poi_1790491884618",
+          "name": "Chinagarten",
+          "city": "Zürich",
+          "category": "kultur",
+          "lat": 47.3543515,
+          "lon": 8.5530924,
+          "description": "Der Chinagarten Zürich ist ein chinesischer Garten beim Zürichhorn im Quartier Seefeld in Zürich. Er gehört in die Gruppe der Tempelgärten....",
+          "website": "https://de.wikipedia.org/wiki/Chinagarten_Z%C3%BCrich",
+          "openingHours": "k.A.",
+          "fee": "k.A.",
+          "transit": "ÖV vorhanden",
+          "cost": 0,
+          "duration": 60,
+          "notes": "",
+          "visited": false
+        }
+      ]
     }
   ]
 }
