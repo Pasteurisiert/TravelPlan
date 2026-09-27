@@ -1330,7 +1330,7 @@
           "visited": false,
           "mode": "foot",
           "selectedForDay": true,
-          "modeIn": "foot",
+          "modeIn": "transit",
           "modeOut": "foot"
         },
         {
