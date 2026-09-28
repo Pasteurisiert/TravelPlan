@@ -138,7 +138,7 @@
           "visited": false,
           "category": "kultur",
           "mode": "transit",
-          "selectedForDay": true,
+          "selectedForDay": false,
           "duration": 60,
           "cost": 0,
           "modeIn": "transit",
