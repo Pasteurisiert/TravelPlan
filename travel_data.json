@@ -1348,7 +1348,7 @@
           "cost": 0,
           "duration": 60,
           "notes": "",
-          "visited": false,
+          "visited": true,
           "mode": "foot",
           "selectedForDay": true,
           "modeIn": "foot",
