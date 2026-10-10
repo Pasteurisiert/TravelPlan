@@ -1222,7 +1222,7 @@
           "selectedForDay": true,
           "duration": 60,
           "cost": 0,
-          "modeIn": "foot",
+          "modeIn": "transit",
           "modeOut": "foot"
         },
         {
