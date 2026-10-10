@@ -1223,7 +1223,7 @@
           "duration": 60,
           "cost": 0,
           "modeIn": "transit",
-          "modeOut": "foot"
+          "modeOut": "transit"
         },
         {
           "id": "poi_1790436208987",
