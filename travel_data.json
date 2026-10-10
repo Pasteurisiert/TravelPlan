@@ -821,7 +821,7 @@
           "visited": false,
           "category": "kultur",
           "mode": "foot",
-          "selectedForDay": true,
+          "selectedForDay": false,
           "duration": 60,
           "cost": 0,
           "modeIn": "foot",
